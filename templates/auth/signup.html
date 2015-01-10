@@ -1,0 +1,39 @@
+{% extends "auth/base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block head %}Sign Up{% endblock %}
+{% block content %}
+    <form method="post">
+        <div class="form-container">
+            <div class="form-labels">
+                <div>Username:</div>
+                <div>Password:</div>
+                <div>Verify password:</div>
+                <div>Email (optional):</div>
+            </div>
+            <div class="form-controls">
+                <div>
+                    <input name="username" type="text" value="{{username_value}}">
+                </div>
+                <div>
+                    <input name="password" type="password">
+                </div>
+                <div>
+                    <input name="verify" type="password">
+                </div>
+                <div>
+                    <input name="email" value="{{email_value}}" type="text">
+                </div>
+            </div>
+            <div class="form-errors">
+                <div>{{ username_error }}</div>
+                <div>{{ password_error }}</div>
+                <div>{{ verify_error }}</div>
+                <div>{{ email_error }}</div>
+            </div>
+        </div>
+        <div class="form-submit-button"><input type="submit"></div>
+    </form>
+    <div class="auth-alternative">
+        Already a user? <a href="/login">Log in!</a>
+    </div>
+{% endblock %}

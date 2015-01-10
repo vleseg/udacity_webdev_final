@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>MyWiki</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/wiki_styles.css">
+</head>
+<body>
+    <div class="top-panel-wrapper">
+        <div class="top-panel">
+            {% if user %}
+                <span><a href="/_edit{{ page.url }}">Edit Page</a></span>
+                <span>Logged in as <b>{{ user.name }}</b>
+                (<a href="/logout">Log Out</a>)
+            </span>
+            {% else %}
+                <span><a href="/login">Log In</a></span>
+                <span><a href="/signup">Sign Up</a></span>
+            {% endif %}
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+</body>
+</html>

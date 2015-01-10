@@ -1,0 +1,7 @@
+{% extends "wiki/wiki_base.html" %}
+{% block content %}
+    <form action="/_edit{{ page.url }}" method="post" id="edit">
+        <textarea name="page_body" id="page-body" rows="35">{{ page.body|safe }}</textarea>
+        <input type="submit" value="Save"/>
+    </form>
+{% endblock %}

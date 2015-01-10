@@ -1,0 +1,30 @@
+{% extends "auth/base.html" %}
+{% block title %}Login{% endblock %}
+{% block head %}Login{% endblock %}
+{% block content %}
+    <form method="post">
+        <div class="form-container">
+            <div class="form-labels">
+                <div>Username:</div>
+                <div>Password:</div>
+            </div>
+            <div class="form-controls">
+                <div>
+                    <input name="username" type="text" value=
+                            "{{ username_value }}"/>
+                </div>
+                <div>
+                    <input name="password" type="password"/>
+                </div>
+            </div>
+            <div class="form-errors">
+                <div>{{ username_error }}</div>
+                <div>{{ password_error }}</div>
+            </div>
+        </div>
+        <div class="form-submit-button"><input type="submit"/></div>
+    </form>
+    <div class="auth-alternative">
+        Not a user? <a href="/signup">Sign up!</a>
+    </div>
+{% endblock %}

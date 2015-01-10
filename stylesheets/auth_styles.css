@@ -1,0 +1,34 @@
+body {
+    margin-left: 4em;
+    margin-top: 4em;
+}
+
+.auth-alternative {
+    font-size: 1.2em;
+    margin-top: 1em;
+    margin-left: 0.6em;
+}
+
+.form-container, .form-submit-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.form-labels, .form-controls, .form-errors {
+    position: relative;
+    float: left;
+}
+
+.form-labels>div, .form-controls>div, .form-errors>div {
+    line-height: 2em;
+    margin-left: 0.6em;
+    margin-right: 0.6em;
+}
+
+.form-submit-button {
+    margin-top: 1em;
+}
+
+.form-errors {
+    color: red;
+}
