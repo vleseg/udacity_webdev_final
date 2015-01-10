@@ -177,14 +177,14 @@ class Logout(BaseHandler):
 
 
 class WikiViewPage(BaseHandler):
-    template = "wiki/wiki_page.html"
+    template = "wiki/view_page.html"
 
     def _get(self, path):
         page = WikiPage.by_prop('url', path)
         if page is None:
             if path == '/':
                 page = WikiPage(url='/', body=self.render_str(
-                    'wiki/homepage_content.html'), parent=GLOBAL_PARENT)
+                    'wiki/default_homepage.html'), parent=GLOBAL_PARENT)
                 page.put()
             elif self.user is None:
                 self.abort(404)
@@ -195,7 +195,7 @@ class WikiViewPage(BaseHandler):
 
 
 class WikiEditPage(BaseHandler):
-    template = "wiki/wiki_edit.html"
+    template = "wiki/edit_page.html"
 
     def _get(self, pageurl):
         if self.user is None:

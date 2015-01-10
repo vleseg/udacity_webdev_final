@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>MyWiki</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/wiki_styles.css">
-</head>
-<body>
+{% extends "base.html" %}
+{% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
+{% block content %}
     <div class="top-panel-wrapper">
         <div class="top-panel">
             {% if user %}
@@ -19,6 +14,5 @@
             {% endif %}
         </div>
     </div>
-    {% block content %}{% endblock %}
-</body>
-</html>
+    {% block wiki_content %}{% endblock %}
+{% endblock %}

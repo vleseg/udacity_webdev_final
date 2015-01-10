@@ -1,10 +1,11 @@
 import datetime as dt
 # Third party libs
+from google.appengine.api.app_identity import get_application_id
 from google.appengine.ext import db
 
 
 SESSION_LIFETIME = 1  # day
-GLOBAL_PARENT = db.Key.from_path('app', 'udacity_webdev_final')
+GLOBAL_PARENT = db.Key.from_path('app', get_application_id())
 
 
 class BaseModel(db.Model):

@@ -1,13 +1,38 @@
+# coding=utf-8
 import unittest
+# Third-party imports
+from google.appengine.ext import testbed
+import webtest
 
 
 class CreateNewUserTest(unittest.TestCase):
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.activate()
+        self.testbed.init_datastore_v3_stub()
+        # This is import is here because another import inside starts using
+        # datastore right away.
+        from main import app
+        self.testapp = webtest.TestApp(app)
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
     def test_can_create_a_new_user(self):
         # Bob types in signup page address and presses Enter. Browser
         # successfully delivers him a signup page.
+        signup_page = self.testapp.get('/signup')
+        self.assertEqual(signup_page.status_int, 200)
 
         # Page title says: "MyWiki -- Sign Up". There's also a heading and a
         # form. Heading is as follows: "Create new user account".
+        pq_page = signup_page.pyquery('html')
+        title = pq_page.find('title')
+        heading = pq_page.find('h1')
+        form = pq_page.find('form')
+        self.assertEqual(title.text(), u'MyWiki — Welcome!')
+        self.assertEqual(heading.text(), 'Create new user account')
+        self.assertNotEqual(len(form), 0)
 
         # Bob enters his name (bob) into "Username" field.
         #

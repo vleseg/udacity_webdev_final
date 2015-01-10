@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="stylesheets/auth_styles.css"/>
-</head>
-<body>
-    <h3>{% block head %}{% endblock %}</h3>
-    {% block content %}{% endblock %}
-</body>
-</html>
+{% extends "base.html" %}
+{% block path_to_stylesheet %}stylesheets/auth_styles.css{% endblock %}
+{% block content %}
+    {% block auth_content %}{% endblock %}
+{% endblock %}
