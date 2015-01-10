@@ -59,23 +59,35 @@ class CreateNewUserTest(unittest.TestCase):
 
     def test_can_not_create_user_with_empty_username(self):
         # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
 
         # Bob omits the "Usename" field, fills in "test123" in both "Password"
         # and "Verify password" fields.
+        form = signup_page.form
+        form['password'] = 'test123'
+        form['verify'] = 'test123'
 
-        # Bob clicks "Create" button.
+        # Bob submits the form.
+        signup_post_response = form.submit()
 
         # Signup page refreshes and he can see error message next to "Username"
         # field. "Password" and "Verify password" fields are empty.
-        pass
+        pq_page = signup_post_response.pyquery('html')
+        title = pq_page.find('title')
+        error = pq_page.find('.form-errors')
+        form = signup_post_response.form
+        self.assertEqual(title.text(), u'MyWiki — Sign Up')
+        self.assertEqual(len(error), 1)
+        self.assertEqual(error.text(), "That's not a valid username!")
+        self.assertEqual(form['password'].value, '')
+        self.assertEqual(form['verify'].value, '')
 
     def test_can_not_create_user_without_password(self):
         # Bob goes to signup page.
 
         # Bob enters his name (bob) into "Username" field.
 
-        # He omits "Password" and "Verify password" fields and clicks "Create"
-        # button.
+        # He omits "Password" and "Verify password" fields and submits the form.
 
         # Signup page refreshes and he can see error message next to "Password"
         # field.
@@ -93,11 +105,30 @@ class CreateNewUserTest(unittest.TestCase):
         # He mistypes confirmation password, entering "test124" into "Verify
         # password" field.
 
-        # Bob clicks "Create" button.
+        # Bob submits the form.
 
         # Signup page refreshes and he can see error message next to "Verify
         # password" field.
 
         # Both "Password" and "Verify password" fields are empty. "Username"
         # field still has his name in it.
+        pass
+
+    def test_email_if_entered_has_to_be_valid(self):
+        # Bob goes to signup page.
+
+        # Bob enters his name (bob) into "Username" field.
+
+        # He enters "test123" into both "Password" and "Verify" fields.
+
+        # He enters "bob@examplecom" into "Email" field, accidentally missing
+        # a dot before "com".
+
+        # Bob submits the form.
+
+        # Signup page refreshes and he can see error message, complaining about
+        # incorrect email address.
+
+        # Both "Password" and "Verify password" fields are empty. "Username" and
+        # "Email" fields still have corresponding values in them.
         pass
