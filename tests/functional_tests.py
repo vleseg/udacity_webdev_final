@@ -70,17 +70,53 @@ class CreateNewUserTest(unittest.TestCase):
         # Bob submits the form.
         signup_post_response = form.submit()
 
-        # Signup page refreshes and he can see error message next to "Username"
-        # field. "Password" and "Verify password" fields are empty.
+        # Signup page refreshes and he can see error message, complaining about
+        # absent username. "Password" and "Verify password" fields are empty.
         pq_page = signup_post_response.pyquery('html')
         title = pq_page.find('title')
         error = pq_page.find('.form-errors')
         form = signup_post_response.form
         self.assertEqual(title.text(), u'MyWiki — Sign Up')
         self.assertEqual(len(error), 1)
-        self.assertEqual(error.text(), "That's not a valid username!")
+        self.assertEqual(error.text(), "You must specify username!")
         self.assertEqual(form['password'].value, '')
         self.assertEqual(form['verify'].value, '')
+
+    def test_username_should_not_be_overly_short(self):
+        # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # Bob enters first two letters of his name into "Username" field.
+        form = signup_page.form
+        form['username'] = 'bo'
+
+        # Bob enters "test123" in both "Password" and "Verify" fields.
+        form['password'] = 'test123'
+        form['verify'] = 'test123'
+
+        # He submits the form.
+        signup_page_response = form.submit()
+
+        # Page refreshes and Bob can see error message, complaining about
+        # username length. Entered username is still available in "Username"
+        # field.
+        pq_page = signup_page_response.pyquery('html')
+        form = signup_page_response.form
+        title = pq_page.find('title')
+        error = pq_page.find('.form-errors')
+        self.assertEqual(title.text(), u'MyWiki — Sign Up')
+        self.assertEqual(form['username'].value, 'bo')
+        self.assertEqual(len(error), 1)
+        self.assertEqual(
+            error.text(),
+            'Username is too short! Must be 3 to 20 characters long.')
+
+
+    def test_username_should_not_be_overly_long(self):
+        pass
+
+    def test_can_not_create_user_if_username_already_exists(self):
+        pass
 
     def test_can_not_create_user_without_password(self):
         # Bob goes to signup page.

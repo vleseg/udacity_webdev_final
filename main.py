@@ -98,7 +98,11 @@ class SignupPage(AuthPageHandler):
         email = self.request.get("email")
 
         if not self.is_valid_username(username):
-            self.context["username_error"] = "That's not a valid username!"
+            if 0 < len(username) < 3:
+                self.context['username_error'] = (
+                    'Username is too short! Must be 3 to 20 characters long.')
+            else:
+                self.context["username_error"] = "You must specify username!"
         elif User.by_prop('name', username):
             self.context["username_error"] = "User already exists!"
 
