@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% block title %}{{ page.title }}{% endblock %}
 {% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
 {% block content %}
     <div class="top-panel-wrapper">
         <div class="top-panel">
             {% if user %}
                 <span><a href="/_edit{{ page.url }}">Edit Page</a></span>
-                <span>Logged in as <b>{{ user.name }}</b>
+                <span>Logged in as <span id="username">{{ user.name }}</span>
                 (<a href="/logout">Log Out</a>)
             </span>
             {% else %}

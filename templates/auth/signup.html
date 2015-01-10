@@ -1,5 +1,5 @@
 {% extends "auth/base.html" %}
-{% block title %}Welcome!{% endblock %}
+{% block title %}Sign Up{% endblock %}
 {% block head %}Create new user account{% endblock %}
 {% block auth_content %}
     <form method="post">
@@ -31,7 +31,9 @@
                 <div>{{ email_error }}</div>
             </div>
         </div>
-        <div class="form-submit-button"><input type="submit"></div>
+        <div class="form-submit-button">
+            <input type="submit" value="Create">
+        </div>
     </form>
     <div class="auth-alternative">
         Already a user? <a href="/login">Log in!</a>

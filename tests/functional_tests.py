@@ -29,23 +29,33 @@ class CreateNewUserTest(unittest.TestCase):
         pq_page = signup_page.pyquery('html')
         title = pq_page.find('title')
         heading = pq_page.find('h1')
-        form = pq_page.find('form')
-        self.assertEqual(title.text(), u'MyWiki — Welcome!')
+        self.assertEqual(title.text(), u'MyWiki — Sign Up')
         self.assertEqual(heading.text(), 'Create new user account')
-        self.assertNotEqual(len(form), 0)
+        self.assertEqual(len(signup_page.forms), 1)
 
         # Bob enters his name (bob) into "Username" field.
-        #
+        form = signup_page.form
+        form['username'] = 'bob'
+
         # Bob uses "test123" as password in "Password" field and confirms it in
         # "Verify password" field.
+        form['password'] = 'test123'
+        form['verify'] = 'test123'
 
-        # He does not specify email address, since it's optional. Bob presses
-        # "Create new user" button.
+        # He does not specify email address, since it's optional. There's a
+        # submit button below the form. It has a label: "Create".
+        submit_button = pq_page.find('input[type=submit]')
+        self.assertEqual(submit_button.attr('value'), 'Create')
 
-        # Browser redirects Bob to the home page. He can tell that by looking at
-        # page title, it says: "MyWiki -- Welcome!" He can also see his name
-        # (bob) in the top area of the page.
-        pass
+        # Bob submits the form. Browser redirects Bob to the home page. He can
+        # tell that by looking at page title, it says: "MyWiki -- Welcome!" He
+        # can also see his name (bob) in the top area of the page.
+        signup_submit_response = form.submit().follow()
+        pq_page = signup_submit_response.pyquery('html')
+        title = pq_page.find('title')
+        username = pq_page.find('#username')
+        self.assertEqual(title.text(), u'MyWiki — Welcome!')
+        self.assertEqual(username.text(), 'bob')
 
     def test_can_not_create_user_with_empty_username(self):
         # Bob goes to signup page.
@@ -53,7 +63,7 @@ class CreateNewUserTest(unittest.TestCase):
         # Bob omits the "Usename" field, fills in "test123" in both "Password"
         # and "Verify password" fields.
 
-        # Bob clicks "Create new user" button.
+        # Bob clicks "Create" button.
 
         # Signup page refreshes and he can see error message next to "Username"
         # field. "Password" and "Verify password" fields are empty.
@@ -64,8 +74,8 @@ class CreateNewUserTest(unittest.TestCase):
 
         # Bob enters his name (bob) into "Username" field.
 
-        # He omits "Password" and "Verify password" fields and clicks "Create
-        # new user" button.
+        # He omits "Password" and "Verify password" fields and clicks "Create"
+        # button.
 
         # Signup page refreshes and he can see error message next to "Password"
         # field.
@@ -83,7 +93,7 @@ class CreateNewUserTest(unittest.TestCase):
         # He mistypes confirmation password, entering "test124" into "Verify
         # password" field.
 
-        # Bob clicks "Create new user button".
+        # Bob clicks "Create" button.
 
         # Signup page refreshes and he can see error message next to "Verify
         # password" field.

@@ -183,9 +183,9 @@ class WikiViewPage(BaseHandler):
         page = WikiPage.by_prop('url', path)
         if page is None:
             if path == '/':
-                page = WikiPage(url='/', body=self.render_str(
-                    'wiki/default_homepage.html'), parent=GLOBAL_PARENT)
-                page.put()
+                page = WikiPage(
+                    url='/', body=self.render_str('wiki/default_homepage.html'),
+                    title='Welcome!', parent=GLOBAL_PARENT); page.put()
             elif self.user is None:
                 self.abort(404)
             else:
