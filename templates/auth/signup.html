@@ -3,37 +3,21 @@
 {% block head %}Create new user account{% endblock %}
 {% block auth_content %}
     <form method="post">
-        <div class="form-container">
-            <div class="form-labels">
-                <div>Username:</div>
-                <div>Password:</div>
-                <div>Verify password:</div>
-                <div>Email (optional):</div>
-            </div>
-            <div class="form-controls">
-                <div>
-                    <input name="username" type="text" value="{{username_value}}">
-                </div>
-                <div>
-                    <input name="password" type="password">
-                </div>
-                <div>
-                    <input name="verify" type="password">
-                </div>
-                <div>
-                    <input name="email" value="{{email_value}}" type="text">
-                </div>
-            </div>
-            <div class="form-errors">
-                <div>{{ username_error }}</div>
-                <div>{{ password_error }}</div>
-                <div>{{ verify_error }}</div>
-                <div>{{ email_error }}</div>
-            </div>
-        </div>
-        <div class="form-submit-button">
-            <input type="submit" value="Create">
-        </div>
+        <div>{{ form.username.label }}: {{ form.username() }}</div>
+        <div>{{ form.password.label }}: {{ form.password() }}</div>
+        <div>{{ form.verify.label }}: {{ form.verify() }}</div>
+        <div>{{ form.email.label }}: {{ form.email() }}</div>
+
+        {% if form.errors %}
+        <ul class="form-errors">
+        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+            {% for error in field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        </ul>
+        {% endif %}
+        <input type="submit" value="Create">
     </form>
     <div class="auth-alternative">
         Already a user? <a href="/login">Log in!</a>

@@ -109,7 +109,7 @@ class CreateNewUserTest(unittest.TestCase):
         self.assertEqual(len(error), 1)
         self.assertEqual(
             error.text(),
-            'Username is too short! Must be 3 to 20 characters long.')
+            'Username is too short! Must be 3 to 20 characters long')
 
     def test_username_should_not_be_overly_long(self):
         pass

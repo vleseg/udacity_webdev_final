@@ -19,7 +19,7 @@ class BaseModel(db.Model):
 class User(BaseModel):
     name = db.StringProperty(required=True)
     password_hash = db.StringProperty(required=True, indexed=False)
-    email = db.EmailProperty()
+    email = db.EmailProperty(required=False)
 
 
 class Session(BaseModel):

@@ -4,6 +4,7 @@ import re
 # Third-party imports
 import webapp2
 # Project-specific imports
+from forms import SignupForm
 from hashutils import check_against_hash, encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
 from model import GLOBAL_PARENT, User, Session, WikiPage
@@ -88,66 +89,29 @@ class SignupPage(AuthPageHandler):
     template = "auth/signup.html"
 
     def _get(self):
+        self.context['form'] = SignupForm()
         self.render()
 
     def _post(self):
-        has_error = False
-        username = self.request.get("username")
-        password = self.request.get("password")
-        verify = self.request.get("verify")
-        email = self.request.get("email")
+        form = SignupForm(self.request.params)
 
-        if not self.is_valid_username(username):
-            if 0 < len(username) < 3:
-                self.context['username_error'] = (
-                    'Username is too short! Must be 3 to 20 characters long.')
-            else:
-                self.context["username_error"] = "You must specify username!"
-        elif User.by_prop('name', username):
-            self.context["username_error"] = "User already exists!"
-
-        if not self.is_valid_password(password):
-            self.context["password_error"] = "That's not a valid password!"
-        elif not self.is_valid_verify(password, verify):
-            self.context["verify_error"] = "Your passwords did not match!"
-
-        if not self.is_valid_email(email):
-            self.context["email_error"] = "That's not a valid email!"
-
-        if any([self.context[k] for k in self.context.keys() if 'error' in k]):
-            has_error = True
-
-        if not has_error:
-            pwd_hash = make_hash(username + password)
+        if form.validate():
+            username = form.username.data
+            pwd = form.password.data
+            pwd_hash = make_hash(username + pwd)
 
             user = User(name=username, password_hash=pwd_hash,
                         parent=GLOBAL_PARENT)
-            if email:
-                user.email = email
+            if form.email.data:
+                user.email = form.email.data
             user.put()
 
             self.redirect_with_cookie('/', self.get_new_session_cookie(user))
         else:
-            self.context["username_value"] = username
-            self.context["email_value"] = email
+            form.password.data = ''
+            form.verify.data = ''
+            self.context['form'] = form
             self.render()
-
-    # Validations
-    @staticmethod
-    def is_valid_username(username):
-        return USERNAME_RE.match(username)
-
-    @staticmethod
-    def is_valid_password(password):
-        return PASSWORD_RE.match(password)
-
-    @staticmethod
-    def is_valid_verify(password, verify):
-        return password == verify
-
-    @staticmethod
-    def is_valid_email(email):
-        return not email or EMAIL_RE.match(email)
 
 
 class LoginPage(AuthPageHandler):
