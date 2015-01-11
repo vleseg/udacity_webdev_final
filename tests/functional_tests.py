@@ -249,6 +249,10 @@ class PasswordValidationTest(BaseTestCase):
         form = signup_submit_response.form
         self.assertEqual(form['username'].value, 'bob')
 
+        # Entered passwords are no longer there.
+        self.assertEqual(form['password'].value, '')
+        self.assertEqual(form['verify'].value, '')
+
     def test_password_can_not_be_overly_long(self):
         # Bob goes to signup page.
         signup_page = self.testapp.get('/signup')
@@ -275,24 +279,36 @@ class PasswordValidationTest(BaseTestCase):
         form = signup_submit_response.form
         self.assertEqual(form['username'].value, 'bob')
 
+        # Entered passwords are no longer there.
+        self.assertEqual(form['password'].value, '')
+        self.assertEqual(form['verify'].value, '')
+
     def test_has_to_verify_password_to_create_a_user(self):
         # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
 
-        # Bob enters his name (bob) into "Username" field.
-
-        # He enters "test123" into "Password" field.
-
-        # He mistypes confirmation password, entering "test124" into "Verify
+        # Bob enters his name (bob) into "Username" field and uses "test123"
+        # as password. He also mistypes, entering "test124" into "Verify
         # password" field.
+        form = self.fill_form(
+            signup_page, username='bob', password='test123', verify='test124')
 
         # Bob submits the form.
+        signup_submit_response = form.submit()
 
-        # Signup page refreshes and he can see error message next to "Verify
-        # password" field.
+        # Signup page refreshes.
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
 
-        # Both "Password" and "Verify password" fields are empty. "Username"
-        # field still has his name in it.
-        pass
+        # Bob can see error message, complaining about passwords not matching.
+        self.assertHasFormError(signup_submit_response, 'Passwords do not match!')
+
+        # Both "Password" and "Verify password" fields are empty.
+        form = signup_submit_response.form
+        self.assertEqual(form['password'].value, '')
+        self.assertEqual(form['verify'].value, '')
+
+        # "Username" field still has his name in it.
+        self.assertEqual(form['username'].value, 'bob')
 
 
 class EmailValidationTest(BaseTestCase):
