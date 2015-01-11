@@ -314,19 +314,31 @@ class PasswordValidationTest(BaseTestCase):
 class EmailValidationTest(BaseTestCase):
     def test_email_if_entered_has_to_be_valid(self):
         # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
 
-        # Bob enters his name (bob) into "Username" field.
-
-        # He enters "test123" into both "Password" and "Verify" fields.
-
-        # He enters "bob@examplecom" into "Email" field, accidentally missing
-        # a dot before "com".
+        # Bob enters his name (bob) into "Username" field and uses 'test123' as
+        # his password. He also enters "bob@examplecom" into "Email" field,
+        # accidentally missing out a dot before "com".
+        form = self.fill_form(
+            signup_page, username='bob', password='test123', verify='test123',
+            email='bob@examplecom')
 
         # Bob submits the form.
+        signup_submit_response = form.submit()
 
-        # Signup page refreshes and he can see error message, complaining about
-        # incorrect email address.
+        # Signup page refreshes.
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
 
-        # Both "Password" and "Verify password" fields are empty. "Username" and
-        # "Email" fields still have corresponding values in them.
+        # Bob can see error message, complaining about invalid email address.
+        self.assertHasFormError(
+            signup_submit_response, 'Invalid email address!')
+
+        # Both "Password" and "Verify password" fields are empty.
+        form = signup_submit_response.form
+        self.assertEqual(form['password'].value, '')
+        self.assertEqual(form['verify'].value, '')
+
+        # "Username" and "Email" field still have corresponding data in them.
+        self.assertEqual(form['username'].value, 'bob')
+        self.assertEqual(form['email'].value, 'bob@examplecom')
         pass

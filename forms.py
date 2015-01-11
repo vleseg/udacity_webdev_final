@@ -44,4 +44,6 @@ class SignupForm(Form):
         [validators.equal_to('password', message='Passwords do not match!')]
     )
     email = StringField(
-        "Email (optional)", [validators.optional(), validators.Email()])
+        "Email (optional)",
+        [validators.optional(),
+         validators.Email(message='Invalid email address!')])
