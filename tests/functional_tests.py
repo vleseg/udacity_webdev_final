@@ -24,6 +24,14 @@ class CreateNewUserTest(unittest.TestCase):
             form[f] = fields[f]
         return form
 
+    def assertTitleEqual(self, page, title_text):
+        self.assertEqual(page.pyquery('title').text(), title_text)
+
+    def assertHasFormError(self, page, error_text):
+        errors = page.pyquery('.form-errors')
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors.text(), error_text)
+
     def test_can_create_a_new_user(self):
         # Bob types in signup page address and presses Enter. Browser
         # successfully delivers him a signup page.
@@ -32,10 +40,8 @@ class CreateNewUserTest(unittest.TestCase):
 
         # Page title says: "MyWiki -- Sign Up". There's also a heading and a
         # form. Heading is as follows: "Create new user account".
-        pq_page = signup_page.pyquery('html')
-        title = pq_page.find('title')
-        heading = pq_page.find('h1')
-        self.assertEqual(title.text(), u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_page, u'MyWiki — Sign Up')
+        heading = signup_page.pyquery('h1')
         self.assertEqual(heading.text(), 'Create new user account')
         self.assertEqual(len(signup_page.forms), 1)
 
@@ -46,19 +52,17 @@ class CreateNewUserTest(unittest.TestCase):
 
         # He does not specify email address, since it's optional. There's a
         # submit button below the form. It has a label: "Create".
-        submit_button = pq_page.find('input[type=submit]')
+        submit_button = signup_page.pyquery('input[type=submit]')
         self.assertEqual(submit_button.attr('value'), 'Create')
 
         # Bob submits the form. Browser redirects Bob to the home page. He can
         # tell that by looking at page title, it says: "MyWiki -- Welcome!"
         signup_submit_response = form.submit().follow()
-        pq_page = signup_submit_response.pyquery('html')
-        title = pq_page.find('title')
-        self.assertEqual(title.text(), u'MyWiki — Welcome!')
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Welcome!')
 
         # He can also see his name (bob) in the top area of the page.
-        username = pq_page.find('#username')
-        self.assertEqual(username.text(), 'bob')
+        username = signup_submit_response.pyquery('#username').text()
+        self.assertEqual(username, 'bob')
 
     def test_can_not_create_user_with_empty_username(self):
         # Bob goes to signup page.
@@ -72,16 +76,14 @@ class CreateNewUserTest(unittest.TestCase):
         signup_post_response = form.submit()
 
         # Signup page refreshes.
-        pq_page = signup_post_response.pyquery('html')
-        title = pq_page.find('title')
-        self.assertEqual(title.text(), u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_post_response, u'MyWiki — Sign Up')
 
         # Bob can see error message, complaining about absent username.
+        self.assertHasFormError(signup_post_response,
+                                'You must specify username!')
+
         # "Password" and "Verify password" fields are empty.
-        error = pq_page.find('.form-errors')
         form = signup_post_response.form
-        self.assertEqual(len(error), 1)
-        self.assertEqual(error.text(), "You must specify username!")
         self.assertEqual(form['password'].value, '')
         self.assertEqual(form['verify'].value, '')
 
@@ -97,22 +99,68 @@ class CreateNewUserTest(unittest.TestCase):
         # He submits the form.
         signup_page_response = form.submit()
 
-        # Page refreshes and Bob can see error message, complaining about
-        # username length. Entered username is still available in "Username"
-        # field.
-        pq_page = signup_page_response.pyquery('html')
-        form = signup_page_response.form
-        title = pq_page.find('title')
-        error = pq_page.find('.form-errors')
-        self.assertEqual(title.text(), u'MyWiki — Sign Up')
-        self.assertEqual(form['username'].value, 'bo')
-        self.assertEqual(len(error), 1)
-        self.assertEqual(
-            error.text(),
+        # Page refreshes.
+        self.assertTitleEqual(signup_page_response, u'MyWiki — Sign Up')
+
+        # Bob can see error message, complaining about username length.
+        self.assertHasFormError(
+            signup_page_response,
             'Username is too short! Must be 3 to 20 characters long')
 
+        # Entered username is still available in "Username" field.
+        form = signup_page_response.form
+        self.assertEqual(form['username'].value, 'bo')
+
     def test_username_should_not_be_overly_long(self):
-        pass
+        # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # Bob enters uses "bobkowalskifrommontaukonlongisland" as his username
+        # and 'test123' as a password.
+        form = self.fill_form(
+            signup_page, username='bobkowalskifrommontaukonlongisland',
+            password='test123', verify='test123')
+
+        # He submits the form.
+        signup_page_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(signup_page_response, u'MyWiki — Sign Up')
+
+        # Bob can see error message, complaining about username length. =
+        self.assertHasFormError(
+            signup_page_response,
+            'Username is too long! Must be 3 to 20 characters long')
+
+        # Entered username is still available in "Username" field.
+        form = signup_page_response.form
+        self.assertEqual(form['username'].value,
+                         'bobkowalskifrommontaukonlongisland')
+
+    def test_username_can_not_contain_invalid_characters(self):
+        # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # Bob enters his name in Russian (боб) and uses 'test123' as password.
+        form = self.fill_form(
+            signup_page, username=u'боб', password='test123', verify='test123')
+
+        # He submits the form.
+        signup_page_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(signup_page_response, u'MyWiki — Sign Up')
+
+        # Bob can see error message, complaining about invalid characters in
+        # username.
+        self.assertHasFormError(
+            signup_page_response,
+            'Invalid username! May contain only latin letters, digits, '
+            'dash and underscore')
+
+        # Entered username is still available in "Username" field.
+        form = signup_page_response.form
+        self.assertEqual(form['username'].value, u'боб')
 
     def test_can_not_create_user_if_username_already_exists(self):
         pass
