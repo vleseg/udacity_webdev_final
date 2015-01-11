@@ -225,11 +225,55 @@ class PasswordValidationTest(BaseTestCase):
         form = signup_submit_response.form
         self.assertEqual(form['username'].value, 'bob')
 
-    def test_password_can_not_be_overly_long(self):
-        pass
-
     def test_password_can_not_be_overly_short(self):
-        pass
+        # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # Bob enters his name (bob) into "Username" field and uses 'te' as a
+        # password.
+        form = self.fill_form(
+            signup_page, username='bob', password='te', verify='te')
+
+        # He submits the form.
+        signup_submit_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+
+        # Bob can see error message, complaining about password length
+        self.assertHasFormError(
+            signup_submit_response,
+            'Password is too short! Must be 3 to 20 characters long')
+
+        # Entered username is still available in "Username" field.
+        form = signup_submit_response.form
+        self.assertEqual(form['username'].value, 'bob')
+
+    def test_password_can_not_be_overly_long(self):
+        # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # Bob enters his name (bob) into "Username" field and uses
+        # 'unsafepasswordexclusivelyfortestingpurposes' as a password.
+        form = self.fill_form(
+            signup_page, username='bob',
+            password='unsafepasswordexclusivelyfortestingpurposes',
+            verify='unsafepasswordexclusivelyfortestingpurposes')
+
+        # He submits the form.
+        signup_submit_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+
+        # Bob can see error message, complaining about password length
+        self.assertHasFormError(
+            signup_submit_response,
+            'Password is too long! Must be 3 to 20 characters long')
+
+        # Entered username is still available in "Username" field.
+        form = signup_submit_response.form
+        self.assertEqual(form['username'].value, 'bob')
 
     def test_has_to_verify_password_to_create_a_user(self):
         # Bob goes to signup page.
