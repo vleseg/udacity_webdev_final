@@ -36,6 +36,18 @@ class CreateNewUserTest(BaseTestCase):
         username = signup_submit_response.pyquery('#username').text()
         self.assertEqual(username, 'bob')
 
+    def test_signup_page_directs_to_login(self):
+        # Bob opens the signup page.
+        signup_page = self.testapp.get('/signup')
+
+        # There's a section on page, that offers existing users to sign in.
+        sign_in_offer = signup_page.pyquery('.auth-alternative')
+        self.assertEqual(sign_in_offer.text(), 'Already a user? Sign in!')
+
+        # This section links to login page.
+        link_to_login_page = sign_in_offer.find('a')
+        self.assertEqual(link_to_login_page.attr('href'), '/login')
+
 
 class UsernameValidationTest(BaseTestCase):
     def test_can_not_create_user_with_empty_username(self):

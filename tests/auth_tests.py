@@ -23,3 +23,17 @@ class LoginTest(BaseTestCase):
         self.assertTitleEqual(login_page, u'MyWiki — Login')
         self.assertEqual(login_page.pyquery('h1').text(), 'Sign into MyWiki')
         self.assertEqual(len(login_page.forms), 1)
+
+        # Bob enters his username and password into corresponding fields.
+        form = self.fill_form(login_page, username='bob', password='test123')
+
+        # Bob submits the form.
+        login_submit_response = form.submit().follow()
+
+        # Browser redirects Bob to the home page. He can # tell that by looking
+        # at page title, it says: "MyWiki -- Welcome!"
+        self.assertTitleEqual(login_submit_response, u'MyWiki — Welcome!')
+
+        # He can also see his name (bob) in the top area of the page.
+        username = login_submit_response.pyquery('#username').text()
+        self.assertEqual(username, 'bob')
