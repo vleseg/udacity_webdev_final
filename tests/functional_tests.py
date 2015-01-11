@@ -26,6 +26,11 @@ class BaseTestCase(unittest.TestCase):
 
     def assertTitleEqual(self, page, title_text):
         self.assertEqual(page.pyquery('title').text(), title_text)
+    
+    def assertHasFormError(self, page, error_text):
+        errors = page.pyquery('.form-errors')
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors.text(), error_text)
 
 
 class CreateNewUserTest(BaseTestCase):
@@ -63,11 +68,6 @@ class CreateNewUserTest(BaseTestCase):
 
 
 class UsernameValidationTest(BaseTestCase):
-    def assertHasFormError(self, page, error_text):
-        errors = page.pyquery('.form-errors')
-        self.assertEqual(len(errors), 1)
-        self.assertEqual(errors.text(), error_text)
-
     def test_can_not_create_user_with_empty_username(self):
         # Bob goes to signup page.
         signup_page = self.testapp.get('/signup')
@@ -206,16 +206,24 @@ class UsernameValidationTest(BaseTestCase):
 class PasswordValidationTest(BaseTestCase):
     def test_can_not_create_user_without_password(self):
         # Bob goes to signup page.
+        signup_page = self.testapp.get('/signup')
 
         # Bob enters his name (bob) into "Username" field.
+        form = self.fill_form(signup_page, username='bob')
 
         # He omits "Password" and "Verify password" fields and submits the form.
+        signup_submit_response = form.submit()
 
-        # Signup page refreshes and he can see error message next to "Password"
-        # field.
+        # Signup page refreshes.
+        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        
+        # Bob can see error message next to "Password" field.
+        self.assertHasFormError(
+            signup_submit_response, 'You must specify password!')
 
         # "Username" field still has his name (bob) in it.
-        pass
+        form = signup_submit_response.form
+        self.assertEqual(form['username'].value, 'bob')
 
     def test_password_can_not_be_overly_long(self):
         pass
