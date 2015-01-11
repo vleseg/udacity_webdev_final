@@ -1,8 +1,16 @@
 import re
 # Project-specific imports
-from wtforms import Form, StringField, PasswordField, validators
+from model import User
+from wtforms import (
+    Form, StringField, PasswordField, validators, ValidationError)
 
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
+
+
+# Custom validators.
+def user_exists(form, field):
+    if User.by_prop('name', field.data):
+        raise ValidationError('User "{}" already exists!'.format(field.data))
 
 
 class SignupForm(Form):
@@ -18,7 +26,8 @@ class SignupForm(Form):
          validators.regexp(
             USERNAME_RE,
             message='Invalid username! May contain only latin letters, '
-                    'digits, dash and underscore')]
+                    'digits, dash and underscore'),
+         user_exists]
     )
     password = PasswordField(
         'Password',
