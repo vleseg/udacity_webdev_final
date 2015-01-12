@@ -22,11 +22,6 @@ class CreateNewUserTest(BaseTestCase):
         form = self.fill_form(
             signup_page, username='bob', password='test123', verify='test123')
 
-        # He does not specify email address, since it's optional. There's a
-        # submit button below the form. It has a label: "Create".
-        submit_button = signup_page.pyquery('input[type=submit]')
-        self.assertEqual(submit_button.attr('value'), 'Create')
-
         # Bob submits the form. Browser redirects Bob to the home page. He can
         # tell that by looking at page title, it says: "MyWiki -- Welcome!"
         signup_submit_response = form.submit().follow()
@@ -36,7 +31,7 @@ class CreateNewUserTest(BaseTestCase):
         username = signup_submit_response.pyquery('#username').text()
         self.assertEqual(username, 'bob')
 
-    def test_signup_page_directs_to_login(self):
+    def test_signup_page_offers_to_sign_in(self):
         # Bob opens the signup page.
         signup_page = self.testapp.get('/signup')
 

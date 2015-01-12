@@ -37,3 +37,59 @@ class LoginTest(BaseTestCase):
         # He can also see his name (bob) in the top area of the page.
         username = login_submit_response.pyquery('#username').text()
         self.assertEqual(username, 'bob')
+
+    def test_login_page_offers_to_sign_up(self):
+        # Bob opens the login page.
+        signup_page = self.testapp.get('/login')
+
+        # There's a section on page, that offers new users to sign up.
+        sign_up_offer = signup_page.pyquery('.auth-alternative')
+        self.assertEqual(sign_up_offer.text(), 'Not a user? Sign up!')
+
+        # This section links to signup page.
+        link_to_signup_page = sign_up_offer.find('a')
+        self.assertEqual(link_to_signup_page.attr('href'), '/signup')
+
+    def test_login_form_does_not_give_a_clue_what_is_wrong_when_it_is(self):
+        # Bob creates a new user using signup page. He uses "bob" as username
+        # and "test123" as password.
+        signup_page = self.testapp.get('/signup')
+        self.fill_form(signup_page, username='bob', password='test123',
+                       verify='test123').submit()
+
+        # He logs out.
+        self.testapp.get('/logout')
+
+        # Bob opens the login page.
+        login_page = self.testapp.get('/login')
+
+        # Bob tries to sign in using nonexistent username.
+        form = self.fill_form(login_page, username='alice', password='test123')
+        login_submit_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+
+
+class LogoutTest(BaseTestCase):
+    def test_logs_out_flawlessly(self):
+        # Bob creates a new user using signup page.
+        signup_page = self.testapp.get('/signup')
+        home_page = self.fill_form(
+            signup_page, username='bob', password='test123',
+            verify='test123').submit().follow()
+
+        # Browser redirects him to homepage. He can see his username in upper
+        # part of the page.
+        top_panel = home_page.pyquery('.top-panel')
+        self.assertIn('bob', top_panel.text())
+
+        # Bob logs out.
+        home_page = self.testapp.get('/logout').follow()
+
+        # Browser redirects him to homepage.
+        self.assertTitleEqual(home_page, u'MyWiki — Welcome!')
+
+        # Now his name isn't displayed on page.
+        top_panel = home_page.pyquery('.top-panel')
+        self.assertNotIn('bob', top_panel.text())
