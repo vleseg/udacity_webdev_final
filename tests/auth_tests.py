@@ -82,7 +82,7 @@ class LogoutTest(BaseTestCase):
 
         # Browser redirects him to homepage. He can see his username in upper
         # part of the page.
-        top_panel = home_page.pyquery('.top-panel')
+        top_panel = home_page.pyquery('#top-panel')
         self.assertIn('bob', top_panel.text())
 
         # Bob logs out.
@@ -92,5 +92,5 @@ class LogoutTest(BaseTestCase):
         self.assertTitleEqual(home_page, u'MyWiki — Welcome to MyWiki!')
 
         # Now his name isn't displayed on page.
-        top_panel = home_page.pyquery('.top-panel')
+        top_panel = home_page.pyquery('#top-panel')
         self.assertNotIn('bob', top_panel.text())

@@ -2,15 +2,15 @@
 {% block title %}{{ page.title }}{% endblock %}
 {% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
 {% block content %}
-    <div class="top-panel-wrapper">
-        <div class="top-panel">
+    <div id="top-panel-wrapper">
+        <div id="top-panel">
             {% if user %}
                 <span><a href="/_edit{{ page.url }}">Edit Page</a></span>
                 <span>Logged in as <span id="username">{{ user.name }}</span>
-                (<a href="/logout">Log Out</a>)
+                (<a href="/logout">Sign Out</a>)
             </span>
             {% else %}
-                <span><a href="/login">Log In</a></span>
+                <span><a href="/login">Sign In</a></span>
                 <span><a href="/signup">Sign Up</a></span>
             {% endif %}
         </div>
