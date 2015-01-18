@@ -32,7 +32,8 @@ class LoginTest(BaseTestCase):
 
         # Browser redirects Bob to the home page. He can # tell that by looking
         # at page title, it says: "MyWiki -- Welcome!"
-        self.assertTitleEqual(login_submit_response, u'MyWiki — Welcome!')
+        self.assertTitleEqual(
+            login_submit_response, u'MyWiki — Welcome to MyWiki!')
 
         # He can also see his name (bob) in the top area of the page.
         username = login_submit_response.pyquery('#username').text()
@@ -88,7 +89,7 @@ class LogoutTest(BaseTestCase):
         home_page = self.testapp.get('/logout').follow()
 
         # Browser redirects him to homepage.
-        self.assertTitleEqual(home_page, u'MyWiki — Welcome!')
+        self.assertTitleEqual(home_page, u'MyWiki — Welcome to MyWiki!')
 
         # Now his name isn't displayed on page.
         top_panel = home_page.pyquery('.top-panel')

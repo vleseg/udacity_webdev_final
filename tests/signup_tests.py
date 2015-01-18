@@ -25,7 +25,8 @@ class CreateNewUserTest(BaseTestCase):
         # Bob submits the form. Browser redirects Bob to the home page. He can
         # tell that by looking at page title, it says: "MyWiki -- Welcome!"
         signup_submit_response = form.submit().follow()
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Welcome!')
+        self.assertTitleEqual(
+            signup_submit_response, u'MyWiki — Welcome to MyWiki!')
 
         # He can also see his name (bob) in the top area of the page.
         username = signup_submit_response.pyquery('#username').text()
