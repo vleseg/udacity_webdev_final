@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ page.title }}{% endblock %}
+{% block title %}{{ page.title }}{% block title_postfix %}{% endblock %}{% endblock %}
 {% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
 {% block content %}
     <div id="top-panel-wrapper">

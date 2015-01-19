@@ -169,13 +169,20 @@ class WikiViewPage(BaseHandler):
 class WikiEditPage(BaseHandler):
     template = "wiki/edit_page.html"
 
-    def _get(self, pageurl):
+    def _get(self, path):
         if self.user is None:
             self.abort(401)
 
-        page = WikiPage.by_prop('url', pageurl)
+        page = WikiPage.by_prop('url', path)
         if page is None:
-            page = WikiPage(url=pageurl, body='', parent=GLOBAL_PARENT)
+            if path == '/':
+                page = {
+                    'body': '<p>You are free to create new pages and edit '
+                            'existing ones.</p>',
+                    'title': 'Welcome to MyWiki!'
+                }
+            else:
+                page = {}
         self.context = {'user': self.user, 'page': page}
         self.render()
 

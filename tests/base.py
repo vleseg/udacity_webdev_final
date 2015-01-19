@@ -30,3 +30,11 @@ class BaseTestCase(unittest.TestCase):
         errors = page.pyquery('.form-errors')
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors.text(), error_text)
+
+    def sign_up(self, **params):
+        if not params:
+            params = {
+                'username': 'bob', 'password': 'test123', 'verify': 'test123'}
+
+        signup_page = self.testapp.get('/signup')
+        self.fill_form(signup_page, **params).submit()

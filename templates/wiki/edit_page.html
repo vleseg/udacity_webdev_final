@@ -1,7 +1,9 @@
 {% extends "wiki/base.html" %}
+{% block title_postfix %} (edit){% endblock %}
 {% block content %}
-    <form action="/_edit{{ page.url }}" method="post" id="edit">
-        <textarea name="page_body" id="page-body" rows="35">{{ page.body|safe }}</textarea>
+    <form action="/_edit{{ page.url }}" method="post" id="wiki-edit-form">
+        <input type="text" name="title" id="wiki-title" value="{{ page.title }}"/>
+        <textarea name="body" id="wiki-body" rows="35">{{page.body }}</textarea>
         <input type="submit" value="Save"/>
     </form>
 {% endblock %}

@@ -3,18 +3,11 @@ from base import BaseTestCase
 
 
 class BasicHomepageTest(BaseTestCase):
-    def sign_up(self, **params):
-        if not params:
-            params = {
-                'username': 'bob', 'password': 'test123', 'verify': 'test123'}
-
-        signup_page = self.testapp.get('/signup')
-        self.fill_form(signup_page, **params).submit()
-
     def test_home_page_opens_and_displays_correct_content(self):
         # Bob types in MyWiki's home page address and presses Return. Browser
         # successfully delivers him the home page.
         homepage = self.testapp.get('/')
+        self.assertEqual(homepage.status_int, 200)
         self.assertTitleEqual(homepage, u'MyWiki — Welcome to MyWiki!')
 
         # Bob finds a heading followed by a piece of text, that both give him
