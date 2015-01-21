@@ -124,12 +124,14 @@ class LoginPage(AuthPageHandler):
         username = self.request.get("username")
         password = self.request.get("password")
 
+        redirect_to = self.request.cookies.get('referrer', '/')
+
         user = User.by_prop('name', username)
         if user:
             pwd_hash = user.password_hash
             if check_against_hash(username + password, pwd_hash):
                 self.redirect_with_cookie(
-                    '/', self.get_new_session_cookie(user))
+                    redirect_to, self.get_new_session_cookie(user))
             else:
                 self.context["username_error"] = "Invalid password!"
         else:
@@ -171,7 +173,8 @@ class WikiEditPage(BaseHandler):
 
     def _get(self, path):
         if self.user is None:
-            self.abort(401)
+            self.redirect_with_cookie(
+                '/login', 'referrer={}; Path=/'.format(self.request.url))
 
         page = WikiPage.by_prop('url', path)
         if page is None:
@@ -188,7 +191,7 @@ class WikiEditPage(BaseHandler):
 
     def _post(self, pageurl):
         if self.user is None:
-            self.abort(401)
+            self.redirect('/login', abort=True)
 
         page = WikiPage.by_prop('url', pageurl)
         if page is None:

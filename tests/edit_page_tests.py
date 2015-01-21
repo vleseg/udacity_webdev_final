@@ -31,3 +31,33 @@ class BasicEditPageTest(BaseTestCase):
         self.assertEqual(
             textarea.text(),
             '<p>You are free to create new pages and edit existing ones.</p>')
+
+    def test_unauthorized_user_is_redirected_to_login_page(self):
+        # Bob tries to access edit form for MyWiki's home page by direct link.
+        # He's not logged in.
+        response = self.testapp.get('/_edit/').follow()
+
+        # Browser delivers him a login page.
+        self.assertTitleEqual(response, u'MyWiki — Login')
+
+    def test_redirects_back_to_edit_form_after_successful_login(self):
+        # Bob signs up and immediately logs off.
+        self.sign_up()
+        self.testapp.get('/logout')
+
+        # Then he tries to access edit form for MyWiki's home page by direct
+        # link.
+        response = self.testapp.get('/_edit/').follow()
+
+        # On the login form he signs in as a newly created user.
+        login_response = self.fill_form(
+            response, username='bob', password='test123').submit().follow()
+
+        # Bob is redirected back to the edit form.
+        self.assertTitleEqual(
+            login_response, u'MyWiki — Welcome to MyWiki! (edit)')
+
+        # He can even see his name in navigation panel.
+        username_container = login_response.pyquery('#username')
+        self.assertEqual(len(username_container), 1)
+        self.assertEqual(username_container.text(), 'bob')
