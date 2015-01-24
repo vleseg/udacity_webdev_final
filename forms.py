@@ -3,7 +3,7 @@ import re
 from model import User
 from wtforms import (
     Form, StringField, PasswordField, TextAreaField, validators,
-    ValidationError)
+    ValidationError, SubmitField)
 
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
@@ -17,18 +17,18 @@ def user_exists(form, field):
 class SignupForm(Form):
     username = StringField(
         'Username',
-        [validators.input_required(message='You must specify username!'),
+        [user_exists,
+         validators.input_required(message='You must specify username!'),
          validators.length(
-            min=3,
-            message='Username is too short! Must be 3 to 20 characters long'),
+             min=3,
+             message='Username is too short! Must be 3 to 20 characters long'),
          validators.length(
-            max=20,
-            message='Username is too long! Must be 3 to 20 characters long'),
+             max=20,
+             message='Username is too long! Must be 3 to 20 characters long'),
          validators.regexp(
-            USERNAME_RE,
-            message='Invalid username! May contain only latin letters, '
-                    'digits, dash and underscore'),
-         user_exists]
+             USERNAME_RE,
+             message='Invalid username! May contain only latin letters, '
+                     'digits, dash and underscore')]
     )
     password = PasswordField(
         'Password',
@@ -50,6 +50,11 @@ class SignupForm(Form):
          validators.Email(message='Invalid email address!')])
 
 
+class LoginForm(Form):
+    pass
+
+
 class EditForm(Form):
-    title = StringField('Page title')
-    body = TextAreaField('Page body')
+    title = StringField('Page title', id='wiki-title')
+    body = TextAreaField('Page body', id='wiki-body')
+    submit = SubmitField('Save')

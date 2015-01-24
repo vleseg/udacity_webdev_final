@@ -8,6 +8,10 @@ from hashutils import check_against_hash, encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
 from model import GLOBAL_PARENT, User, Session, WikiPage
 
+# Setup logging
+import logging
+logging.getLogger().setLevel(logging.DEBUG)
+
 
 # Handlers
 class BaseHandler(webapp2.RequestHandler):
@@ -29,9 +33,11 @@ class BaseHandler(webapp2.RequestHandler):
                 return True
 
     def get(self, *args, **kwargs):
+        logging.info(self.request.cookies)
         self.auth_wrapper(self._get, *args, **kwargs)
 
     def post(self, *args, **kwargs):
+        logging.info(self.request.cookies)
         self.auth_wrapper(self._post, *args, **kwargs)
 
     def handle_exception(self, exception, debug):
@@ -64,9 +70,13 @@ class BaseHandler(webapp2.RequestHandler):
     def write(self, *args, **kwargs):
         self.response.out.write(*args, **kwargs)
 
-    def redirect_with_cookie(self, path, cookie_str):
-        self.response.headers.add_header("Set-Cookie", cookie_str)
-        self.redirect(path)
+    def redirect_with_cookie(self, path, new_cookies):
+        for k in self.request.cookies:
+            if k not in new_cookies:
+                self.response.delete_cookie(k)
+        for key, value in new_cookies.items():
+            self.response.set_cookie(key, value)
+        self.redirect(str(path))
 
 
 # Base handler for signup & login pages
@@ -81,7 +91,7 @@ class AuthPageHandler(BaseHandler):
         sid = encrypt(user.name + user.password_hash + make_salt())
         session = Session(sid=sid, user=user, parent=GLOBAL_PARENT)
         session.put()
-        return "sid={}; Path=/".format(sid)
+        return {'sid': sid}
 
 
 # Signup form regexps
@@ -91,6 +101,8 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 
 class SignupPage(AuthPageHandler):
+    # TODO: line up form fields and labels nicely
+    # TODO: error messages should not shift submit button to alt link to side
     template = "auth/signup.html"
 
     def _get(self):
@@ -124,6 +136,7 @@ class SignupPage(AuthPageHandler):
 
 class LoginPage(AuthPageHandler):
     # TODO: use wtforms
+    # TODO: errors have to appear under form
     template = "auth/login.html"
 
     def _get(self):
@@ -145,24 +158,26 @@ class LoginPage(AuthPageHandler):
                 self.context["username_error"] = "Invalid password!"
         else:
             self.context["username_error"] = "User does not exist!"
-        self.render()
+            self.render()
 
 
 class Logout(BaseHandler):
     def _get(self):
         if self.session:
             self.session.delete()
-        self.redirect_with_cookie('/', 'sid=; Path=/')
+        self.redirect_with_cookie('/', {})
 
 
 class WikiViewPage(BaseHandler):
     template = "wiki/view_page.html"
 
     def _handle_exception(self, exception, debug):
+        self.template = "wiki/error.html"
+
         if exception.status_int == 404:
             self.context = {
                 'user': self.user,
-                'page': {'title': 'Page not found'}
+                'error': 'Page not found'
             }
             self.response.set_status(404)
         else:
@@ -194,35 +209,36 @@ class WikiEditPage(BaseHandler):
 
     def _get(self, path):
         if self.user is None:
-            self.redirect_with_cookie(
-                '/login', 'referrer={}; Path=/'.format(self.request.url))
+            self.redirect_with_cookie('/login', {'referrer': self.request.url})
 
+        form = EditForm()
         page = WikiPage.by_prop('url', path)
+
         if page is None:
             if path == '/':
-                page = {
-                    'body': '<p>You are free to create new pages and edit '
-                            'existing ones.</p>',
-                    'title': 'Welcome to MyWiki!'
-                }
-            else:
-                page = {}
-        self.context = {'user': self.user, 'page': page}
+                form.title.data = 'Welcome to MyWiki!'
+                form.body.data = (
+                    '<p>You are free to create new pages and edit existing '
+                    'ones.</p>')
+        else:
+            form.title.data = page.title
+            form.body.data = page.body
+        self.context = {'user': self.user, 'form': form, 'page_url': path}
         self.render()
 
-    def _post(self, pageurl):
+    def _post(self, path):
         if self.user is None:
             self.redirect('/login', abort=True)
 
         form = EditForm(self.request.params)
-        page = WikiPage.by_prop('url', pageurl)
+        page = WikiPage.by_prop('url', path)
         if page is None:
             page = WikiPage(
-                url=pageurl, title=form.title.data, parent=GLOBAL_PARENT)
+                url=path, title=form.title.data, parent=GLOBAL_PARENT)
         page.body = form.body.data
         page.put()
 
-        self.redirect(pageurl)
+        self.redirect(path)
 
 
 PAGE_RE = r'(/(?:[a-zA-Z0-9_-]+/?)*)'

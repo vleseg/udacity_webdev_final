@@ -12,9 +12,8 @@ class BasicHomepageTest(BaseTestCase):
 
         # Bob finds a heading followed by a piece of text, that both give him
         # an idea, that he really is on MyWiki's homepage.
-        content = homepage.pyquery('#wiki-content')
-        heading = content.find('#wiki-heading')
-        body = content.find('#wiki-body')
+        heading = homepage.pyquery('#wiki-heading')
+        body = homepage.pyquery('#wiki-body')
         self.assertEqual(heading.text(), 'Welcome to MyWiki!')
         self.assertEqual(
             body.text(),

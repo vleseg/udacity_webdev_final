@@ -11,7 +11,7 @@ class BasicViewPageTest(BaseTestCase):
         self.assertTitleEqual(response, u'MyWiki — Page not found')
         self.assertEqual(response.status_int, 404)
         self.assertEqual(
-            response.pyquery('#wiki-heading').text(), 'Page not found')
+            response.pyquery('#error-message').text(), 'Page not found')
 
         # Top panel is present on the page too.
         self.assertEqual(len(response.pyquery('#top-panel')), 1)

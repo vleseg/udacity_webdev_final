@@ -9,6 +9,7 @@ def datetime_format(value, f="%H:%M %d.%m.%Y"):
 jinja_environment = jinja2.Environment(
     autoescape=True, loader=jinja2.FileSystemLoader(
         os.path.join(os.path.dirname(__file__), 'templates')))
-
+jinja_environment.lstrip_blocks = True
+jinja_environment.trim_blocks = True
 
 jinja_environment.filters['datetimeformat'] = datetime_format

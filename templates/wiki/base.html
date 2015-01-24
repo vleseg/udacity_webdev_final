@@ -1,21 +1,26 @@
 {% extends "base.html" %}
-{% block title %}{{ page.title }}{% block title_postfix %}{% endblock %}{% endblock %}
+{% block title %}
+    {% block title_base %}{% endblock %}
+    {% block title_postfix %}{% endblock %}
+{% endblock %}
 {% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
 {% block content %}
     <div id="top-panel-wrapper">
         <div id="top-panel">
             {% if user %}
-                <span><a href="/_edit{{ page.url }}" id="edit-page">Edit Page</a></span>
-                <span>Logged in as <span id="username">{{ user.name }}</span>
-                (<a href="/logout">Sign Out</a>)
-            </span>
+                {% if page %}
+                    <span class="top-panel-section">
+                        <a href="/_edit{{ page.url }}" id="edit-page">Edit Page</a>
+                    </span>
+                {% endif %}
+                <span class="top-panel-section">
+                    Logged in as <span id="username">{{ user.name }}</span> (<a href="/logout">Sign Out</a>)
+                </span>
             {% else %}
-                <span><a href="/login">Sign In</a></span>
-                <span><a href="/signup">Sign Up</a></span>
+                <span class="top-panel-section"><a href="/login">Sign In</a></span>
+                <span class="top-panel-section"><a href="/signup">Sign Up</a></span>
             {% endif %}
         </div>
     </div>
-    <div id="wiki-content">
-        {% block wiki_content %}{% endblock %}
-    </div>
+    {% block wiki_content %}{% endblock %}
 {% endblock %}

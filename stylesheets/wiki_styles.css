@@ -12,10 +12,10 @@ textarea {
 #top-panel {
     float: right;
 }
-#top-panel span {
+#top-panel span.top-panel-section {
     text-align: right;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 #username {
     font-weight: bold;
