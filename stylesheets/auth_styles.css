@@ -9,13 +9,12 @@ body {
     margin-left: 0.6em;
 }
 
-.form-container, .form-submit-button {
-    position: relative;
-    overflow: hidden;
+.form-container, .form-submit-button, .auth-alternative {
+    float: left;
+    width: 100%;
 }
 
 .form-labels, .form-controls, .form-errors {
-    position: relative;
     float: left;
 }
 

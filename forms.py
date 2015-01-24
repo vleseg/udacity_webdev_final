@@ -48,6 +48,7 @@ class SignupForm(Form):
         "Email (optional)",
         [validators.optional(),
          validators.Email(message='Invalid email address!')])
+    submit = SubmitField('Create')
 
 
 class LoginForm(Form):

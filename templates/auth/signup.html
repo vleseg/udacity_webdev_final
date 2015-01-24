@@ -3,11 +3,20 @@
 {% block head %}Create new user account{% endblock %}
 {% block auth_content %}
     <form method="post">
-        <div>{{ form.username.label }}: {{ form.username() }}</div>
-        <div>{{ form.password.label }}: {{ form.password() }}</div>
-        <div>{{ form.verify.label }}: {{ form.verify() }}</div>
-        <div>{{ form.email.label }}: {{ form.email() }}</div>
-
+        <div class="form-container">
+            <div class="form-labels">
+                <div>{{ form.username.label }}</div>
+                <div>{{ form.password.label }}</div>
+                <div>{{ form.verify.label }}</div>
+                <div>{{ form.email.label }}</div>
+            </div>
+            <div class="form-controls">
+                <div>{{ form.username }}</div>
+                <div>{{ form.password }}</div>
+                <div>{{ form.verify }}</div>
+                <div>{{ form.email }}</div>
+            </div>
+        </div>
         {% if form.errors %}
             <ul class="form-errors">
             {% for field_name, field_errors in form.errors|dictsort if field_errors %}
@@ -17,8 +26,7 @@
             {% endfor %}
             </ul>
         {% endif %}
-        <input type="submit" value="Create">
-{#        TODO: submit button must be part of WTForms form #}
+        <div class="form-submit-button">{{ form.submit }}</div>
     </form>
     <div class="auth-alternative">
         Already a user? <a href="/login" id="auth-alternative-link">Sign in!</a>
