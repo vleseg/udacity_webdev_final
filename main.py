@@ -1,5 +1,4 @@
 # --coding:utf-8--
-import logging
 import re
 # Third-party imports
 import webapp2
@@ -35,10 +34,13 @@ class BaseHandler(webapp2.RequestHandler):
     def post(self, *args, **kwargs):
         self.auth_wrapper(self._post, *args, **kwargs)
 
-    def auth_wrapper(self, method_handler, *args, **kwargs):
+    def handle_exception(self, exception, debug):
+        self.auth_wrapper(self._handle_exception, exception, debug)
+
+    def auth_wrapper(self, method, *args, **kwargs):
         if self.sid_is_valid():
             self.user = self.session.user
-        method_handler(*args, **kwargs)
+        method(*args, **kwargs)
 
     # Actual handlers
     def _get(self, *args, **kwargs):
@@ -46,6 +48,9 @@ class BaseHandler(webapp2.RequestHandler):
 
     def _post(self, *args, **kwargs):
         raise NotImplementedError
+
+    def _handle_exception(self, exception, debug):
+        super(BaseHandler, self).handle_exception(exception, debug)
 
     # Render & write methods
     @staticmethod
@@ -66,8 +71,8 @@ class BaseHandler(webapp2.RequestHandler):
 
 # Base handler for signup & login pages
 class AuthPageHandler(BaseHandler):
-    def auth_wrapper(self, method_handler, *args, **kwargs):
-        method_handler(*args, **kwargs)
+    def auth_wrapper(self, method, *args, **kwargs):
+        method(*args, **kwargs)
 
     # It won't set 'self.session', 'cause it is used exclusively by signup
     # and login handlers, that die after user has been authenticated
@@ -152,6 +157,18 @@ class Logout(BaseHandler):
 
 class WikiViewPage(BaseHandler):
     template = "wiki/view_page.html"
+
+    def _handle_exception(self, exception, debug):
+        if exception.status_int == 404:
+            self.context = {
+                'user': self.user,
+                'page': {'title': 'Page not found'}
+            }
+            self.response.set_status(404)
+        else:
+            super(WikiViewPage, self)._handle_exception(exception, debug)
+
+        self.render()
 
     def _get(self, path):
         page = WikiPage.by_prop('url', path)
