@@ -9,15 +9,16 @@
         <div>{{ form.email.label }}: {{ form.email() }}</div>
 
         {% if form.errors %}
-        <ul class="form-errors">
-        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-            {% for error in field_errors %}
-                <li>{{ error }}</li>
+            <ul class="form-errors">
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-        </ul>
+            </ul>
         {% endif %}
         <input type="submit" value="Create">
+{#        TODO: submit button must be part of WTForms form #}
     </form>
     <div class="auth-alternative">
         Already a user? <a href="/login" id="auth-alternative-link">Sign in!</a>

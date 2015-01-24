@@ -33,11 +33,9 @@ class BaseHandler(webapp2.RequestHandler):
                 return True
 
     def get(self, *args, **kwargs):
-        logging.info(self.request.cookies)
         self.auth_wrapper(self._get, *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        logging.info(self.request.cookies)
         self.auth_wrapper(self._post, *args, **kwargs)
 
     def handle_exception(self, exception, debug):
