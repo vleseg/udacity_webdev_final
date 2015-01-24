@@ -86,6 +86,7 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 
 class SignupPage(AuthPageHandler):
+    # TODO: use wtforms in wikieditpage
     template = "auth/signup.html"
 
     def _get(self):
@@ -94,6 +95,8 @@ class SignupPage(AuthPageHandler):
 
     def _post(self):
         form = SignupForm(self.request.params)
+
+        redirect_path = self.request.cookies.get('referrer', '/')
 
         if form.validate():
             username = form.username.data
@@ -106,7 +109,8 @@ class SignupPage(AuthPageHandler):
                 user.email = form.email.data
             user.put()
 
-            self.redirect_with_cookie('/', self.get_new_session_cookie(user))
+            self.redirect_with_cookie(
+                redirect_path, self.get_new_session_cookie(user))
         else:
             form.password.data = ''
             form.verify.data = ''
@@ -124,14 +128,14 @@ class LoginPage(AuthPageHandler):
         username = self.request.get("username")
         password = self.request.get("password")
 
-        redirect_to = self.request.cookies.get('referrer', '/')
+        redirect_path = self.request.cookies.get('referrer', '/')
 
         user = User.by_prop('name', username)
         if user:
             pwd_hash = user.password_hash
             if check_against_hash(username + password, pwd_hash):
                 self.redirect_with_cookie(
-                    redirect_to, self.get_new_session_cookie(user))
+                    redirect_path, self.get_new_session_cookie(user))
             else:
                 self.context["username_error"] = "Invalid password!"
         else:

@@ -5,7 +5,7 @@
     <div id="top-panel-wrapper">
         <div id="top-panel">
             {% if user %}
-                <span><a href="/_edit{{ page.url }}">Edit Page</a></span>
+                <span><a href="/_edit{{ page.url }}" id="edit-page">Edit Page</a></span>
                 <span>Logged in as <span id="username">{{ user.name }}</span>
                 (<a href="/logout">Sign Out</a>)
             </span>

@@ -40,6 +40,7 @@ class CreateNewUserTest(BaseTestCase):
         sign_in_offer = signup_page.pyquery('.auth-alternative')
         self.assertEqual(sign_in_offer.text(), 'Already a user? Sign in!')
 
+        # TODO: check link by clicking
         # This section links to login page.
         link_to_login_page = sign_in_offer.find('a')
         self.assertEqual(link_to_login_page.attr('href'), '/login')
