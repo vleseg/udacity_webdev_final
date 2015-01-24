@@ -4,7 +4,7 @@ import re
 # Third-party imports
 import webapp2
 # Project-specific imports
-from forms import SignupForm
+from forms import SignupForm, EditForm
 from hashutils import check_against_hash, encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
 from model import GLOBAL_PARENT, User, Session, WikiPage
@@ -86,7 +86,6 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 
 class SignupPage(AuthPageHandler):
-    # TODO: use wtforms in wikieditpage
     template = "auth/signup.html"
 
     def _get(self):
@@ -119,6 +118,7 @@ class SignupPage(AuthPageHandler):
 
 
 class LoginPage(AuthPageHandler):
+    # TODO: use wtforms
     template = "auth/login.html"
 
     def _get(self):
@@ -197,14 +197,14 @@ class WikiEditPage(BaseHandler):
         if self.user is None:
             self.redirect('/login', abort=True)
 
+        form = EditForm(self.request.params)
         page = WikiPage.by_prop('url', pageurl)
         if page is None:
             page = WikiPage(
-                url=pageurl, body=self.request.get('page_body'),
-                parent=GLOBAL_PARENT)
-        else:
-            page.body = self.request.get('page_body')
+                url=pageurl, title=form.title.data, parent=GLOBAL_PARENT)
+        page.body = form.body.data
         page.put()
+
         self.redirect(pageurl)
 
 

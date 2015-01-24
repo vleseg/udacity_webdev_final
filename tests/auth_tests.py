@@ -41,15 +41,14 @@ class LoginTest(BaseTestCase):
 
     def test_login_page_offers_to_sign_up(self):
         # Bob opens the login page.
-        signup_page = self.testapp.get('/login')
+        signin_page = self.testapp.get('/login')
 
         # There's a section on page, that offers new users to sign up.
-        sign_up_offer = signup_page.pyquery('.auth-alternative')
+        sign_up_offer = signin_page.pyquery('.auth-alternative')
         self.assertEqual(sign_up_offer.text(), 'Not a user? Sign up!')
 
-        # This section links to signup page.
-        link_to_signup_page = sign_up_offer.find('a')
-        self.assertEqual(link_to_signup_page.attr('href'), '/signup')
+        # This section contains a link, that leads to the registration page.
+        signin_page.click(linkid='auth-alternative-link')
 
     def test_login_form_does_not_give_a_clue_what_is_wrong_when_it_is(self):
         # Bob creates a new user using signup page. He uses "bob" as username

@@ -40,10 +40,9 @@ class CreateNewUserTest(BaseTestCase):
         sign_in_offer = signup_page.pyquery('.auth-alternative')
         self.assertEqual(sign_in_offer.text(), 'Already a user? Sign in!')
 
-        # TODO: check link by clicking
-        # This section links to login page.
-        link_to_login_page = sign_in_offer.find('a')
-        self.assertEqual(link_to_login_page.attr('href'), '/login')
+        # There is a link, that leads to the login page.
+        response = signup_page.click(linkid='auth-alternative')
+        self.assertTitleEqual(response, u'MyWiki — Login')
 
 
 class UsernameValidationTest(BaseTestCase):
@@ -320,4 +319,3 @@ class EmailValidationTest(BaseTestCase):
         # "Username" and "Email" field still have corresponding data in them.
         self.assertEqual(form['username'].value, 'bob')
         self.assertEqual(form['email'].value, 'bob@examplecom')
-        pass

@@ -2,7 +2,8 @@ import re
 # Project-specific imports
 from model import User
 from wtforms import (
-    Form, StringField, PasswordField, validators, ValidationError)
+    Form, StringField, PasswordField, TextAreaField, validators,
+    ValidationError)
 
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
@@ -47,3 +48,8 @@ class SignupForm(Form):
         "Email (optional)",
         [validators.optional(),
          validators.Email(message='Invalid email address!')])
+
+
+class EditForm(Form):
+    title = StringField('Page title')
+    body = TextAreaField('Page body')

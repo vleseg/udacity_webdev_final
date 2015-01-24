@@ -68,7 +68,6 @@ class BasicEditPageTest(BaseTestCase):
         # Bob tries to access edit form for MyWiki's home page by direct link.
         response = self.testapp.get('/_edit/').follow()
 
-        # TODO: replace direct getting of urls to link clicking where applicable
         # He is redirected to the login page. Bob does not sign in -- he's not
         # registered and instead opts for signup page.
         signup_page = response.click(linkid='auth-alternative')
