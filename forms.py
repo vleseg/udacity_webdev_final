@@ -1,5 +1,7 @@
 import re
 # Project-specific imports
+from hashutils import check_against_hash
+from wtforms.validators import StopValidation
 from model import User
 from wtforms import (
     Form, StringField, PasswordField, TextAreaField, validators,
@@ -14,17 +16,31 @@ def user_exists(form, field):
         raise ValidationError('User "{}" already exists!'.format(field.data))
 
 
+def length(min, max):
+    def _length(form, field):
+        value = len(field.data) if field.data else 0
+        if value < min:
+            adjective = 'short'
+        elif value > max:
+            adjective = 'long'
+        else:
+            return
+        message = (
+            "{field_name} is too {adjective}! Must be {min} to {max} "
+            "characters long".format(
+                field_name=field.label.text, adjective=adjective, min=min,
+                max=max))
+        raise ValidationError(message)
+
+    return _length
+
+
 class SignupForm(Form):
     username = StringField(
         'Username',
         [user_exists,
          validators.input_required(message='You must specify username!'),
-         validators.length(
-             min=3,
-             message='Username is too short! Must be 3 to 20 characters long'),
-         validators.length(
-             max=20,
-             message='Username is too long! Must be 3 to 20 characters long'),
+         length(3, 20),
          validators.regexp(
              USERNAME_RE,
              message='Invalid username! May contain only latin letters, '
@@ -33,12 +49,7 @@ class SignupForm(Form):
     password = PasswordField(
         'Password',
         [validators.input_required(message='You must specify password!'),
-         validators.length(
-            min=3,
-            message='Password is too short! Must be 3 to 20 characters long'),
-         validators.length(
-            max=20,
-            message='Password is too long! Must be 3 to 20 characters long')]
+         length(3, 20)]
     )
     verify = PasswordField(
         'Verify password',
@@ -52,7 +63,22 @@ class SignupForm(Form):
 
 
 class LoginForm(Form):
-    pass
+    username = StringField('Username')
+    password = StringField('Password')
+    submit = SubmitField('Sign In')
+    _user = None
+
+    # Username validation was put inside because there's not other way (?) to
+    # control order in which fields are validated.
+    def validate_password(form, field):
+        message = 'Username or password you entered is not correct'
+
+        form._user = User.by_prop('name', form.username.data)
+        if not form._user:
+            raise ValidationError(message)
+        pwd_hash = form._user.password_hash
+        if not check_against_hash(form.username.data + field.data, pwd_hash):
+            raise ValidationError(message)
 
 
 class EditForm(Form):

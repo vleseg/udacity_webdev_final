@@ -80,30 +80,30 @@ class BasicEditPageTest(BaseTestCase):
         # He is redirected back to edit form for MyWiki's home page.
         self.assertTitleEqual(
             signup_response, u'MyWiki — Welcome to MyWiki! (edit)')
-
-    def test_page_title_cannot_exceed_256_characters(self):
-        # Bob signs up and goes straight to edit form for MyWiki's homepage.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/')
-
-        # He attempts to give page a title longer than 256 characters.
-        overly_long_title = (
-            'This is an absurdly long MyWiki page title crafted exclusively to '
-            'test application\'s tolerance to verbose page titles, exceeding '
-            '256 characters in length. It is not that titles of such length '
-            'will actually be used by somebody, it\'s about the need for the '
-            'extreme point, which would hopefully result in cutting on '
-            'entropy of the app.')
-        edit_response = self.fill_form(
-            edit_page, title=overly_long_title, body='Test body').submit()
-
-        # Page refreshes and Bob sees an error message, complaining about the
-        # length of the title.
-        self.assertHasFormError(
-            edit_response,
-            'Page title is too long! Must not exceed 256 characters')
-
-        # Everything Bob entered into the form is left intact.
-        form = edit_response.form
-        self.assertEqual(form['title'], overly_long_title)
-        self.assertEqual(form['body'], 'Test body')
+    #
+    # def test_page_title_cannot_exceed_256_characters(self):
+    #     # Bob signs up and goes straight to edit form for MyWiki's homepage.
+    #     self.sign_up()
+    #     edit_page = self.testapp.get('/_edit/')
+    #
+    #     # He attempts to give page a title longer than 256 characters.
+    #     overly_long_title = (
+    #         'This is an absurdly long MyWiki page title crafted exclusively to '
+    #         'test application\'s tolerance to verbose page titles, exceeding '
+    #         '256 characters in length. It is not that titles of such length '
+    #         'will actually be used by somebody, it\'s about the need for the '
+    #         'extreme point, which would hopefully result in cutting on '
+    #         'entropy of the app.')
+    #     edit_response = self.fill_form(
+    #         edit_page, title=overly_long_title, body='Test body').submit()
+    #
+    #     # Page refreshes and Bob sees an error message, complaining about the
+    #     # length of the title.
+    #     self.assertHasFormError(
+    #         edit_response,
+    #         'Page title is too long! Must not exceed 256 characters')
+    #
+    #     # Everything Bob entered into the form is left intact.
+    #     form = edit_response.form
+    #     self.assertEqual(form['title'], overly_long_title)
+    #     self.assertEqual(form['body'], 'Test body')

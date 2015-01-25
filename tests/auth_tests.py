@@ -50,14 +50,10 @@ class LoginTest(BaseTestCase):
         # This section contains a link, that leads to the registration page.
         signin_page.click(linkid='auth-alternative-link')
 
-    def test_login_form_does_not_give_a_clue_what_is_wrong_when_it_is(self):
-        # Bob creates a new user using signup page. He uses "bob" as username
-        # and "test123" as password.
-        signup_page = self.testapp.get('/signup')
-        self.fill_form(signup_page, username='bob', password='test123',
-                       verify='test123').submit()
-
-        # He logs out.
+    def test_vague_error_message_on_wrong_credentials(self):
+        # Bob signs up using standard test credentials (bob/ test123) and
+        # immediately logs out.
+        self.sign_up()
         self.testapp.get('/logout')
 
         # Bob opens the login page.
@@ -69,6 +65,56 @@ class LoginTest(BaseTestCase):
 
         # Page refreshes.
         self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+
+        # There's a vague error message, that does not give a clue, what's wrong
+        # with input data.
+        self.assertHasFormError(
+            login_submit_response, 'Username or password you entered is not '
+                                   'correct')
+
+    def test_vague_error_message_on_empty_username(self):
+        # Bob signs up using standard test credentials (bob/ test123) and
+        # immediately logs out.
+        self.sign_up()
+        self.testapp.get('/logout')
+
+        # Bob opens the login page.
+        login_page = self.testapp.get('/login')
+
+        # Bob tries to sign in without username.
+        form = self.fill_form(login_page, username='', password='test123')
+        login_submit_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+
+        # There's a vague error message, that does not give a clue, what's wrong
+        # with input data.
+        self.assertHasFormError(
+            login_submit_response, 'Username or password you entered is not '
+                                   'correct')
+
+    def test_vague_error_message_on_empty_password(self):
+        # Bob signs up using standard test credentials (bob/ test123) and
+        # immediately logs out.
+        self.sign_up()
+        self.testapp.get('/logout')
+
+        # Bob opens the login page.
+        login_page = self.testapp.get('/login')
+
+        # Bob tries to sign in without password.
+        form = self.fill_form(login_page, username='bob', password='')
+        login_submit_response = form.submit()
+
+        # Page refreshes.
+        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+
+        # There's a vague error message, that does not give a clue, what's wrong
+        # with input data.
+        self.assertHasFormError(
+            login_submit_response, 'Username or password you entered is not '
+                                   'correct')
 
 
 class LogoutTest(BaseTestCase):

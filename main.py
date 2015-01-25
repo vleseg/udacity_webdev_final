@@ -3,7 +3,7 @@ import re
 # Third-party imports
 import webapp2
 # Project-specific imports
-from forms import SignupForm, EditForm
+from forms import EditForm, LoginForm, SignupForm
 from hashutils import check_against_hash, encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
 from model import GLOBAL_PARENT, User, Session, WikiPage
@@ -138,24 +138,19 @@ class LoginPage(AuthPageHandler):
     template = "auth/login.html"
 
     def _get(self):
+        self.context['form'] = LoginForm()
         self.render()
 
     def _post(self):
-        username = self.request.get("username")
-        password = self.request.get("password")
-
+        form = LoginForm(self.request.params)
         redirect_path = self.request.cookies.get('referrer', '/')
 
-        user = User.by_prop('name', username)
-        if user:
-            pwd_hash = user.password_hash
-            if check_against_hash(username + password, pwd_hash):
-                self.redirect_with_cookie(
-                    redirect_path, self.get_new_session_cookie(user))
-            else:
-                self.context["username_error"] = "Invalid password!"
+        if form.validate():
+            self.redirect_with_cookie(
+                redirect_path, self.get_new_session_cookie(form._user))
         else:
-            self.context["username_error"] = "User does not exist!"
+            form.password.data = ''
+            self.context['form'] = form
             self.render()
 
 
