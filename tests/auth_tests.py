@@ -69,8 +69,8 @@ class LoginTest(BaseTestCase):
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.
         self.assertHasFormError(
-            login_submit_response, 'Username or password you entered is not '
-                                   'correct')
+            login_submit_response,
+            'Something is wrong with your username or password')
 
     def test_vague_error_message_on_empty_username(self):
         # Bob signs up using standard test credentials (bob/ test123) and
@@ -91,8 +91,8 @@ class LoginTest(BaseTestCase):
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.
         self.assertHasFormError(
-            login_submit_response, 'Username or password you entered is not '
-                                   'correct')
+            login_submit_response,
+            'Something is wrong with your username or password')
 
     def test_vague_error_message_on_empty_password(self):
         # Bob signs up using standard test credentials (bob/ test123) and
@@ -113,8 +113,8 @@ class LoginTest(BaseTestCase):
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.
         self.assertHasFormError(
-            login_submit_response, 'Username or password you entered is not '
-                                   'correct')
+            login_submit_response,
+            'Something is wrong with your username or password')
 
 
 class LogoutTest(BaseTestCase):

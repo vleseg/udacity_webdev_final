@@ -12,7 +12,8 @@
                 <div>{{ form.username }}</div>
                 <div>{{ form.password }}</div>
             </div>
-            {% if form.errors %}
+        </div>
+        {% if form.errors %}
             <ul class="form-errors">
             {% for field_name, field_errors in form.errors|dictsort if field_errors %}
                 {% for error in field_errors %}
@@ -20,8 +21,8 @@
                 {% endfor %}
             {% endfor %}
             </ul>
-            {% endif %}
-        </div>
+        {% endif %}
+        <div class="form-submit-button">{{ form.submit }}</div>
     </form>
     <div class="auth-alternative">
         Not a user? <a href="/signup" id="auth-alternative-link">Sign up!</a>

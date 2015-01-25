@@ -19,11 +19,11 @@
         </div>
         {% if form.errors %}
             <ul class="form-errors">
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                    <li>{{ error }}</li>
+                {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                    {% for error in field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
             </ul>
         {% endif %}
         <div class="form-submit-button">{{ form.submit }}</div>

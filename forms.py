@@ -71,7 +71,7 @@ class LoginForm(Form):
     # Username validation was put inside because there's not other way (?) to
     # control order in which fields are validated.
     def validate_password(form, field):
-        message = 'Username or password you entered is not correct'
+        message = 'Something is wrong with your username or password'
 
         form._user = User.by_prop('name', form.username.data)
         if not form._user:
