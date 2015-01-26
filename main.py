@@ -200,23 +200,36 @@ class WikiViewPage(BaseHandler):
 class WikiEditPage(BaseHandler):
     template = "wiki/edit_page.html"
 
+    @staticmethod
+    def form_title_from_path(path):
+        words = path.strip('/').split('_')
+        return ' '.join([w.capitalize() for w in words])
+
     def _get(self, path):
         if self.user is None:
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
 
         form = EditForm()
         page = WikiPage.by_prop('url', path)
+        self.context['new_page'] = page is None
 
-        if page is None:
+        if self.context['new_page']:
             if path == '/':
-                form.title.data = 'Welcome to MyWiki!'
-                form.body.data = (
+                default_body = (
                     '<p>You are free to create new pages and edit existing '
                     'ones.</p>')
+                page = WikiPage(
+                    url='/', body=default_body, title='Welcome to MyWiki!',
+                    parent=GLOBAL_PARENT)
+                page.put()
+                self.context['new_page'] = False
+            else:
+                form.title.data = self.form_title_from_path(path)
         else:
             form.title.data = page.title
             form.body.data = page.body
-        self.context = {'user': self.user, 'form': form, 'page_url': path}
+
+        self.context.update({'user': self.user, 'form': form, 'page_url': path})
         self.render()
 
     def _post(self, path):
@@ -225,13 +238,24 @@ class WikiEditPage(BaseHandler):
 
         form = EditForm(self.request.params)
         page = WikiPage.by_prop('url', path)
-        if page is None:
-            page = WikiPage(
-                url=path, title=form.title.data, parent=GLOBAL_PARENT)
-        page.body = form.body.data
-        page.put()
+        self.context['new_page'] = page is None
 
-        self.redirect(path)
+        if form.validate():
+            if self.context['new_page']:
+                page = WikiPage(
+                    url=path, title=form.title.data, parent=GLOBAL_PARENT)
+            page.title = form.title.data
+            page.body = form.body.data
+            page.put()
+            self.redirect(path)
+        else:
+            # IF page is None -- it is a new page, whose title is hardcoded into
+            # template.
+            self.context = {
+                'user': self.user, 'form': form,
+                'fallback_title': page.title if page else None}
+            self.render()
+
 
 
 PAGE_RE = r'(/(?:[a-zA-Z0-9_-]+/?)*)'

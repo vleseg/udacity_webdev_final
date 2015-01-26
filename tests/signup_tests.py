@@ -278,7 +278,8 @@ class PasswordValidationTest(BaseTestCase):
         self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
 
         # Bob can see error message, complaining about passwords not matching.
-        self.assertHasFormError(signup_submit_response, 'Passwords do not match!')
+        self.assertHasFormError(
+            signup_submit_response, 'Passwords do not match!')
 
         # Both "Password" and "Verify password" fields are empty.
         form = signup_submit_response.form

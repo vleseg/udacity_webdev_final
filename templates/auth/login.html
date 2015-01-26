@@ -1,4 +1,5 @@
 {% extends "auth/base.html" %}
+{% from "macros.html" import form_errors %}
 {% block title %}Login{% endblock %}
 {% block head %}Sign into MyWiki{% endblock %}
 {% block content %}
@@ -13,15 +14,7 @@
                 <div>{{ form.password }}</div>
             </div>
         </div>
-        {% if form.errors %}
-            <ul class="form-errors">
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-            </ul>
-        {% endif %}
+        {{ form_errors(form) }}
         <div class="form-submit-button">{{ form.submit }}</div>
     </form>
     <div class="auth-alternative">
