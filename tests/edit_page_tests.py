@@ -44,7 +44,6 @@ class EditPageLayoutTest(BaseTestCase):
 
 
 class EditPageBehaviourTest(BaseTestCase):
-
     def test_unauthorized_user_is_redirected_to_login_page(self):
         # Bob tries to access edit form for MyWiki's home page by direct link.
         # He's not logged in.
@@ -165,7 +164,33 @@ class NewPageTest(BaseTestCase):
         self.assertEqual(body.text(), 'This is some testing text.')
 
     def test_can_edit_page_once_it_has_been_created(self):
-        pass
+        # Bob signs up and creates a new page right away.
+        self.sign_up()
+        edit_form = self.testapp.get('/kittens').follow()
+
+        # Bob enters some data into form and saves the new page.
+        self.fill_form(
+            edit_form, title='Puppies',
+            body='<p>Puppies are cute and cuddly</p>').submit()
+
+        # He requests the newly created page.
+        puppies_page = self.testapp.get('/kittens')
+
+        # Bob clicks "Edit Page" link to access edit form for this page.
+        edit_form = puppies_page.click(linkid='edit-page')
+
+        # He slightly modifies page title and replaces the body. The he saves
+        # the page once again.
+        response = self.fill_form(
+            edit_form, title='Suicidal Puppies',
+            body="<h2>Banned by Roskomnadzor</h2>").submit().follow()
+
+        # He can see, that the changes were applied successfully.
+        self.assertTitleEqual(response, u'MyWiki — Suicidal Puppies')
+        heading = response.pyquery('#wiki-heading')
+        body = response.pyquery('#wiki-body')
+        self.assertEqual(heading.text(), 'Suicidal Puppies')
+        self.assertEqual(body.text(), 'Banned by Roskomnadzor')
 
 
 class EditPageValidationTest(BaseTestCase):
