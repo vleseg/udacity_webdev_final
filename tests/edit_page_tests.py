@@ -2,7 +2,7 @@
 from base import BaseTestCase
 
 
-class BasicEditPageTest(BaseTestCase):
+class EditPageLayoutTest(BaseTestCase):
     def test_edit_form_renders_correctly(self):
         # Bob signs up and then opens edit form for MyWiki's homepage.
         self.sign_up()
@@ -32,6 +32,18 @@ class BasicEditPageTest(BaseTestCase):
         self.assertEqual(
             textarea.text(),
             '<p>You are free to create new pages and edit existing ones.</p>')
+
+    def test_edit_link_is_not_displayed_in_edit_form(self):
+        # Bob signs up and then opens edit form for MyWiki's homepage.
+        self.sign_up()
+        response = self.testapp.get('/_edit/')
+
+        # There is no "Edit Page" link in navigation panel.
+        edit_link = response.pyquery('#edit-page')
+        self.assertFalse(bool(edit_link))
+
+
+class EditPageBehaviourTest(BaseTestCase):
 
     def test_unauthorized_user_is_redirected_to_login_page(self):
         # Bob tries to access edit form for MyWiki's home page by direct link.
