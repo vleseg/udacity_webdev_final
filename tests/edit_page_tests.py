@@ -21,7 +21,7 @@ class EditPageLayoutTest(BaseTestCase):
         # This form has a text input for title, text area for body and a submit
         # button.
         form_html = edit_page.pyquery('#wiki-edit-form')
-        input_ = form_html.find('input#wiki-title')
+        input_ = form_html.find('input#wiki-head')
         textarea = form_html.find('textarea#wiki-body')
         submit = form_html.find('input[type=submit]')
         self.assertTrue(all([input_, textarea, submit]))
@@ -50,7 +50,7 @@ class EditPageBehaviourTest(BaseTestCase):
         response = self.testapp.get('/_edit/').follow()
 
         # Browser delivers him a login page.
-        self.assertTitleEqual(response, u'MyWiki — Login')
+        self.assertTitleEqual(response, 'MyWiki *** Login')
 
     def test_redirects_back_to_edit_form_after_successful_login(self):
         # Bob signs up and immediately logs out.
@@ -100,7 +100,7 @@ class NewPageTest(BaseTestCase):
         response = self.testapp.get('/i_do_not_exist').follow()
 
         # The edit form opens up.
-        self.assertTitleEqual(response, u'MyWiki — New Page')
+        self.assertTitleEqual(response, 'MyWiki *** New Page')
 
     def test_edit_form_makes_up_a_title_from_path(self):
         # Bob signs up and tries to request a page, that doesn't exist yet.
@@ -110,11 +110,11 @@ class NewPageTest(BaseTestCase):
         # The edit form opens up. Bob notices, that there's a word 'Kittens' in
         # upper input box -- exactly the word from the path he requested, only
         # capitalized.
-        input_box_content = response.pyquery('#wiki-title').attr('value')
+        input_box_content = response.pyquery('#wiki-head').attr('value')
         self.assertEqual(input_box_content, 'Kittens')
 
         # He also notices the generic page title: New Page.
-        self.assertTitleEqual(response, u'MyWiki — New Page')
+        self.assertTitleEqual(response, 'MyWiki *** New Page')
 
     def test_edit_form_correctly_handles_underscores_in_path(self):
         # Bob signs up and tries to request a page, that doesn't exist yet. This
@@ -125,11 +125,11 @@ class NewPageTest(BaseTestCase):
         # The edit form opens up. Bob finds out, that requested path is rendered
         # into a text for page title input box -- it is now a correct fraze,
         # where words are delimited by spaces and each one is capitalized.
-        input_box_content = response.pyquery('#wiki-title').attr('value')
+        input_box_content = response.pyquery('#wiki-head').attr('value')
         self.assertEqual(input_box_content, 'I Do Not Exist')
 
         # He also notices the generic page title: New Page.
-        self.assertTitleEqual(response, u'MyWiki — New Page')
+        self.assertTitleEqual(response, 'MyWiki *** New Page')
 
     def test_new_page_can_be_saved_and_be_accessible_by_the_path(self):
         # Bob signs up and tries to request a page, that doesn't exist yet.
@@ -146,10 +146,10 @@ class NewPageTest(BaseTestCase):
         # corresponding title.
         self.assertTitleEqual(edit_form_response, u'MyWiki — I Do Not Exist')
 
-        # It has a corresponding heading and body, that Bob edited on form.
-        heading = edit_form_response.pyquery('#wiki-heading')
+        # It has a corresponding head and body, that Bob edited on form.
+        head = edit_form_response.pyquery('#wiki-head')
         body = edit_form_response.pyquery('#wiki-body')
-        self.assertEqual(heading.text(), 'I Do Not Exist')
+        self.assertEqual(head.text(), 'I Do Not Exist')
         self.assertEqual(body.text(), 'This is some testing text.')
 
         # Bob logs out. And requests this page again.
@@ -158,9 +158,9 @@ class NewPageTest(BaseTestCase):
 
         # Everything is still in place.
         self.assertTitleEqual(response, u'MyWiki — I Do Not Exist')
-        heading = edit_form_response.pyquery('#wiki-heading')
+        head = edit_form_response.pyquery('#wiki-head')
         body = edit_form_response.pyquery('#wiki-body')
-        self.assertEqual(heading.text(), 'I Do Not Exist')
+        self.assertEqual(head.text(), 'I Do Not Exist')
         self.assertEqual(body.text(), 'This is some testing text.')
 
     def test_can_edit_page_once_it_has_been_created(self):
@@ -170,7 +170,7 @@ class NewPageTest(BaseTestCase):
 
         # Bob enters some data into form and saves the new page.
         self.fill_form(
-            edit_form, title='Puppies',
+            edit_form, head='Puppies',
             body='<p>Puppies are cute and cuddly</p>').submit()
 
         # He requests the newly created page.
@@ -182,14 +182,14 @@ class NewPageTest(BaseTestCase):
         # He slightly modifies page title and replaces the body. The he saves
         # the page once again.
         response = self.fill_form(
-            edit_form, title='Suicidal Puppies',
+            edit_form, head='Suicidal Puppies',
             body="<h2>Banned by Roskomnadzor</h2>").submit().follow()
 
         # He can see, that the changes were applied successfully.
         self.assertTitleEqual(response, u'MyWiki — Suicidal Puppies')
-        heading = response.pyquery('#wiki-heading')
+        head = response.pyquery('#wiki-head')
         body = response.pyquery('#wiki-body')
-        self.assertEqual(heading.text(), 'Suicidal Puppies')
+        self.assertEqual(head.text(), 'Suicidal Puppies')
         self.assertEqual(body.text(), 'Banned by Roskomnadzor')
 
 
@@ -200,15 +200,15 @@ class EditPageValidationTest(BaseTestCase):
         edit_form = self.testapp.get('/_edit/')
 
         # He cleans the title and tries to save the page like this.
-        response = self.fill_form(edit_form, title='').submit()
+        response = self.fill_form(edit_form, head='').submit()
 
         # Page refreshes and he can see an error, complaining about empty title.
         self.assertTitleEqual(response, u'MyWiki — Welcome to MyWiki! (edit)')
-        self.assertHasFormError(response, 'Title cannot be empty!')
+        self.assertHasFormError(response, 'Head cannot be empty!')
 
         # However, page title input box is left empty for Bob to correct as he
         # wills.
-        input_box_content = response.pyquery('#wiki-title').attr('value')
+        input_box_content = response.pyquery('#wiki-head').attr('value')
         self.assertEqual(input_box_content, '')
 
     def test_page_can_be_saved_with_empty_body(self):
@@ -222,10 +222,10 @@ class EditPageValidationTest(BaseTestCase):
         # It is saved! Newly created page is served by browser.
         self.assertTitleEqual(response, u'MyWiki — Kittens')
 
-        # It has a heading, but has no body.
-        heading = response.pyquery('#wiki-heading')
+        # It has a head, but has no body.
+        head = response.pyquery('#wiki-head')
         body = response.pyquery('#wiki-body')
-        self.assertEqual(heading.text(), 'Kittens')
+        self.assertEqual(head.text(), 'Kittens')
         self.assertEqual(body.text(), '')
 
     def test_page_title_cannot_exceed_256_characters(self):
@@ -233,8 +233,8 @@ class EditPageValidationTest(BaseTestCase):
         self.sign_up()
         edit_page = self.testapp.get('/_edit/')
 
-        # He attempts to give page a title longer than 256 characters.
-        overly_long_title = (
+        # He attempts to give page a head longer than 256 characters.
+        overly_long_head = (
             'This is an absurdly long MyWiki page title crafted exclusively to '
             'test application\'s tolerance to verbose page titles, exceeding '
             '256 characters in length. It is not that titles of such length '
@@ -242,15 +242,15 @@ class EditPageValidationTest(BaseTestCase):
             'extreme point, which would hopefully result in cutting on '
             'entropy of the app.')
         edit_response = self.fill_form(
-            edit_page, title=overly_long_title, body='Test body').submit()
+            edit_page, head=overly_long_head, body='Test body').submit()
 
         # Page refreshes and Bob sees an error message, complaining about the
-        # length of the title.
+        # length of the head.
         self.assertHasFormError(
             edit_response,
-            'Page title is too long! Must not exceed 256 characters')
+            'Page head is too long! Must not exceed 256 characters')
 
         # Everything Bob entered into the form is left intact.
         form = edit_response.form
-        self.assertEqual(form['title'].value, overly_long_title)
+        self.assertEqual(form['head'].value, overly_long_head)
         self.assertEqual(form['body'].value, 'Test body')

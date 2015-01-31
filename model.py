@@ -34,5 +34,5 @@ class Session(BaseModel):
 
 class WikiPage(BaseModel):
     url = db.StringProperty(required=True)
-    title = db.StringProperty(required=True)
+    head = db.StringProperty(required=True)
     body = db.TextProperty()

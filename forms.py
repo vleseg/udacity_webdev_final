@@ -81,12 +81,12 @@ class LoginForm(Form):
 
 
 class EditForm(Form):
-    title = StringField(
-        'Page title',
-        [validators.input_required('Title cannot be empty!'),
+    head = StringField(
+        'Page head',
+        [validators.input_required('Head cannot be empty!'),
          validators.length(
             max=256,
-            message="Page title is too long! Must not exceed 256 characters")],
-        id='wiki-title')
+            message="Page head is too long! Must not exceed 256 characters")],
+        id='wiki-head')
     body = TextAreaField('Page body', id='wiki-body')
     submit = SubmitField('Save')

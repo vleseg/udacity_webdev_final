@@ -10,11 +10,11 @@ class BasicHomepageTest(BaseTestCase):
         self.assertEqual(homepage.status_int, 200)
         self.assertTitleEqual(homepage, u'MyWiki — Welcome to MyWiki!')
 
-        # Bob finds a heading followed by a piece of text, that both give him
-        # an idea, that he really is on MyWiki's homepage.
-        heading = homepage.pyquery('#wiki-heading')
+        # Bob finds a head followed by a piece of text, that both give him an
+        # idea, that he really is on MyWiki's homepage.
+        head = homepage.pyquery('#wiki-head')
         body = homepage.pyquery('#wiki-body')
-        self.assertEqual(heading.text(), 'Welcome to MyWiki!')
+        self.assertEqual(head.text(), 'Welcome to MyWiki!')
         self.assertEqual(
             body.text(),
             'You are free to create new pages and edit existing ones.')

@@ -4,7 +4,7 @@ import re
 import webapp2
 # Project-specific imports
 from forms import EditForm, LoginForm, SignupForm
-from hashutils import check_against_hash, encrypt, make_hash, make_salt
+from hashutils import encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
 from model import GLOBAL_PARENT, User, Session, WikiPage
 
@@ -39,6 +39,9 @@ class BaseHandler(webapp2.RequestHandler):
         self.auth_wrapper(self._post, *args, **kwargs)
 
     def handle_exception(self, exception, debug):
+        # Correctly handle all internal server errors.
+        if not isinstance(exception, webapp2.HTTPException):
+            super(BaseHandler, self).handle_exception(exception, debug)
         self.auth_wrapper(self._handle_exception, exception, debug)
 
     def auth_wrapper(self, method, *args, **kwargs):
@@ -57,12 +60,29 @@ class BaseHandler(webapp2.RequestHandler):
         super(BaseHandler, self).handle_exception(exception, debug)
 
     # Render & write methods
+    def set_title(self):
+        state_to_title = {
+            'new': 'New Page', 'signup': 'Sign Up', 'login': 'Login',
+            'edit': lambda c: '{} (edit)'.format(c['page'].head),
+            'view': lambda c: c['page'].head,
+            'error': lambda c: c['error']
+        }
+        state = self.context['state']
+        sep = u'—' if state in ['view', 'edit'] else '***'
+        title_handler = state_to_title[state]
+        if callable(title_handler):
+            self.context['title'] = u'MyWiki {0} {1}'.format(
+                sep, title_handler(self.context))
+        else:
+            self.context['title'] = u'MyWiki {0} {1}'.format(sep, title_handler)
+
     @staticmethod
     def render_str(template, **context):
         t = jinja_environment.get_template(template)
         return t.render(context)
 
     def render(self):
+        self.set_title()
         self.write(self.render_str(self.template, **self.context))
 
     def write(self, *args, **kwargs):
@@ -99,9 +119,11 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 
 class SignupPage(AuthPageHandler):
-    # TODO: line up form fields and labels nicely
-    # TODO: error messages should not shift submit button to alt link to side
     template = "auth/signup.html"
+
+    def dispatch(self):
+        self.context['state'] = 'signup'
+        super(SignupPage, self).dispatch()
 
     def _get(self):
         self.context['form'] = SignupForm()
@@ -109,7 +131,6 @@ class SignupPage(AuthPageHandler):
 
     def _post(self):
         form = SignupForm(self.request.params)
-
         redirect_path = self.request.cookies.get('referrer', '/')
 
         if form.validate():
@@ -133,9 +154,11 @@ class SignupPage(AuthPageHandler):
 
 
 class LoginPage(AuthPageHandler):
-    # TODO: use wtforms
-    # TODO: errors have to appear under form
     template = "auth/login.html"
+
+    def dispatch(self):
+        self.context['state'] = 'login'
+        super(LoginPage, self).dispatch()
 
     def _get(self):
         self.context['form'] = LoginForm()
@@ -164,14 +187,16 @@ class Logout(BaseHandler):
 class WikiViewPage(BaseHandler):
     template = "wiki/view_page.html"
 
+    def dispatch(self):
+        self.context['state'] = 'view'
+        super(WikiViewPage, self).dispatch()
+
     def _handle_exception(self, exception, debug):
         self.template = "wiki/error.html"
 
         if exception.status_int == 404:
-            self.context = {
-                'user': self.user,
-                'error': 'Page not found'
-            }
+            self.context['error'] = 'Page not found'
+            self.context['state'] = 'error'
             self.response.set_status(404)
         else:
             super(WikiViewPage, self)._handle_exception(exception, debug)
@@ -186,22 +211,27 @@ class WikiViewPage(BaseHandler):
                     '<p>You are free to create new pages and edit existing '
                     'ones.</p>')
                 page = WikiPage(
-                    url='/', body=default_body, title='Welcome to MyWiki!',
+                    url='/', body=default_body, head='Welcome to MyWiki!',
                     parent=GLOBAL_PARENT)
                 page.put()
             elif self.user is None:
                 self.abort(404)
             else:
                 self.redirect('/_edit' + path, abort=True)
-        self.context = {'page': page, 'user': self.user}
+        self.context.update({'page': page, 'user': self.user})
+
         self.render()
 
 
 class WikiEditPage(BaseHandler):
     template = "wiki/edit_page.html"
 
+    def dispatch(self):
+        self.context['state'] = 'edit'
+        super(WikiEditPage, self).dispatch()
+
     @staticmethod
-    def form_title_from_path(path):
+    def form_head_from_path(path):
         words = path.strip('/').split('_')
         return ' '.join([w.capitalize() for w in words])
 
@@ -211,25 +241,24 @@ class WikiEditPage(BaseHandler):
 
         form = EditForm()
         page = WikiPage.by_prop('url', path)
-        self.context['new_page'] = page is None
 
-        if self.context['new_page']:
+        if page is None:
             if path == '/':
                 default_body = (
                     '<p>You are free to create new pages and edit existing '
                     'ones.</p>')
                 page = WikiPage(
-                    url='/', body=default_body, title='Welcome to MyWiki!',
+                    url='/', body=default_body, head='Welcome to MyWiki!',
                     parent=GLOBAL_PARENT)
                 page.put()
-                self.context['new_page'] = False
             else:
-                form.title.data = self.form_title_from_path(path)
+                self.context['state'] = 'new'
+                form.head.data = self.form_head_from_path(path)
         else:
-            form.title.data = page.title
+            form.head.data = page.head
             form.body.data = page.body
 
-        self.context.update({'user': self.user, 'form': form, 'page_url': path})
+        self.context.update({'form': form, 'page': page, 'user': self.user})
         self.render()
 
     def _post(self, path):
@@ -238,24 +267,20 @@ class WikiEditPage(BaseHandler):
 
         form = EditForm(self.request.params)
         page = WikiPage.by_prop('url', path)
-        self.context['new_page'] = page is None
+        if page is None:
+            self.context['state'] = 'new'
 
         if form.validate():
-            if self.context['new_page']:
+            if self.context['state'] == 'new':
                 page = WikiPage(
-                    url=path, title=form.title.data, parent=GLOBAL_PARENT)
-            page.title = form.title.data
+                    url=path, head=form.head.data, parent=GLOBAL_PARENT)
+            page.head = form.head.data
             page.body = form.body.data
             page.put()
             self.redirect(path)
         else:
-            # IF page is None -- it is a new page, whose title is hardcoded into
-            # template.
-            self.context = {
-                'user': self.user, 'form': form,
-                'fallback_title': page.title if page else None}
+            self.context.update({'user': self.user, 'form': form, 'page': page})
             self.render()
-
 
 
 PAGE_RE = r'(/(?:[a-zA-Z0-9_-]+/?)*)'

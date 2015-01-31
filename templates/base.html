@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>MyWiki — {% block title %}{% endblock %}</title>
+    <title>{% block title %}{{ title }}{% endblock %}</title>
     <link rel="stylesheet" href="{% block path_to_stylesheet %}{% endblock %}"/>
 </head>
 <body>

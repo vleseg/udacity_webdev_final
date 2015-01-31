@@ -18,9 +18,9 @@ class LoginTest(BaseTestCase):
         login_page = self.testapp.get('/login')
         self.assertEqual(login_page.status_int, 200)
 
-        # Page's title says "MyWiki — Login"; heading on the page says "Log in
-        # to MyWiki"; there's also a login form.
-        self.assertTitleEqual(login_page, u'MyWiki — Login')
+        # Page's title says "MyWiki — Login"; head on the page says "Log into
+        # MyWiki"; there's also a login form.
+        self.assertTitleEqual(login_page, 'MyWiki *** Login')
         self.assertEqual(login_page.pyquery('h1').text(), 'Sign into MyWiki')
         self.assertEqual(len(login_page.forms), 1)
 
@@ -41,14 +41,14 @@ class LoginTest(BaseTestCase):
 
     def test_login_page_offers_to_sign_up(self):
         # Bob opens the login page.
-        signin_page = self.testapp.get('/login')
+        login_page = self.testapp.get('/login')
 
         # There's a section on page, that offers new users to sign up.
-        sign_up_offer = signin_page.pyquery('.auth-alternative')
+        sign_up_offer = login_page.pyquery('.auth-alternative')
         self.assertEqual(sign_up_offer.text(), 'Not a user? Sign up!')
 
         # This section contains a link, that leads to the registration page.
-        signin_page.click(linkid='auth-alternative-link')
+        login_page.click(linkid='auth-alternative-link')
 
     def test_vague_error_message_on_wrong_credentials(self):
         # Bob signs up using standard test credentials (bob/ test123) and
@@ -64,7 +64,7 @@ class LoginTest(BaseTestCase):
         login_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+        self.assertTitleEqual(login_submit_response, 'MyWiki *** Login')
 
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.
@@ -86,7 +86,7 @@ class LoginTest(BaseTestCase):
         login_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+        self.assertTitleEqual(login_submit_response, 'MyWiki *** Login')
 
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.
@@ -108,7 +108,7 @@ class LoginTest(BaseTestCase):
         login_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(login_submit_response, u'MyWiki — Login')
+        self.assertTitleEqual(login_submit_response, 'MyWiki *** Login')
 
         # There's a vague error message, that does not give a clue, what's wrong
         # with input data.

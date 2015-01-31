@@ -1,4 +1,3 @@
-# coding=utf-8
 from base import BaseTestCase
 
 
@@ -8,7 +7,7 @@ class BasicViewPageTest(BaseTestCase):
         response = self.testapp.get('/i_do_not_exist', expect_errors=True)
 
         # He receives a 404 and a brief error text.
-        self.assertTitleEqual(response, u'MyWiki — Page not found')
+        self.assertTitleEqual(response, 'MyWiki *** Page not found')
         self.assertEqual(response.status_int, 404)
         self.assertEqual(
             response.pyquery('#error-message').text(), 'Page not found')

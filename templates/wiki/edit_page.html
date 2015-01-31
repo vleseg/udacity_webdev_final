@@ -1,17 +1,8 @@
 {% extends "wiki/base.html" %}
 {% from "macros.html" import form_errors %}
-{% block title_base %}
-    {% if new_page %}New Page
-    {% elif fallback_title %}{{ fallback_title }}
-    {%- else %}{{ form.title.data }}
-    {%- endif %}
-{% endblock %}
-{% block title_postfix %}
-    {% if not new_page %} (edit){% endif %}
-{% endblock %}
 {% block wiki_content %}
-    <form action="/_edit{{ page_url }}" method="post" id="wiki-edit-form">
-        {{ form.title }}
+    <form method="post" id="wiki-edit-form">
+        {{ form.head }}
         {{ form.body(rows=35) }}
         {{ form_errors(form) }}
         {{ form.submit }}

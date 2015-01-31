@@ -1,8 +1,7 @@
 {% extends "wiki/base.html" %}
-{% block title_base %}{{ page.title }}{% endblock %}
 {% block wiki_content %}
     <div class="wiki-page">
-        <h1 id="wiki-heading">{{ page.title }}</h1>
+        <h1 id="wiki-head">{{ page.head }}</h1>
         <div id="wiki-body">
             {{ page.body|safe }}
         </div>

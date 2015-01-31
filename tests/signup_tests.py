@@ -10,11 +10,11 @@ class CreateNewUserTest(BaseTestCase):
         signup_page = self.testapp.get('/signup')
         self.assertEqual(signup_page.status_int, 200)
 
-        # Page title says: "MyWiki -- Sign Up". There's also a heading and a
-        # form. Heading is as follows: "Create new user account".
-        self.assertTitleEqual(signup_page, u'MyWiki — Sign Up')
-        heading = signup_page.pyquery('h1')
-        self.assertEqual(heading.text(), 'Create new user account')
+        # Page title says: "MyWiki -- Sign Up". There's also a head and a
+        # form. Head is as follows: "Create new user account".
+        self.assertTitleEqual(signup_page, 'MyWiki *** Sign Up')
+        head = signup_page.pyquery('h1')
+        self.assertEqual(head.text(), 'Create new user account')
         self.assertEqual(len(signup_page.forms), 1)
 
         # Bob enters his name (bob) into "Username" field and uses "test123" as
@@ -42,7 +42,7 @@ class CreateNewUserTest(BaseTestCase):
 
         # There is a link, that leads to the login page.
         response = signup_page.click(linkid='auth-alternative')
-        self.assertTitleEqual(response, u'MyWiki — Login')
+        self.assertTitleEqual(response, 'MyWiki *** Login')
 
 
 class UsernameValidationTest(BaseTestCase):
@@ -58,7 +58,7 @@ class UsernameValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Signup page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about absent username.
         self.assertHasFormError(signup_submit_response,
@@ -82,7 +82,7 @@ class UsernameValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about username length.
         self.assertHasFormError(
@@ -107,7 +107,7 @@ class UsernameValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about username length.
         self.assertHasFormError(
@@ -131,7 +131,7 @@ class UsernameValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about invalid characters in
         # username.
@@ -170,7 +170,7 @@ class UsernameValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob sees an error message, complaining about user already existing.
         self.assertHasFormError(
@@ -193,7 +193,7 @@ class PasswordValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Signup page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
         
         # Bob can see error message next to "Password" field.
         self.assertHasFormError(
@@ -216,7 +216,7 @@ class PasswordValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about password length
         self.assertHasFormError(
@@ -246,7 +246,7 @@ class PasswordValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about password length
         self.assertHasFormError(
@@ -275,7 +275,7 @@ class PasswordValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Signup page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about passwords not matching.
         self.assertHasFormError(
@@ -306,7 +306,7 @@ class EmailValidationTest(BaseTestCase):
         signup_submit_response = form.submit()
 
         # Signup page refreshes.
-        self.assertTitleEqual(signup_submit_response, u'MyWiki — Sign Up')
+        self.assertTitleEqual(signup_submit_response, 'MyWiki *** Sign Up')
 
         # Bob can see error message, complaining about invalid email address.
         self.assertHasFormError(
