@@ -48,7 +48,7 @@ class EditPageLayoutTest(BaseTestCase):
         response = self.testapp.get('/_edit/')
         
         # There's a link to homepage in navigation panel.
-        self.assertHasLinkToHomepage()
+        self.assertHasLinkToHomepage(response)
 
 
 class EditPageBehaviourTest(BaseTestCase):
