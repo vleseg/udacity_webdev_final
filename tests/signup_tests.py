@@ -22,7 +22,7 @@ class CreateNewUserTest(BaseTestCase):
         form = self.fill_form(
             signup_page, username='bob', password='test123', verify='test123')
 
-        # Bob submits the form. Browser redirects Bob to the home page. He can
+        # Bob submits the form. Browser redirects Bob to the homepage. He can
         # tell that by looking at page title, it says: "MyWiki -- Welcome!"
         signup_submit_response = form.submit().follow()
         self.assertTitleEqual(

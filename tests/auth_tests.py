@@ -30,7 +30,7 @@ class LoginTest(BaseTestCase):
         # Bob submits the form.
         login_submit_response = form.submit().follow()
 
-        # Browser redirects Bob to the home page. He can # tell that by looking
+        # Browser redirects Bob to the homepage. He can # tell that by looking
         # at page title, it says: "MyWiki -- Welcome!"
         self.assertTitleEqual(
             login_submit_response, u'MyWiki — Welcome to MyWiki!')
@@ -121,21 +121,21 @@ class LogoutTest(BaseTestCase):
     def test_logs_out_flawlessly(self):
         # Bob creates a new user using signup page.
         signup_page = self.testapp.get('/signup')
-        home_page = self.fill_form(
+        homepage = self.fill_form(
             signup_page, username='bob', password='test123',
             verify='test123').submit().follow()
 
         # Browser redirects him to homepage. He can see his username in upper
         # part of the page.
-        top_panel = home_page.pyquery('#top-panel')
+        top_panel = homepage.pyquery('#top-panel')
         self.assertIn('bob', top_panel.text())
 
         # Bob logs out.
-        home_page = self.testapp.get('/logout').follow()
+        homepage = self.testapp.get('/logout').follow()
 
         # Browser redirects him to homepage.
-        self.assertTitleEqual(home_page, u'MyWiki — Welcome to MyWiki!')
+        self.assertTitleEqual(homepage, u'MyWiki — Welcome to MyWiki!')
 
         # Now his name isn't displayed on page.
-        top_panel = home_page.pyquery('#top-panel')
+        top_panel = homepage.pyquery('#top-panel')
         self.assertNotIn('bob', top_panel.text())

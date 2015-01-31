@@ -3,9 +3,9 @@ from base import BaseTestCase
 
 
 class BasicHomepageTest(BaseTestCase):
-    def test_home_page_opens_and_displays_correct_content(self):
-        # Bob types in MyWiki's home page address and presses Return. Browser
-        # successfully delivers him the home page.
+    def test_homepage_opens_and_displays_correct_content(self):
+        # Bob types in MyWiki's homepage address and presses Return. Browser
+        # successfully delivers him the homepage.
         homepage = self.testapp.get('/')
         self.assertEqual(homepage.status_int, 200)
         self.assertTitleEqual(homepage, u'MyWiki — Welcome to MyWiki!')
@@ -55,3 +55,13 @@ class BasicHomepageTest(BaseTestCase):
         links_dict = dict((link.text, link.get('href')) for link in links)
         self.assertDictContainsSubset(
             {'Sign Out': '/logout', 'Edit Page': '/_edit/'}, links_dict)
+        
+    def test_does_not_contain_link_to_self(self):
+        # Bop opens the homepage.
+        homepage = self.testapp.get('/')
+        
+        # He remembers that every page in MyWiki contains link to the homepage.
+        # But it occurs that homepage itself does not. Which, on second 
+        # thought, is quite logical.
+        self.assertRaises(
+            AssertionError, self.assertHasLinkToHomepage, homepage)

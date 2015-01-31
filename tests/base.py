@@ -23,14 +23,6 @@ class BaseTestCase(unittest.TestCase):
             form[f] = fields[f]
         return form
 
-    def assertTitleEqual(self, page, title_text):
-        self.assertEqual(page.pyquery('title').text(), title_text)
-
-    def assertHasFormError(self, page, error_text):
-        errors = page.pyquery('.form-errors')
-        self.assertEqual(len(errors), 1)
-        self.assertEqual(errors.text(), error_text)
-
     def sign_up(self, **params):
         if not params:
             params = {
@@ -38,3 +30,16 @@ class BaseTestCase(unittest.TestCase):
 
         signup_page = self.testapp.get('/signup')
         self.fill_form(signup_page, **params).submit()
+
+    def assertHasFormError(self, page, error_text):
+        errors = page.pyquery('.form-errors')
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors.text(), error_text)
+
+    def assertHasLinkToHomepage(self, page):
+        link_to_homepage = page.pyquery('#top-panel #homepage-link')
+        self.assertEqual(link_to_homepage.text(), 'Home')
+        self.assertTitleEqual(link_to_homepage.attr('href'), '/')
+
+    def assertTitleEqual(self, page, title_text):
+        self.assertEqual(page.pyquery('title').text(), title_text)

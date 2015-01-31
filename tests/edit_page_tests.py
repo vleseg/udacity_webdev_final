@@ -27,7 +27,7 @@ class EditPageLayoutTest(BaseTestCase):
         self.assertTrue(all([input_, textarea, submit]))
 
         # Text input and text area already contain corresponding parts of the
-        # home page ready for editing.
+        # homepage ready for editing.
         self.assertEqual(input_.attr('value'), 'Welcome to MyWiki!')
         self.assertEqual(
             textarea.text(),
@@ -41,11 +41,19 @@ class EditPageLayoutTest(BaseTestCase):
         # There is no "Edit Page" link in navigation panel.
         edit_link = response.pyquery('#edit-page')
         self.assertFalse(bool(edit_link))
+        
+    def test_has_link_to_homepage(self):
+        # Bob signs up and the opens edit form for MyWiki's homepage.
+        self.sign_up()
+        response = self.testapp.get('/_edit/')
+        
+        # There's a link to homepage in navigation panel.
+        self.assertHasLinkToHomepage()
 
 
 class EditPageBehaviourTest(BaseTestCase):
     def test_unauthorized_user_is_redirected_to_login_page(self):
-        # Bob tries to access edit form for MyWiki's home page by direct link.
+        # Bob tries to access edit form for MyWiki's homepage by direct link.
         # He's not logged in.
         response = self.testapp.get('/_edit/').follow()
 
@@ -57,7 +65,7 @@ class EditPageBehaviourTest(BaseTestCase):
         self.sign_up()
         self.testapp.get('/logout')
 
-        # Then he tries to access edit form for MyWiki's home page by direct
+        # Then he tries to access edit form for MyWiki's homepage by direct
         # link.
         response = self.testapp.get('/_edit/').follow()
 
@@ -76,7 +84,7 @@ class EditPageBehaviourTest(BaseTestCase):
         self.assertEqual(username_container.text(), 'bob')
 
     def test_redirects_back_to_edit_form_after_successful_signup(self):
-        # Bob tries to access edit form for MyWiki's home page by direct link.
+        # Bob tries to access edit form for MyWiki's homepage by direct link.
         response = self.testapp.get('/_edit/').follow()
 
         # He is redirected to the login page. Bob does not sign in -- he's not
@@ -88,7 +96,7 @@ class EditPageBehaviourTest(BaseTestCase):
             signup_page, username='bob', password='test123', verify='test123')
         signup_response = signup_form.submit().follow()
 
-        # He is redirected back to edit form for MyWiki's home page.
+        # He is redirected back to edit form for MyWiki's homepage.
         self.assertTitleEqual(
             signup_response, u'MyWiki — Welcome to MyWiki! (edit)')
 
