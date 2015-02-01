@@ -32,6 +32,15 @@ class BaseHandler(webapp2.RequestHandler):
             if self.session and not self.session.has_expired():
                 return True
 
+    def dispatch(self):
+        super(BaseHandler, self).dispatch()
+        # logout_url must be initially set in overriding class; it may change
+        # inside handling method.
+        try:
+            self.set_logout_url(self.context['logout_url'])
+        except KeyError:  # no logout_url was defined, will use the default
+            pass
+
     def get(self, *args, **kwargs):
         self.auth_wrapper(self._get, *args, **kwargs)
 
@@ -196,15 +205,16 @@ class WikiViewPage(BaseHandler):
     template = "wiki/view_page.html"
 
     def dispatch(self):
-        self.context['state'] = 'view'
+        self.context.update({'state': 'view', 'logout_url': self.request.url})
         super(WikiViewPage, self).dispatch()
 
     def _handle_exception(self, exception, debug):
         self.template = "wiki/error.html"
 
         if exception.status_int == 404:
-            self.context['error'] = 'Page not found'
-            self.context['state'] = 'error'
+            self.context.update(
+                {'error': 'Page not found', 'state': 'error',
+                 'logout_url': '/'})
             self.response.set_status(404)
         else:
             super(WikiViewPage, self)._handle_exception(exception, debug)
@@ -235,9 +245,10 @@ class WikiEditPage(BaseHandler):
     template = "wiki/edit_page.html"
 
     def dispatch(self):
-        self.context['state'] = 'edit'
+        self.context.update(
+            {'state': 'edit',
+             'logout_url': self.request.url.split('_edit')[-1]})
         super(WikiEditPage, self).dispatch()
-        self.set_logout_url(self.request.url.split('_edit')[-1])
 
     @staticmethod
     def form_head_from_path(path):
@@ -261,7 +272,7 @@ class WikiEditPage(BaseHandler):
                     parent=GLOBAL_PARENT)
                 page.put()
             else:
-                self.context['state'] = 'new'
+                self.context.update({'state': 'new', 'logout_url': '/'})
                 form.head.data = self.form_head_from_path(path)
         else:
             form.head.data = page.head

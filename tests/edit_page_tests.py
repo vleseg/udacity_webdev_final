@@ -100,6 +100,24 @@ class EditPageBehaviourTest(BaseTestCase):
         self.assertTitleEqual(
             signup_response, u'MyWiki — Welcome to MyWiki! (edit)')
 
+    def test_logging_out_of_edit_form_for_page_redirects_to_that_page(self):
+        # Bob signs up and immediately creates a new page.
+        self.sign_up()
+        edit_form = self.testapp.get('/_edit/kittens')
+
+        # Bob enters some data into edit form and saves the page.
+        new_page = self.fill_form(
+            edit_form, body='Kittens are cute and cuddly.').submit().follow()
+
+        # Bob clicks "Edit Page" link to introduce more changes into page, but
+        # changes his mind and on edit form, which was delivered by browser, he
+        # clicks "Sign Out".
+        edit_form = new_page.click(linkid='edit-page-link')
+        response = edit_form.click(linkid='logout-link').follow()
+
+        # He's redirected to the page he was about to edit.
+        self.assertTitleEqual(response, u'MyWiki — Kittens')
+
 
 class NewPageTest(BaseTestCase):
     def test_requesting_nonexistent_page_opens_edit_form(self):
@@ -199,6 +217,17 @@ class NewPageTest(BaseTestCase):
         body = response.pyquery('#wiki-body')
         self.assertEqual(head.text(), 'Suicidal Puppies')
         self.assertEqual(body.text(), 'Banned by Roskomnadzor')
+
+    def test_logging_out_of_edit_form_for_new_page_redirects_to_homepage(self):
+        # Bob signs up immediately opens an edit form for the new page.
+        self.sign_up()
+        edit_form = self.testapp.get('/_edit/kittens')
+
+        # On second thought, he decides not to create a new page, and logs out.
+        response = edit_form.click(linkid='logout-link').follow()
+
+        # He is redirected to home page.
+        self.assertTitleEqual(response, u'MyWiki — Welcome to MyWiki!')
 
 
 class EditPageValidationTest(BaseTestCase):
