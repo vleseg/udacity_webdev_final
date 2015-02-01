@@ -7,7 +7,7 @@ class EditPageLayoutTest(BaseTestCase):
         # Bob signs up and then opens edit form for MyWiki's homepage.
         self.sign_up()
         homepage = self.testapp.get('/')
-        edit_page = homepage.click(linkid='edit-page')
+        edit_page = homepage.click(linkid='edit-page-link')
 
         # Browser successfully delivers him edit form.
         self.assertEqual(edit_page.status_int, 200)
@@ -39,14 +39,14 @@ class EditPageLayoutTest(BaseTestCase):
         response = self.testapp.get('/_edit/')
 
         # There is no "Edit Page" link in navigation panel.
-        edit_link = response.pyquery('#edit-page')
+        edit_link = response.pyquery('#edit-page-link')
         self.assertFalse(bool(edit_link))
         
     def test_has_link_to_homepage(self):
         # Bob signs up and the opens edit form for MyWiki's homepage.
         self.sign_up()
         response = self.testapp.get('/_edit/')
-        
+
         # There's a link to homepage in navigation panel.
         self.assertHasLinkToHomepage(response)
 
@@ -185,7 +185,7 @@ class NewPageTest(BaseTestCase):
         puppies_page = self.testapp.get('/kittens')
 
         # Bob clicks "Edit Page" link to access edit form for this page.
-        edit_form = puppies_page.click(linkid='edit-page')
+        edit_form = puppies_page.click(linkid='edit-page-link')
 
         # He slightly modifies page title and replaces the body. The he saves
         # the page once again.

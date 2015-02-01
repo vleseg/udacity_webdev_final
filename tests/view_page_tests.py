@@ -29,7 +29,7 @@ class BasicViewPageTest(BaseTestCase):
         
         # Bob opens newly created page.
         new_page = self.testapp.get('/kittens')
-        
+
         # There's a link to app's homepage.
         self.assertHasLinkToHomepage(new_page)
         

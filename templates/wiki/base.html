@@ -3,10 +3,15 @@
 {% block content %}
     <div id="top-panel-wrapper">
         <div id="top-panel">
+            {% if state != 'view' or page.url != '/' %}
+                <span class="top-panel-section">
+                    <a href="/" id="homepage-link">Home</a>
+                </span>
+            {% endif %}
             {% if user %}
                 {% if state == 'view' %}
                     <span class="top-panel-section">
-                        <a href="/_edit{{ page.url }}" id="edit-page">Edit Page</a>
+                        <a href="/_edit{{ page.url }}" id="edit-page-link">Edit Page</a>
                     </span>
                 {% endif %}
                 <span class="top-panel-section">

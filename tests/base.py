@@ -37,9 +37,10 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(errors.text(), error_text)
 
     def assertHasLinkToHomepage(self, page):
-        link_to_homepage = page.pyquery('#top-panel #homepage-link')
+        link_to_homepage = page.pyquery('#homepage-link')
+        self.assertTrue(bool(link_to_homepage))
         self.assertEqual(link_to_homepage.text(), 'Home')
-        self.assertTitleEqual(link_to_homepage.attr('href'), '/')
+        self.assertEqual(link_to_homepage.attr('href'), '/')
 
     def assertTitleEqual(self, page, title_text):
         self.assertEqual(page.pyquery('title').text(), title_text)
