@@ -17,7 +17,7 @@ class BasicHomepageTest(BaseTestCase):
         self.assertEqual(head.text(), 'Welcome to MyWiki!')
         self.assertEqual(
             body.text(),
-            'You are free to create new pages and edit existing ones.')
+            'You are free to create new articles and edit existing ones.')
 
     def test_homepage_panel_displays_correct_things_to_unauthorized_user(self):
         # Bob opens MyWiki's homepage.
@@ -49,19 +49,19 @@ class BasicHomepageTest(BaseTestCase):
         self.assertIn('bob', top_panel.text())
 
         # It also contains two links:
-        # "Edit Page", leading to page editing form, and "Sign Out", that
+        # "Edit Page", leading to article edit form, and "Sign Out", that
         # triggers signout handler.
         links = top_panel.find('a')
         links_dict = dict((link.text, link.get('href')) for link in links)
         self.assertDictContainsSubset(
-            {'Sign Out': '/logout', 'Edit Page': '/_edit/'}, links_dict)
+            {'Sign Out': '/logout', 'Edit Article': '/_edit/'}, links_dict)
         
     def test_does_not_contain_link_to_self(self):
         # Bop opens the homepage.
         homepage = self.testapp.get('/')
         
-        # He remembers that every page in MyWiki contains link to the homepage.
-        # But it occurs that homepage itself does not. Which, on second 
-        # thought, is quite logical.
+        # He remembers that every article in MyWiki contains link to the
+        # homepage. But it occurs that homepage itself does not. Which, on
+        # second thought, is quite logical.
         self.assertRaises(
             AssertionError, self.assertHasLinkToHomepage, homepage)

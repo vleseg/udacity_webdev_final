@@ -6,7 +6,7 @@ import webapp2
 from forms import EditForm, LoginForm, SignupForm
 from hashutils import encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
-from model import GLOBAL_PARENT, User, Session, WikiPage
+from model import GLOBAL_PARENT, User, Session, Article
 
 # Setup logging
 import logging
@@ -71,9 +71,9 @@ class BaseHandler(webapp2.RequestHandler):
     # Render & write methods
     def set_title(self):
         state_to_title = {
-            'new': 'New Page', 'signup': 'Sign Up', 'login': 'Login',
-            'edit': lambda c: '{} (edit)'.format(c['page'].head),
-            'view': lambda c: c['page'].head,
+            'new': 'New Article', 'signup': 'Sign Up', 'login': 'Login',
+            'edit': lambda c: '{} (edit)'.format(c['article'].head),
+            'view': lambda c: c['article'].head,
             'error': lambda c: c['error']
         }
         state = self.context['state']
@@ -201,54 +201,54 @@ class Logout(BaseHandler):
         self.redirect_with_cookie(logout_url, {})
 
 
-class WikiViewPage(BaseHandler):
+class ViewPage(BaseHandler):
     template = "wiki/view_page.html"
 
     def dispatch(self):
         self.context.update({'state': 'view', 'logout_url': self.request.url})
-        super(WikiViewPage, self).dispatch()
+        super(ViewPage, self).dispatch()
 
     def _handle_exception(self, exception, debug):
         self.template = "wiki/error.html"
 
         if exception.status_int == 404:
             self.context.update(
-                {'error': 'Page not found', 'state': 'error',
+                {'error': 'Article not found', 'state': 'error',
                  'logout_url': '/'})
             self.response.set_status(404)
         else:
-            super(WikiViewPage, self)._handle_exception(exception, debug)
+            super(ViewPage, self)._handle_exception(exception, debug)
 
         self.render()
 
     def _get(self, path):
-        page = WikiPage.by_prop('url', path)
-        if page is None:
+        article = Article.by_prop('url', path)
+        if article is None:
             if path == '/':
                 default_body = (
-                    '<p>You are free to create new pages and edit existing '
+                    '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                page = WikiPage(
+                article = Article(
                     url='/', body=default_body, head='Welcome to MyWiki!',
                     parent=GLOBAL_PARENT)
-                page.put()
+                article.put()
             elif self.user is None:
                 self.abort(404)
             else:
                 self.redirect('/_edit' + path, abort=True)
-        self.context.update({'page': page, 'user': self.user})
+        self.context.update({'article': article, 'user': self.user})
 
         self.render()
 
 
-class WikiEditPage(BaseHandler):
+class EditPage(BaseHandler):
     template = "wiki/edit_page.html"
 
     def dispatch(self):
         self.context.update(
             {'state': 'edit',
              'logout_url': self.request.url.split('_edit')[-1]})
-        super(WikiEditPage, self).dispatch()
+        super(EditPage, self).dispatch()
 
     @staticmethod
     def form_head_from_path(path):
@@ -260,25 +260,26 @@ class WikiEditPage(BaseHandler):
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
 
         form = EditForm()
-        page = WikiPage.by_prop('url', path)
+        article = Article.by_prop('url', path)
 
-        if page is None:
+        if article is None:
             if path == '/':
                 default_body = (
-                    '<p>You are free to create new pages and edit existing '
+                    '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                page = WikiPage(
+                article = Article(
                     url='/', body=default_body, head='Welcome to MyWiki!',
                     parent=GLOBAL_PARENT)
-                page.put()
+                article.put()
             else:
                 self.context.update({'state': 'new', 'logout_url': '/'})
                 form.head.data = self.form_head_from_path(path)
         else:
-            form.head.data = page.head
-            form.body.data = page.body
+            form.head.data = article.head
+            form.body.data = article.body
 
-        self.context.update({'form': form, 'page': page, 'user': self.user})
+        self.context.update(
+            {'form': form, 'article': article, 'user': self.user})
         self.render()
 
     def _post(self, path):
@@ -286,29 +287,30 @@ class WikiEditPage(BaseHandler):
             self.redirect('/login', abort=True)
 
         form = EditForm(self.request.params)
-        page = WikiPage.by_prop('url', path)
-        if page is None:
+        article = Article.by_prop('url', path)
+        if article is None:
             self.context['state'] = 'new'
 
         if form.validate():
             if self.context['state'] == 'new':
-                page = WikiPage(
+                article = Article(
                     url=path, head=form.head.data, parent=GLOBAL_PARENT)
-            page.head = form.head.data
-            page.body = form.body.data
-            page.put()
+            article.head = form.head.data
+            article.body = form.body.data
+            article.put()
             self.redirect(path)
         else:
-            self.context.update({'user': self.user, 'form': form, 'page': page})
+            self.context.update(
+                {'user': self.user, 'form': form, 'article': article})
             self.render()
 
 
-PAGE_RE = r'(/(?:[a-zA-Z0-9_-]+/?)*)'
+ARTICLE_RE = r'(/(?:[a-zA-Z0-9_-]+/?)*)'
 handlers = [
     ('/signup', SignupPage),
     ('/login', LoginPage),
     ('/logout', Logout),
-    ('/_edit' + PAGE_RE, WikiEditPage),
-    (PAGE_RE, WikiViewPage)
+    ('/_edit' + ARTICLE_RE, EditPage),
+    (ARTICLE_RE, ViewPage)
 ]
 app = webapp2.WSGIApplication(handlers, debug=True)

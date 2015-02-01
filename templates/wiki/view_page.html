@@ -1,9 +1,9 @@
 {% extends "wiki/base.html" %}
 {% block wiki_content %}
-    <div class="wiki-page">
-        <h1 id="wiki-head">{{ page.head }}</h1>
+    <div class="wiki-article">
+        <h1 id="wiki-head">{{ article.head }}</h1>
         <div id="wiki-body">
-            {{ page.body|safe }}
+            {{ article.body|safe }}
         </div>
     </div>
 {% endblock %}

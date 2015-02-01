@@ -33,7 +33,7 @@ class Session(BaseModel):
         return delta.days > SESSION_LIFETIME
 
 
-class WikiPage(BaseModel):
+class Article(BaseModel):
     url = db.StringProperty(required=True)
     head = db.StringProperty(required=True)
     body = db.TextProperty()

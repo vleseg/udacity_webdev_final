@@ -4,46 +4,46 @@ from base import BaseTestCase
 
 class BasicViewPageTest(BaseTestCase):
     def test_there_is_a_link_to_homepage_on_any_wiki_page(self):
-        # Bob signs up and immediately creates a new page.
+        # Bob signs up and immediately creates a new article.
         self.sign_up()
-        new_page_edit_form = self.testapp.get('/kittens').follow()
+        edit_page = self.testapp.get('/kittens').follow()
         
-        # He saves the page with the default values, that are already present
+        # He saves the article with the default values, that are already present
         # in the form.
-        self.fill_form(new_page_edit_form).submit()
+        self.fill_form(edit_page).submit()
         
-        # Bob opens newly created page.
-        new_page = self.testapp.get('/kittens')
+        # Bob opens newly created article.
+        new_article = self.testapp.get('/kittens')
 
         # There's a link to app's homepage.
-        self.assertHasLinkToHomepage(new_page)
+        self.assertHasLinkToHomepage(new_article)
         
     def test_there_is_a_link_to_homepage_even_for_unauthorized_users(self):
-        # Bob signs up and immediately creates a new page.
+        # Bob signs up and immediately creates a new article.
         self.sign_up()
-        new_page_edit_form = self.testapp.get('/kittens').follow()
+        edit_page = self.testapp.get('/kittens').follow()
         
-        # He saves the page with the default values, that are already present
+        # He saves the article with the default values, that are already present
         # in the form. Then, Bob signs out.
-        self.fill_form(new_page_edit_form).submit()
+        self.fill_form(edit_page).submit()
         self.testapp.get('/logout')
         
-        # Bob opens newly created page.
-        new_page = self.testapp.get('/kittens')
+        # Bob opens newly created article.
+        new_article = self.testapp.get('/kittens')
         
         # There's a link to app's homepage.
-        self.assertHasLinkToHomepage(new_page)
+        self.assertHasLinkToHomepage(new_article)
 
-    def test_logging_out_while_viewing_page_redirects_back_to_that_page(self):
-        # Bob signs up and immediately creates a new page.
+    def test_logging_out_on_view_page_redirects_back_there(self):
+        # Bob signs up and immediately creates a new article.
         self.sign_up()
-        new_page_edit_form = self.testapp.get('/kittens').follow()
+        edit_form = self.testapp.get('/kittens').follow()
 
-        # He saves the page with the default values, that are already present
-        # in the form. He is redirected to the new page.
-        new_page = self.fill_form(new_page_edit_form).submit().follow()
+        # He saves the article with the default values, that are already present
+        # in the form. He is redirected to the new article.
+        new_article = self.fill_form(edit_form).submit().follow()
 
         # Bob signs out. Upon doing this, he is redirected back to 'Kittens'
-        # page.
-        response = new_page.click(linkid='logout-link').follow()
+        # article.
+        response = new_article.click(linkid='logout-link').follow()
         self.assertTitleEqual(response, u'MyWiki — Kittens')
