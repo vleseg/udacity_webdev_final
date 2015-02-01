@@ -27,3 +27,24 @@ class BasicErrorPageTest(BaseTestCase):
         # He clicks a "Sign Out" link and is redirected to homepage as a result.
         response = error_page.click(linkid='logout-link').follow()
         self.assertTitleEqual(response, u'MyWiki — Welcome to MyWiki!')
+
+    def test_404_page_offers_user_to_login_or_sign_up(self):
+        # Bob tries to fetch a page, that certainly does not exist. He receives
+        # a 404.
+        error_page = self.testapp.get('/i_do_not_exist', expect_errors=True)
+
+        # However, he sees, that page offers him to log in or sign up to create
+        # the page he requested.
+        auth_offer = error_page.pyquery('#auth-offer')
+        self.assertTrue(bool(auth_offer))
+        self.assertEqual(
+            auth_offer.text(),
+            'Sign in or sign up to create the page you requested.')
+
+        # There are two links in the offer, that lead to corresponding pages.
+        login_offer = auth_offer.find('#login-offer-link')
+        signup_offer = auth_offer.find('#signup-offer-link')
+        self.assertTrue(bool(login_offer))
+        self.assertTrue(bool(signup_offer))
+        self.assertEqual(login_offer.attr.href, '/login')
+        self.assertEqual(signup_offer.attr.href, '/signup')
