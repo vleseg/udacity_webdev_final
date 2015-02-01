@@ -2,7 +2,7 @@
 from base import BaseTestCase
 
 
-class BasicErrorPageTest(BaseTestCase):
+class NotFoundErrorPageTest(BaseTestCase):
     def test_404_is_returned_when_nonexistent_page_is_requested(self):
         # Bob tries to fetch a page, that certainly does not exist.
         response = self.testapp.get('/i_do_not_exist', expect_errors=True)
