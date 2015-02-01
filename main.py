@@ -96,6 +96,13 @@ class BaseHandler(webapp2.RequestHandler):
             self.response.set_cookie(key, value)
         self.redirect(str(path))
 
+    def set_logout_url(self, url):
+        try:
+            self.session.logout_url = url
+            self.session.put()
+        except AttributeError:
+            pass
+
 
 # Base handler for signup & login pages
 class AuthPageHandler(BaseHandler):
@@ -179,9 +186,10 @@ class LoginPage(AuthPageHandler):
 
 class Logout(BaseHandler):
     def _get(self):
+        logout_url = self.session.logout_url
         if self.session:
             self.session.delete()
-        self.redirect_with_cookie('/', {})
+        self.redirect_with_cookie(logout_url, {})
 
 
 class WikiViewPage(BaseHandler):
@@ -229,6 +237,7 @@ class WikiEditPage(BaseHandler):
     def dispatch(self):
         self.context['state'] = 'edit'
         super(WikiEditPage, self).dispatch()
+        self.set_logout_url(self.request.url.split('_edit')[-1])
 
     @staticmethod
     def form_head_from_path(path):

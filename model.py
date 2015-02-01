@@ -26,6 +26,7 @@ class Session(BaseModel):
     sid = db.StringProperty(required=True)
     user = db.ReferenceProperty(User, collection_name="Sessions")
     created = db.DateTimeProperty(auto_now_add=True)
+    logout_url = db.StringProperty(default='/')
 
     def has_expired(self):
         delta = dt.datetime.now() - self.created

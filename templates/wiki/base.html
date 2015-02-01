@@ -15,11 +15,16 @@
                     </span>
                 {% endif %}
                 <span class="top-panel-section">
-                    Logged in as <span id="username">{{ user.name }}</span> (<a href="/logout">Sign Out</a>)
+                    Logged in as <span id="username">{{ user.name }}</span>
+                    (<a href="/logout" id="logout-link">Sign Out</a>)
                 </span>
             {% else %}
-                <span class="top-panel-section"><a href="/login">Sign In</a></span>
-                <span class="top-panel-section"><a href="/signup">Sign Up</a></span>
+                <span class="top-panel-section">
+                    <a href="/login" id="login-link">Sign In</a>
+                </span>
+                <span class="top-panel-section">
+                    <a href="/signup" id="signup-link">Sign Up</a>
+                </span>
             {% endif %}
         </div>
     </div>

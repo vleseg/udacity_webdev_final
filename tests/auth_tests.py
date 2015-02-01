@@ -139,3 +139,21 @@ class LogoutTest(BaseTestCase):
         # Now his name isn't displayed on page.
         top_panel = homepage.pyquery('#top-panel')
         self.assertNotIn('bob', top_panel.text())
+
+    def test_logging_out_of_edit_form_for_page_redirects_to_that_page(self):
+        # Bob signs up and immediately creates a new page.
+        self.sign_up()
+        edit_form = self.testapp.get('/_edit/kittens')
+
+        # Bob enters some data into edit form and saves the page.
+        new_page = self.fill_form(
+            edit_form, body='Kittens are cute and cuddly.').submit().follow()
+
+        # Bob clicks "Edit Page" link to introduce more changes into page, but
+        # changes his mind and on edit form, which was delivered by browser, he
+        # clicks "Sign Out".
+        edit_form = new_page.click(linkid='edit-page-link')
+        response = edit_form.click(linkid='logout-link').follow()
+
+        # He's redirected to the page he was about to edit.
+        self.assertTitleEqual(response, u'MyWiki — Kittens')
