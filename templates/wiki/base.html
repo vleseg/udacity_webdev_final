@@ -8,6 +8,11 @@
                     <a href="/" id="homepage-link">Home</a>
                 </span>
             {% endif %}
+            {% if state == 'view' %}
+                <span class="top-panel-section">
+                    <a id="history-link" href="/_history{{ article.url }}">History</a>
+                </span>
+            {% endif %}
             {% if user %}
                 {% if state == 'view' %}
                     <span class="top-panel-section">
