@@ -39,11 +39,26 @@ class BasicViewPageTest(BaseTestCase):
         self.sign_up()
         edit_form = self.testapp.get('/kittens').follow()
 
-        # He saves the article with the default values, that are already present
-        # in the form. He is redirected to the new article.
+        # He saves the article with the default values. He is redirected to the
+        # new article.
         new_article = self.fill_form(edit_form).submit().follow()
 
         # Bob signs out. Upon doing this, he is redirected back to 'Kittens'
         # article.
         response = new_article.click(linkid='logout-link').follow()
         self.assertTitleEqual(response, u'MyWiki — Kittens')
+
+    def test_there_is_a_link_to_history_page_above_every_article(self):
+        # Bob signs up and immediately creates a new article.
+        self.sign_up()
+        edit_form = self.testapp.get('/kittens').follow()
+
+        # He saves the article with the default values. He is redirected to the
+        # new article.
+        new_article = self.fill_form(edit_form).submit().follow()
+
+        # There is a link to the history page for this article in navigation
+        # panel.
+        history_page_link = new_article.pyquery('#history-link')
+        self.assertEqual(history_page_link.text(), 'History')
+        self.assertEqual(history_page_link.attr.href, '/_history/kittens')
