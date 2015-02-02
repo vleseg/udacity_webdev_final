@@ -208,6 +208,9 @@ class NewArticleTest(BaseTestCase):
         # Bob clicks "Edit Article" link to access edit page for this article.
         edit_page = puppies_article.click(linkid='edit-article-link')
 
+        # Edit page is successfully delivered to him.
+        self.assertTitleEqual(edit_page, u'MyWiki — Puppies (edit)')
+
         # He slightly modifies article title and replaces the body. The he saves
         # the article once again.
         response = self.fill_form(
