@@ -72,12 +72,13 @@ class BaseHandler(webapp2.RequestHandler):
     def set_title(self):
         state_to_title = {
             'new': 'New Article', 'signup': 'Sign Up', 'login': 'Login',
-            'edit': lambda c: '{} (edit)'.format(c['article'].head),
             'view': lambda c: c['article'].head,
+            'edit': lambda c: '{} (edit)'.format(c['article'].head),
+            'history': lambda c: '{} (history)'.format(c['article'].head),
             'error': lambda c: c['error']
         }
         state = self.context['state']
-        sep = u'—' if state in ['view', 'edit'] else '***'
+        sep = u'—' if state in ['view', 'edit', 'history'] else '***'
         title_handler = state_to_title[state]
         if callable(title_handler):
             self.context['title'] = u'MyWiki {0} {1}'.format(
@@ -221,23 +222,35 @@ class ViewPage(BaseHandler):
 
         self.render()
 
-    def _get(self, path):
-        article = Article.by_prop('url', path)
+    def _get(self, url):
+        article = Article.latest_version(url)
         if article is None:
-            if path == '/':
+            if url == '/':
                 default_body = (
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                article = Article(
-                    url='/', body=default_body, head='Welcome to MyWiki!',
-                    parent=GLOBAL_PARENT)
-                article.put()
+                article = Article.new(
+                    url='/', body=default_body, head='Welcome to MyWiki!')
             elif self.user is None:
                 self.abort(404)
             else:
-                self.redirect('/_edit' + path, abort=True)
+                self.redirect('/_edit' + url, abort=True)
         self.context.update({'article': article, 'user': self.user})
 
+        self.render()
+
+
+class HistoryPage(BaseHandler):
+    template = "wiki/history.html"
+
+    def dispatch(self):
+        self.context.update(
+            {'state': 'history', 'logout_url': self.request.url})
+        super(HistoryPage, self).dispatch()
+
+    def _get(self, url):
+        article = Article.latest_version(url)
+        self.context['article'] = article
         self.render()
 
 
@@ -255,25 +268,23 @@ class EditPage(BaseHandler):
         words = path.strip('/').split('_')
         return ' '.join([w.capitalize() for w in words])
 
-    def _get(self, path):
+    def _get(self, url):
         if self.user is None:
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
 
         form = EditForm()
-        article = Article.by_prop('url', path)
+        article = Article.latest_version(url)
 
         if article is None:
-            if path == '/':
+            if url == '/':
                 default_body = (
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                article = Article(
-                    url='/', body=default_body, head='Welcome to MyWiki!',
-                    parent=GLOBAL_PARENT)
-                article.put()
+                article = Article.new(
+                    url='/', body=default_body, head='Welcome to MyWiki!')
             else:
                 self.context.update({'state': 'new', 'logout_url': '/'})
-                form.head.data = self.form_head_from_path(path)
+                form.head.data = self.form_head_from_path(url)
         else:
             form.head.data = article.head
             form.body.data = article.body
@@ -282,23 +293,22 @@ class EditPage(BaseHandler):
             {'form': form, 'article': article, 'user': self.user})
         self.render()
 
-    def _post(self, path):
+    def _post(self, url):
         if self.user is None:
             self.redirect('/login', abort=True)
 
         form = EditForm(self.request.params)
-        article = Article.by_prop('url', path)
+        article = Article.latest_version(url)
+
         if article is None:
             self.context['state'] = 'new'
 
         if form.validate():
             if self.context['state'] == 'new':
-                article = Article(
-                    url=path, head=form.head.data, parent=GLOBAL_PARENT)
-            article.head = form.head.data
-            article.body = form.body.data
-            article.put()
-            self.redirect(path)
+                Article.new(url, form.head.data, form.body.data)
+            else:
+                article.new_version(form.head.data, form.body.data)
+            self.redirect(url)
         else:
             self.context.update(
                 {'user': self.user, 'form': form, 'article': article})
@@ -311,6 +321,7 @@ handlers = [
     ('/login', LoginPage),
     ('/logout', Logout),
     ('/_edit' + ARTICLE_RE, EditPage),
+    ('/_history' + ARTICLE_RE, HistoryPage),
     (ARTICLE_RE, ViewPage)
 ]
 app = webapp2.WSGIApplication(handlers, debug=True)
