@@ -20,7 +20,8 @@ class CreateNewUserTest(BaseTestCase):
         # Bob enters his name (bob) into "Username" field and uses "test123" as
         # password.
         form = self.fill_form(
-            signup_page, username='bob', password='test123', verify='test123')
+            signup_page, username='bob', password='test123', verify='test123',
+            email='bob@example.com')
 
         # Bob submits the form. Browser redirects Bob to the homepage. He can
         # tell that by looking at page title, it says: "MyWiki -- Welcome!"

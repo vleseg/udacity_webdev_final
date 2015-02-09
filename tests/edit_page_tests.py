@@ -61,6 +61,14 @@ class EditPageBehaviourTest(BaseTestCase):
         # Browser delivers him a login page.
         self.assertTitleEqual(response, 'MyWiki *** Login')
 
+    def test_unauthorized_user_cannot_post_directly(self):
+        # Bob tries to send a direct POST request to edit page for MyWiki's
+        # homepage. He's not logged in.
+        response = self.testapp.post('/_edit/').follow()
+
+        # Browser delivers him a login page.
+        self.assertTitleEqual(response, 'MyWiki *** Login')
+
     def test_redirects_back_to_edit_page_after_successful_login(self):
         # Bob signs up and immediately logs out.
         self.sign_up()
