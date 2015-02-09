@@ -143,6 +143,10 @@ class SignupPage(AuthPageHandler):
         super(SignupPage, self).dispatch()
 
     def _get(self):
+        return_to = self.request.get('return_to')
+        if return_to:
+            self.response.set_cookie('referrer', return_to)
+
         self.context['form'] = SignupForm()
         self.render()
 
@@ -178,6 +182,10 @@ class LoginPage(AuthPageHandler):
         super(LoginPage, self).dispatch()
 
     def _get(self):
+        return_to = self.request.get('return_to')
+        if return_to:
+            self.response.set_cookie('referrer', return_to)
+
         self.context['form'] = LoginForm()
         self.render()
 
@@ -232,6 +240,7 @@ class ViewPage(BaseHandler):
                 article = Article.new(
                     url='/', body=default_body, head='Welcome to MyWiki!')
             elif self.user is None:
+                self.context['edit_url'] = '/_edit' + url
                 self.abort(404)
             else:
                 self.redirect('/_edit' + url, abort=True)

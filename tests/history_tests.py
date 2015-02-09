@@ -3,7 +3,6 @@ from base import BaseTestCase
 
 
 # TODO: write a test about version's timestamp -- it has to be correct
-# TODO: write tests for uncovered code
 class BasicHistoryPageTest(BaseTestCase):
     def test_there_is_a_history_page_for_every_article(self):
         # Bob opens MyWiki's homepage. There is a link to the edit history page.

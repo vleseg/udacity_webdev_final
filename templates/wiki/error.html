@@ -2,7 +2,7 @@
 {% block wiki_content %}
     <h1 id="error-message">{{ error }}</h1>
     <div id="auth-offer">
-        <a id="login-offer-link" href="/login">Sign in</a> or
-        <a id="signup-offer-link" href="/signup">sign up</a> to create the article you requested.
+        <a id="login-offer-link" href="/login?return_to={{ edit_url }}">Sign in</a> or
+        <a id="signup-offer-link" href="/signup?return_to={{ edit_url }}">sign up</a> to create the article you requested.
     </div>
 {% endblock %}
