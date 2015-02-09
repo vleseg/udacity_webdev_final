@@ -1,7 +1,7 @@
 import unittest
 # Third-party imports
 from google.appengine.ext import testbed
-import webtest
+from webtest import TestApp, TestResponse
 
 
 class BaseTestCase(unittest.TestCase):
@@ -12,7 +12,7 @@ class BaseTestCase(unittest.TestCase):
         # This is import is here because another import inside starts using
         # datastore right away.
         from main import app
-        self.testapp = webtest.TestApp(app)
+        self.testapp = TestApp(app)
 
     def tearDown(self):
         self.testbed.deactivate()
@@ -36,11 +36,19 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors.text(), error_text)
 
+    def assertHasLink(self, container, selector, text=None, href=None):
+        if isinstance(container, TestResponse):
+            container = container.pyquery('body')
+
+        link = container.find(selector)
+        self.assertTrue(bool(link))
+        if text is not None:
+            self.assertEqual(link.text(), text)
+        if href is not None:
+            self.assertEqual(link.attr('href'), href)
+
     def assertHasLinkToHomepage(self, page):
-        link_to_homepage = page.pyquery('#homepage-link')
-        self.assertTrue(bool(link_to_homepage))
-        self.assertEqual(link_to_homepage.text(), 'Home')
-        self.assertEqual(link_to_homepage.attr('href'), '/')
+        self.assertHasLink(page, '#homepage-link', text='Home', href='/')
 
     def assertTitleEqual(self, page, title_text):
         self.assertEqual(page.pyquery('title').text(), title_text)

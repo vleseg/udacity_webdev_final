@@ -40,9 +40,9 @@ class EditPageLayoutTest(BaseTestCase):
         response = self.testapp.get('/_edit/')
 
         # There is no "Edit Article" link in navigation panel.
-        edit_link = response.pyquery('#edit-article-link')
-        self.assertFalse(bool(edit_link))
-        
+        self.assertRaises(
+            AssertionError, self.assertHasLink, response, '#edit-article-link')
+
     def test_has_link_to_homepage(self):
         # Bob signs up and the opens edit page for MyWiki's homepage.
         self.sign_up()

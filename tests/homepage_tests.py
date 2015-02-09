@@ -29,10 +29,10 @@ class BasicHomepageTest(BaseTestCase):
 
         # Navigation panel has "Sign In" and "Sign Up" links. They point at,
         # correspondingly, login page and signup page.
-        links = top_panel.find('a')
-        links_dict = dict((link.text, link.get('href')) for link in links)
-        self.assertDictContainsSubset(
-            {'Sign Up': '/signup', 'Sign In': '/login'}, links_dict)
+        self.assertHasLink(
+            top_panel, '#signup-link', text='Sign Up', href='/signup')
+        self.assertHasLink(
+            top_panel, '#login-link', text='Sign In', href='/login')
 
     def test_homepage_panel_displays_correct_things_to_authorized_user(self):
         # Bob sings up for MyWiki
@@ -48,13 +48,13 @@ class BasicHomepageTest(BaseTestCase):
         # Navigation panel has Bob's name in it.
         self.assertIn('bob', top_panel.text())
 
-        # It also contains two links:
-        # "Edit Page", leading to article edit form, and "Sign Out", that
-        # triggers signout handler.
-        links = top_panel.find('a')
-        links_dict = dict((link.text, link.get('href')) for link in links)
-        self.assertDictContainsSubset(
-            {'Sign Out': '/logout', 'Edit Article': '/_edit/'}, links_dict)
+        # It also contains two links: "Edit Article", leading to article edit
+        # page, and "Sign Out", that triggers signout handler.
+        self.assertHasLink(
+            top_panel, '#logout-link', text='Sign Out', href='/logout')
+        self.assertHasLink(
+            top_panel, '#edit-article-link', text='Edit Article',
+            href='/_edit/')
         
     def test_does_not_contain_link_to_self(self):
         # Bop opens the homepage.

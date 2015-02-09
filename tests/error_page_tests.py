@@ -42,9 +42,7 @@ class NotFoundErrorPageTest(BaseTestCase):
             'Sign in or sign up to create the article you requested.')
 
         # There are two links in the offer, that lead to corresponding pages.
-        login_offer = auth_offer.find('#login-offer-link')
-        signup_offer = auth_offer.find('#signup-offer-link')
-        self.assertTrue(bool(login_offer))
-        self.assertTrue(bool(signup_offer))
-        self.assertEqual(login_offer.attr.href, '/login')
-        self.assertEqual(signup_offer.attr.href, '/signup')
+        self.assertHasLink(
+            error_page, '#login-offer-link', text='Sign in', href='/login')
+        self.assertHasLink(
+            error_page, '#signup-offer-link', text='sign up', href='/signup')

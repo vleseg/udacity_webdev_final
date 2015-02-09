@@ -59,6 +59,6 @@ class BasicViewPageTest(BaseTestCase):
 
         # There is a link to the history page for this article in navigation
         # panel.
-        history_page_link = new_article.pyquery('#history-link')
-        self.assertEqual(history_page_link.text(), 'History')
-        self.assertEqual(history_page_link.attr.href, '/_history/kittens')
+        self.assertHasLink(
+            new_article, '#history-link', text='History',
+            href='/_history/kittens')
