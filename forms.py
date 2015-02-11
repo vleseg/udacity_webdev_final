@@ -64,7 +64,7 @@ class SignupForm(Form):
 
 class LoginForm(Form):
     username = StringField('Username')
-    password = StringField('Password')
+    password = PasswordField('Password')
     submit = SubmitField('Sign In')
     _user = None
 
