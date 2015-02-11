@@ -1,5 +1,4 @@
 # coding=utf-8
-# Project-specific imports
 from base import BaseTestCase
 
 

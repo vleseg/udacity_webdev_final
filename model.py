@@ -1,6 +1,5 @@
-from collections import namedtuple
 import datetime as dt
-# Third party libs
+# Third-party imports
 from google.appengine.api.app_identity import get_application_id
 from google.appengine.ext import db
 

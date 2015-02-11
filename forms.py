@@ -1,10 +1,11 @@
 import re
-# Project-specific imports
-from hashutils import check_against_hash
-from model import User
+# Third-party imports
 from wtforms import (
     Form, StringField, PasswordField, TextAreaField, validators,
     ValidationError, SubmitField)
+# Internal project imports
+from hashutils import check_against_hash
+from model import User
 
 USERNAME_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 

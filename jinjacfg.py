@@ -1,5 +1,6 @@
-import jinja2
 import os
+# Third-party imports
+import jinja2
 
 
 def datetime_format(value, f="%H:%M %d.%m.%Y"):
