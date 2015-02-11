@@ -1,1 +1,8 @@
 {% extends "wiki/base.html" %}
+{% block wiki_content %}
+    <ul id="versions">
+    {% for version in article.version_set %}
+        <li>Version #{{ loop.index0 }}, created {{ version.created }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

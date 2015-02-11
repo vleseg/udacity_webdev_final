@@ -38,6 +38,44 @@ class BasicHistoryPageTest(BaseTestCase):
         self.assertTitleEqual(
             history_page, u'MyWiki — Kittens (history)')
 
+    def test_first_version_of_homepage_can_be_found_on_its_history_page(self):
+        # Bob opens MyWiki's homepage.
+        homepage = self.testapp.get('/')
+
+        # He clicks the "History" link to see homepage's edit history.
+        response = homepage.click(linkid='history-link')
+
+        # History page is delivered to Bob. It has a list of all version of the
+        # homepage.
+        versions_list = response.pyquery('ul#versions')
+        self.assertTrue(bool(versions_list))
+
+        # At the time being it contains only one version.
+        versions = versions_list.find('li')
+        self.assertEqual(len(versions), 1)
+
+    def test_first_version_of_any_page_can_be_found_on_its_history_page(self):
+        # Bob signs up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/russia_strong')
+
+        # He saves the article with default values. Newly created article is
+        # delivered to Bob.
+        new_article = self.fill_form(edit_page).submit().follow()
+
+        # He clicks the "History" link to see article's edit history.
+        response = new_article.click(linkid='history-link')
+
+        # History page is delivered to Bob. It has a list of all version of the
+        # article.
+        versions_list = response.pyquery('ul#versions')
+        self.assertTrue(bool(versions_list))
+
+        # At the time being it contains only one version.
+        versions = versions_list.find('li')
+        self.assertEqual(len(versions), 1)
+
+
 
 class HistoryUnitTests(BaseTestCase):
     def test_version_timestamp_stores_a_correct_value(self):
