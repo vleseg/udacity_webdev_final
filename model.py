@@ -57,6 +57,7 @@ class Article(BaseModel):
         projection.url = self.url
         projection.head = version.head
         projection.body = version.body
+        projection.modified = version.created
 
         return projection
 

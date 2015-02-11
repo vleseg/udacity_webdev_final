@@ -47,9 +47,9 @@ class HistoryUnitTests(BaseTestCase):
         new_page = self.testapp.get('/_edit/kittens')
 
         # He saves article with default values.
-        t = datetime.now()
+        t = datetime.utcnow()
         self.fill_form(new_page).submit()
 
         # Timestamp for article's first version is written correctly.
-        version_ts = Article.latest_version('/kittens')
+        version_ts = Article.latest_version('/kittens').modified
         self.assertAlmostEqual(t, version_ts, delta=timedelta(seconds=1))
