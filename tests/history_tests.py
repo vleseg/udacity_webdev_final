@@ -64,17 +64,41 @@ class BasicHistoryPageTest(BaseTestCase):
         new_article = self.fill_form(edit_page).submit().follow()
 
         # He clicks the "History" link to see article's edit history.
-        response = new_article.click(linkid='history-link')
+        history_page = new_article.click(linkid='history-link')
 
         # History page is delivered to Bob. It has a list of all version of the
         # article.
-        versions_list = response.pyquery('ul#versions')
+        versions_list = history_page.pyquery('ul#versions')
         self.assertTrue(bool(versions_list))
 
         # At the time being it contains only one version.
         versions = versions_list.find('li')
         self.assertEqual(len(versions), 1)
 
+    def test_after_page_was_edited_new_version_is_created(self):
+        # Bob signs up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/white_rabbit')
+
+        # He saves the article with default values. Newly created article is
+        # delivered to Bob.
+        new_article = self.fill_form(edit_page).submit().follow()
+
+        # Bob clicks "Edit Article" link. Edit page opens again.
+        edit_page = new_article.click(linkid='edit-article-link')
+
+        # Bob changes article's body and saves the page. Modified article is
+        # delivered to Bob.
+        modified_article = self.fill_form(
+            edit_page, body="Follow it, Neo!").submit().follow()
+
+        # He clicks the "History" link to see article's edit history. History
+        # page is delivered to Bob.
+        history_page = modified_article.click(linkid='history-link')
+
+        # There are two versions of the article present.
+        versions = history_page.pyquery('ul#versions>li')
+        self.assertEqual(len(versions), 2)
 
 
 class HistoryUnitTests(BaseTestCase):
