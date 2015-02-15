@@ -6,6 +6,8 @@
             Version #{{ loop.revindex0 }}, created {{ version.created }}
             {% if loop.last %}
                 <span class="distinction-label">(new article)</span>
+            {% elif loop.first %}
+                <span class="distinction-label">(current)</span>
             {%- endif %}
         </li>
     {% endfor %}

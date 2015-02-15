@@ -115,11 +115,34 @@ class BasicHistoryPageTest(BaseTestCase):
         history_page = self.testapp.get('/_history/no_nay_never_no_more')
 
         # History page has two versions.
-        versions_list = history_page.pyquery('ul#versions')
-        self.assertEqual(len(versions_list.find('li')), 2)
+        versions_list = history_page.pyquery('ul#versions>li')
+        self.assertEqual(len(versions_list), 2)
 
-        # One of them is labeled as "new article". The other one is not labeled.
-        label = versions_list.find('.distinction-label')
+        # The bottom one is the oldest one. It is labeled "(new article)".
+        oldest_version = versions_list.eq(1)
+        label = oldest_version.find('.distinction-label')
+        self.assertEqual(len(label), 1)
+        self.assertEqual(label.text(), '(new article)')
+
+    def test_last_version_on_history_page_is_labeled_current(self):
+        # Bob sings up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/remember_remember')
+
+        # He saves the article with default values. And then opens it for
+        # editing again.
+        self.fill_form(edit_page).submit()
+        edit_page = self.testapp.get('/_edit/remember_remember')
+
+        # Bob edits article's body and saves it. Then he opens the history page.
+        self.fill_form(edit_page, body='<p>the fifth of november</p>')
+        history_page = self.testapp.get('/_history/remember_remember')
+
+        # History page has two versions. The top one is the newest one. It is
+        # labeled "(current)".
+        versions_list = history_page.pyquery('ul#versions>li')
+        newest_version = versions_list.eq(0)
+        label = newest_version.find('.distinction-label')
         self.assertEqual(len(label), 1)
         self.assertEqual(label.text(), '(new article)')
 
