@@ -3,7 +3,7 @@
     <ul id="versions">
     {% for version in article.all_versions() %}
         <li>
-            Version #{{ loop.index0 }}, created {{ version.created }}
+            Version #{{ loop.revindex0 }}, created {{ version.created }}
             {% if loop.last %}
                 <span class="distinction-label">(new article)</span>
             {%- endif %}
