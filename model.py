@@ -47,6 +47,10 @@ class Session(BaseModel):
 class Article(BaseModel):
     url = db.StringProperty(required=True)
 
+    def all_versions(self):
+        q = self.version_set
+        return q.order('-created')
+
     def new_version(self, head, body):
         version = Version(
             article=self, head=head, body=body, parent=GLOBAL_PARENT)

@@ -90,7 +90,7 @@ class BasicHistoryPageTest(BaseTestCase):
         # Bob changes article's body and saves the page. Modified article is
         # delivered to Bob.
         modified_article = self.fill_form(
-            edit_page, body="Follow it, Neo!").submit().follow()
+            edit_page, body="<p>Follow it, Neo!</p>").submit().follow()
 
         # He clicks the "History" link to see article's edit history. History
         # page is delivered to Bob.
@@ -99,6 +99,29 @@ class BasicHistoryPageTest(BaseTestCase):
         # There are two versions of the article present.
         versions = history_page.pyquery('ul#versions>li')
         self.assertEqual(len(versions), 2)
+
+    def test_first_version_on_history_page_is_labeled_new_article(self):
+        # Bob sings up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
+
+        # He saves the article with default values. And then opens it for
+        # editing again.
+        self.fill_form(edit_page).submit()
+        edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
+
+        # Bob edits article's body and saves it. Then he opens the history page.
+        self.fill_form(edit_page, body='<span>Bogus!</span>').submit()
+        history_page = self.testapp.get('/_history/no_nay_never_no_more')
+
+        # History page has two versions.
+        versions_list = history_page.pyquery('ul#versions')
+        self.assertEqual(len(versions_list.find('li')), 2)
+
+        # One of them is labeled as "new article". The other one is not labeled.
+        label = versions_list.find('.distinction-label')
+        self.assertEqual(len(label), 1)
+        self.assertEqual(label.text(), '(new article)')
 
 
 class HistoryUnitTests(BaseTestCase):
