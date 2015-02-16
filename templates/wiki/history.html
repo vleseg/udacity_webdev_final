@@ -1,16 +1,16 @@
 {% extends "wiki/base.html" %}
 {% block wiki_content %}
-    <ul id="versions">
+  <ul id="versions">
     {% for version in article.all_versions() %}
-        <li>
-            Version #{{ loop.revindex0 }}, created
-            <span class="timestamp">{{ version.created|timestampformat }}</span>
-            {% if loop.last %}
-                <span class="distinction-label">(new article)</span>
-            {% elif loop.first %}
-                <span class="distinction-label">(current)</span>
-            {%- endif %}
-        </li>
+      <li>
+        Version #{{ loop.revindex0 }}, created
+        <span class="timestamp">{{ version.created|timestampformat }}</span>
+        {% if loop.last %}
+          <span class="distinction-label">(new article)</span>
+        {% elif loop.first %}
+          <span class="distinction-label">(current)</span>
+        {%- endif %}
+      </li>
     {% endfor %}
-    </ul>
+  </ul>
 {% endblock %}

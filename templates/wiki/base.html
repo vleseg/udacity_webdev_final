@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% block path_to_stylesheet %}/stylesheets/wiki_styles.css{% endblock %}
 {% block content %}
-    <div id="top-panel-wrapper">
-        <div id="top-panel">
-            {% if state != 'view' or article.url != '/' %}
-                <span class="top-panel-section">
-                    <a href="/" id="homepage-link">Home</a>
-                </span>
-            {% endif %}
-            {% if state == 'view' %}
-                <span class="top-panel-section">
-                    <a id="history-link" href="/_history{{ article.url }}">History</a>
-                </span>
-            {% endif %}
-            {% if user %}
-                {% if state == 'view' %}
-                    <span class="top-panel-section">
-                        <a href="/_edit{{ article.url }}" id="edit-article-link">Edit Article</a>
-                    </span>
-                {% endif %}
-                <span class="top-panel-section">
-                    Logged in as <span id="username">{{ user.name }}</span>
-                    (<a href="/logout" id="logout-link">Sign Out</a>)
-                </span>
-            {% else %}
-                <span class="top-panel-section">
-                    <a href="/login" id="login-link">Sign In</a>
-                </span>
-                <span class="top-panel-section">
-                    <a href="/signup" id="signup-link">Sign Up</a>
-                </span>
-            {% endif %}
-        </div>
+  <div id="top-panel-wrapper">
+    <div id="top-panel">
+      {% if state != 'view' or article.url != '/' %}
+        <span class="top-panel-section">
+          <a href="/" id="homepage-link">Home</a>
+        </span>
+      {% endif %}
+      {% if state == 'view' %}
+        <span class="top-panel-section">
+          <a id="history-link" href="/_history{{ article.url }}">History</a>
+        </span>
+      {% endif %}
+      {% if user %}
+        {% if state == 'view' %}
+          <span class="top-panel-section">
+            <a href="/_edit{{ article.url }}" id="edit-article-link">Edit Article</a>
+          </span>
+        {% endif %}
+        <span class="top-panel-section">
+          Logged in as <span id="username">{{ user.name }}</span>
+          (<a href="/logout" id="logout-link">Sign Out</a>)
+        </span>
+      {% else %}
+        <span class="top-panel-section">
+          <a href="/login" id="login-link">Sign In</a>
+        </span>
+        <span class="top-panel-section">
+          <a href="/signup" id="signup-link">Sign Up</a>
+        </span>
+      {% endif %}
     </div>
-    <div id="wiki-content">
-        {% block wiki_content %}{% endblock %}
-    </div>
+  </div>
+  <div id="wiki-content">
+    {% block wiki_content %}{% endblock %}
+  </div>
 {% endblock %}

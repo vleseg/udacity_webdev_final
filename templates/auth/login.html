@@ -2,21 +2,21 @@
 {% from "macros.html" import form_errors %}
 {% block head %}Sign into MyWiki{% endblock %}
 {% block content %}
-    <form method="post">
-        <div class="form-container">
-            <div class="form-labels">
-                <div>Username</div>
-                <div>Password</div>
-            </div>
-            <div class="form-controls">
-                <div>{{ form.username }}</div>
-                <div>{{ form.password }}</div>
-            </div>
-        </div>
-        {{ form_errors(form) }}
-        <div class="form-submit-button">{{ form.submit }}</div>
-    </form>
-    <div class="auth-alternative">
-        Not a user? <a href="/signup" id="auth-alternative-link">Sign up!</a>
+  <form method="post">
+    <div class="form-container">
+      <div class="form-labels">
+        <div>Username</div>
+        <div>Password</div>
+      </div>
+      <div class="form-controls">
+        <div>{{ form.username }}</div>
+        <div>{{ form.password }}</div>
+      </div>
     </div>
+    {{ form_errors(form) }}
+    <div class="form-submit-button">{{ form.submit }}</div>
+  </form>
+  <div class="auth-alternative">
+    Not a user? <a href="/signup" id="auth-alternative-link">Sign up!</a>
+  </div>
 {% endblock %}
