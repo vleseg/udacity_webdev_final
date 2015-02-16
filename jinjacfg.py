@@ -3,7 +3,7 @@ import os
 import jinja2
 
 
-def datetime_format(value, f="%H:%M %d.%m.%Y"):
+def timestamp_format(value, f="%d %B %Y %H:%M:%S"):
     return value.strftime(f)
 
 
@@ -13,4 +13,4 @@ jinja_environment = jinja2.Environment(
 jinja_environment.lstrip_blocks = True
 jinja_environment.trim_blocks = True
 
-jinja_environment.filters['datetimeformat'] = datetime_format
+jinja_environment.filters['timestampformat'] = timestamp_format

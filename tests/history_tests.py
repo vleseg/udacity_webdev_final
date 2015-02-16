@@ -148,6 +148,7 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(len(label), 1)
         self.assertEqual(label.text(), '(new article)')
 
+    # TODO: reformat project's HTML files to use 2-space indentation
     def test_version_timestamp_is_human_readable(self):
         # Bob signs up and immediately creates a new article.
         self.sign_up()
