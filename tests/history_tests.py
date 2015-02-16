@@ -102,8 +102,37 @@ class BasicHistoryPageTest(BaseTestCase):
 
 
 class HistoryPageLayoutTest(BaseTestCase):
+    def test_history_page_has_a_link_to_edit_articles_current_version(self):
+        # Bob signs up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/dancing_queen')
+
+        # He saves the article with default values. And then opens it for
+        # editing again.
+        self.fill_form(edit_page).submit()
+        edit_page = self.testapp.get('/_edit/dancing_queen')
+
+        # Bob edits article's body and saves it. Then he opens the history page.
+        self.fill_form(
+            edit_page,
+            body='<p>You can dance, you can jive, having the time of your '
+                 'life. See that girl, watch that scene, dig in the '
+                 'Dancing Queen.</p>').submit()
+        history_page = self.testapp.get('/_history/dancing_queen')
+
+        # History page has an "Edit Article" link in navigation panel at the
+        # top of the page.
+        self.assertHasLink(history_page, '#edit-article-link')
+
+        # Bob clicks the link. Browser delivers him the article's edit page.
+        edit_page = history_page.click(linkid='edit-article-link')
+        self.assertTitleEqual(edit_page, u'MyWiki — Dancing Queen (edit)')
+        
+        # Article's body is empty, because it is the first version.
+        self.assertEqual(edit_page.form['body'].value, '')
+
     def test_first_version_on_history_page_is_labeled_new_article(self):
-        # Bob sings up and immediately creates a new article.
+        # Bob signs up and immediately creates a new article.
         self.sign_up()
         edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
 
@@ -148,7 +177,6 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(len(label), 1)
         self.assertEqual(label.text(), '(new article)')
 
-    # TODO: reformat project's HTML files to use 2-space indentation
     def test_version_timestamp_is_human_readable(self):
         # Bob signs up and immediately creates a new article.
         self.sign_up()
