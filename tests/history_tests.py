@@ -100,6 +100,8 @@ class BasicHistoryPageTest(BaseTestCase):
         versions = history_page.pyquery('ul#versions>li')
         self.assertEqual(len(versions), 2)
 
+
+class HistoryPageLayoutTest(BaseTestCase):
     def test_first_version_on_history_page_is_labeled_new_article(self):
         # Bob sings up and immediately creates a new article.
         self.sign_up()
@@ -145,6 +147,26 @@ class BasicHistoryPageTest(BaseTestCase):
         label = newest_version.find('.distinction-label')
         self.assertEqual(len(label), 1)
         self.assertEqual(label.text(), '(new article)')
+
+    def test_version_timestamp_is_human_readable(self):
+        # Bob signs up and immediately creates a new article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/cogito_ergo_sum')
+
+        # He saves the article with default values.
+        self.fill_form(edit_page).submit()
+
+        # Bob opens article's history page.
+        history_page = self.testapp.get('/_history/cogito_ergo_sum')
+
+        # There's one version on the page. It contains timestamp of format
+        # "1 January 2015, 17:00:09".
+        version_timestamp = history_page.pyquery('.timestamp')
+        self.assertEqual(len(version_timestamp), 1)
+        self.assertFalse(
+            self.assertRaises(
+                ValueError, datetime.strptime, version_timestamp.text(),
+                '%d %B %Y, %H:%M:%S'))
 
 
 class HistoryUnitTests(BaseTestCase):
