@@ -14,7 +14,7 @@
         </span>
       {% endif %}
       {% if user %}
-        {% if state == 'view' %}
+        {% if state == 'view' or state == 'history' %}
           <span class="top-panel-section">
             <a href="/_edit{{ article.url }}" id="edit-article-link">Edit Article</a>
           </span>

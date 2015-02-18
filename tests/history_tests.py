@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+from time import sleep
 # Internal project imports
 from base import BaseTestCase
 from model import Article
@@ -109,15 +110,17 @@ class HistoryPageLayoutTest(BaseTestCase):
 
         # He saves the article with default values. And then opens it for
         # editing again.
-        self.fill_form(edit_page).submit()
-        edit_page = self.testapp.get('/_edit/dancing_queen')
-
-        # Bob edits article's body and saves it. Then he opens the history page.
         self.fill_form(
             edit_page,
             body='<p>You can dance, you can jive, having the time of your '
-                 'life. See that girl, watch that scene, dig in the '
-                 'Dancing Queen.</p>').submit()
+                 'life. See that girl, watch that scene, dig in the Dancing '
+                 'Queen.</p>').submit()
+        sleep(1)
+        edit_page = self.testapp.get('/_edit/dancing_queen')
+
+        # Bob deletes article's body and saves it. Then he opens the history
+        # page.
+        self.fill_form(edit_page, body='').submit()
         history_page = self.testapp.get('/_history/dancing_queen')
 
         # History page has an "Edit Article" link in navigation panel at the
@@ -127,8 +130,8 @@ class HistoryPageLayoutTest(BaseTestCase):
         # Bob clicks the link. Browser delivers him the article's edit page.
         edit_page = history_page.click(linkid='edit-article-link')
         self.assertTitleEqual(edit_page, u'MyWiki — Dancing Queen (edit)')
-        
-        # Article's body is empty, because it is the first version.
+
+        # Article's body is empty, because it is the current version.
         self.assertEqual(edit_page.form['body'].value, '')
 
     def test_first_version_on_history_page_is_labeled_new_article(self):

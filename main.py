@@ -259,7 +259,7 @@ class HistoryPage(BaseHandler):
 
     def _get(self, url):
         article = Article.latest_version(url)
-        self.context['article'] = article
+        self.context.update({'article': article, 'user': self.user})
         self.render()
 
 
