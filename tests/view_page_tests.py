@@ -1,4 +1,7 @@
 # coding=utf-8
+from datetime import datetime, timedelta
+from time import sleep
+# Internal project imports
 from base import BaseTestCase
 
 
@@ -54,5 +57,37 @@ class TimestampTest(BaseTestCase):
         timestamp = new_article.pyquery('#ts-version')
         self.assertTrue(timestamp.text().startswith('Version of '))
 
-    def test_timestamp_of_currently_viewed_version_is_correct(self):
-        pass
+    def test_timestamp_of_currently_viewed_version_is_human_readable(self):
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/esse_homo')
+
+        # Version timestamp is present on page. It has formatted like
+        # "1 January 2015, 17:00:09".
+        ts = new_article.pyquery('#ts-version>.timestamp')
+        self.assertEqual(len(ts), 1)
+        self.assertFalse(
+            self.assertRaises(
+                ValueError, datetime.strptime, ts.text(), '%d %B %Y, %H:%M:%S'))
+
+    def test_timestamp_really_belongs_to_current_version(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/so_where_do_we_begin')
+        sleep(1)
+
+        # After a while Bob edits the article.
+        edit_page = self.testapp.get('/_edit/so_where_do_we_begin')
+        self.fill_form(
+            edit_page, body="<span>And what else can we say?</span>").submit()
+        sleep(1)
+
+        # And again.
+        edit_page = self.testapp.get('/_edit/so_where_do_we_begin')
+        article = self.fill_form(
+            edit_page, head='Drifting In And Out').submit()
+        t = datetime.utcnow()
+
+        # Version timestamp on page shows timestamp of article's last
+        # modification (i. e. current version creation date and time).
+        ts = article.pyquery('#ts-version>.timestamp')
+        ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
+        self.assertAlmostEqual(t, ts_parsed, timedelta(1))
