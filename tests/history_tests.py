@@ -20,13 +20,8 @@ class BasicHistoryPageTest(BaseTestCase):
         self.assertTitleEqual(
             history_page, u'MyWiki — Welcome to MyWiki! (history)')
 
-        # Bob signs up and creates an article right away.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/kittens')
-
-        # He saves the article with default values. Webapp redirects him to
-        # the newly created article.
-        new_article = self.fill_form(edit_page).submit().follow()
+        # Bob signs up and creates an article.
+        new_article = self.create_article('/kittens')
 
         # There is a link to edit history page. Bob clicks that link.
         self.assertHasLink(
@@ -56,13 +51,8 @@ class BasicHistoryPageTest(BaseTestCase):
         self.assertEqual(len(versions), 1)
 
     def test_first_version_of_any_page_can_be_found_on_its_history_page(self):
-        # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/russia_strong')
-
-        # He saves the article with default values. Newly created article is
-        # delivered to Bob.
-        new_article = self.fill_form(edit_page).submit().follow()
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/russia_strong')
 
         # He clicks the "History" link to see article's edit history.
         history_page = new_article.click(linkid='history-link')
@@ -77,13 +67,8 @@ class BasicHistoryPageTest(BaseTestCase):
         self.assertEqual(len(versions), 1)
 
     def test_after_page_was_edited_new_version_is_created(self):
-        # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/white_rabbit')
-
-        # He saves the article with default values. Newly created article is
-        # delivered to Bob.
-        new_article = self.fill_form(edit_page).submit().follow()
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/white_rabbit')
 
         # Bob clicks "Edit Article" link. Edit page opens again.
         edit_page = new_article.click(linkid='edit-article-link')
@@ -104,17 +89,14 @@ class BasicHistoryPageTest(BaseTestCase):
 
 class HistoryPageLayoutTest(BaseTestCase):
     def test_history_page_has_a_link_to_edit_articles_current_version(self):
-        # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/dancing_queen')
-
-        # He saves the article with default values. And then opens it for
-        # editing again.
-        self.fill_form(
-            edit_page,
+        # Bob signs up and creates a new article with a short body.
+        self.create_article(
+            '/dancing_queen',
             body='<p>You can dance, you can jive, having the time of your '
                  'life. See that girl, watch that scene, dig in the Dancing '
-                 'Queen.</p>').submit()
+                 'Queen.</p>')
+
+        # After a short delay he opens it for editing again.
         sleep(1)
         edit_page = self.testapp.get('/_edit/dancing_queen')
 
@@ -135,13 +117,9 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(edit_page.form['body'].value, '')
 
     def test_first_version_on_history_page_is_labeled_new_article(self):
-        # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
-
-        # He saves the article with default values. And then opens it for
-        # editing again.
-        self.fill_form(edit_page).submit()
+        # Bob signs up and creates a new article and then opens it for editing
+        # again
+        self.create_article('/no_nay_never_no_more')
         edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
 
         # Bob edits article's body and saves it. Then he opens the history page.
@@ -159,13 +137,9 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(label.text(), '(new article)')
 
     def test_last_version_on_history_page_is_labeled_current(self):
-        # Bob sings up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/remember_remember')
-
-        # He saves the article with default values. And then opens it for
-        # editing again.
-        self.fill_form(edit_page).submit()
+        # Bob sings up and  creates a new article and then opens it for editing
+        # again.
+        self.create_article('/remember_remember')
         edit_page = self.testapp.get('/_edit/remember_remember')
 
         # Bob edits article's body and saves it. Then he opens the history page.
@@ -181,14 +155,10 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(label.text(), '(new article)')
 
     def test_version_timestamp_is_human_readable(self):
-        # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/cogito_ergo_sum')
+        # Bob signs up and creates a new article.
+        self.create_article('/cogito_ergo_sum')
 
-        # He saves the article with default values.
-        self.fill_form(edit_page).submit()
-
-        # Bob opens article's history page.
+        # He opens article's history page.
         history_page = self.testapp.get('/_history/cogito_ergo_sum')
 
         # There's one version on the page. It contains timestamp of format
@@ -203,13 +173,9 @@ class HistoryPageLayoutTest(BaseTestCase):
 
 class HistoryUnitTests(BaseTestCase):
     def test_version_timestamp_stores_a_correct_value(self):
-        # Bob sings up and immediately creates a new article.
-        self.sign_up()
-        new_page = self.testapp.get('/_edit/kittens')
-
-        # He saves article with default values.
+        # Bob signs up and creates a new article.
+        self.create_article('/kittens')
         t = datetime.utcnow()
-        self.fill_form(new_page).submit()
 
         # Timestamp for article's first version is written correctly.
         version_ts = Article.latest_version('/kittens').modified

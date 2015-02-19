@@ -1,4 +1,3 @@
-import os
 import unittest
 # Third-party imports
 from google.appengine.ext import testbed
@@ -17,6 +16,14 @@ class BaseTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.testbed.deactivate()
+
+    def create_article(self, url, sign_up=True, **fields):
+        if sign_up:
+            self.sign_up()
+        edit_page = self.testapp.get('/_edit' + url)
+        new_page = self.fill_form(edit_page, **fields).submit().follow()
+
+        return new_page
 
     def fill_form(self, page, **fields):
         form = page.form
