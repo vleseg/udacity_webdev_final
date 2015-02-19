@@ -82,7 +82,7 @@ class TimestampTest(BaseTestCase):
 
         # There's a timestamp on the page, which indicates date and time when
         # currently current version (the first one) was created.
-        timestamp = new_article.pyquery('#ts-created')
+        timestamp = new_article.pyquery('#ts-version')
         self.assertTrue(timestamp.text().startswith('Version of '))
 
     def test_timestamp_of_currently_viewed_version_is_correct(self):
