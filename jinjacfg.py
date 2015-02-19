@@ -3,7 +3,7 @@ import os
 import jinja2
 
 
-def timestamp_format(value, f="%d %B %Y %H:%M:%S"):
+def timestamp_format(value, f="%d %B %Y, %H:%M:%S"):
     return value.strftime(f)
 
 

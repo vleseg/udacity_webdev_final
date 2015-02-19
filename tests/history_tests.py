@@ -165,10 +165,9 @@ class HistoryPageLayoutTest(BaseTestCase):
         # "1 January 2015, 17:00:09".
         version_timestamp = history_page.pyquery('.timestamp')
         self.assertEqual(len(version_timestamp), 1)
-        self.assertFalse(
-            self.assertRaises(
-                ValueError, datetime.strptime, version_timestamp.text(),
-                '%d %B %Y, %H:%M:%S'))
+        self.assertTrue(
+            bool(datetime.strptime(
+                version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
 
 
 class HistoryUnitTests(BaseTestCase):

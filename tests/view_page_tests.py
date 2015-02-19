@@ -65,9 +65,8 @@ class TimestampTest(BaseTestCase):
         # "1 January 2015, 17:00:09".
         ts = new_article.pyquery('#ts-version>.timestamp')
         self.assertEqual(len(ts), 1)
-        self.assertFalse(
-            self.assertRaises(
-                ValueError, datetime.strptime, ts.text(), '%d %B %Y, %H:%M:%S'))
+        self.assertTrue(
+            bool(datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')))
 
     def test_timestamp_really_belongs_to_current_version(self):
         # Bob signs up and creates a new article.
@@ -83,11 +82,11 @@ class TimestampTest(BaseTestCase):
         # And again.
         edit_page = self.testapp.get('/_edit/so_where_do_we_begin')
         article = self.fill_form(
-            edit_page, head='Drifting In And Out').submit()
+            edit_page, head='Drifting In And Out').submit().follow()
         t = datetime.utcnow()
 
         # Version timestamp on page shows timestamp of article's last
         # modification (i. e. current version creation date and time).
         ts = article.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
-        self.assertAlmostEqual(t, ts_parsed, timedelta(1))
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
