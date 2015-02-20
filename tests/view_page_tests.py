@@ -90,3 +90,14 @@ class TimestampTest(BaseTestCase):
         ts = article.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
         self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
+
+    def test_version_ts_for_newly_created_article_is_labeled_new(self):
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/its_nothing')
+
+        # There's a version timestamp on view page for newly created article. It
+        # is labeled as "new article".
+        label = new_article.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        ts = new_article.pyquery('#ts-version')
+        self.assertIn('(new article)', ts.text())
