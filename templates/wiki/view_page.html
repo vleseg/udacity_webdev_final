@@ -2,8 +2,9 @@
 {% block wiki_content %}
   <div id="wiki-article">
     <h1 id="wiki-head">{{ article.head }}</h1>
-    <div id="ts-version">Version of <span class="timestamp">
-      {{ article.modified|timestampformat }}</span></div>
+    <div id="ts-version">
+      Version of <span class="timestamp">{{ article.modified|timestampformat }}</span>
+    </div>
     <div id="wiki-body">
       {{ article.body|safe }}
     </div>

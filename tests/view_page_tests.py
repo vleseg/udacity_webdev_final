@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
+from model import Article
 
 
 class BasicViewPageTest(BaseTestCase):
@@ -90,14 +91,40 @@ class TimestampTest(BaseTestCase):
         ts = article.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
         self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
+    #
+    # def test_version_ts_for_newly_created_article_is_labeled_new(self):
+    #     # Bob signs up and creates a new article.
+    #     new_article = self.create_article('/its_nothing')
+    #
+    #     # There's a version timestamp on view page for newly created article. It
+    #     # is labeled as "new article".
+    #     label = new_article.pyquery('.distinction-label')
+    #     self.assertTrue(bool(label))
+    #     ts = new_article.pyquery('#ts-version')
+    #     self.assertIn('(new article)', ts.text())
 
-    def test_version_ts_for_newly_created_article_is_labeled_new(self):
-        # Bob signs up and creates a new article.
-        new_article = self.create_article('/its_nothing')
 
-        # There's a version timestamp on view page for newly created article. It
-        # is labeled as "new article".
-        label = new_article.pyquery('.distinction-label')
-        self.assertTrue(bool(label))
-        ts = new_article.pyquery('#ts-version')
-        self.assertIn('(new article)', ts.text())
+class VersionsTest(BaseTestCase):
+    def test_can_open_view_page_for_different_article_version(self):
+        # Bob sings up and creates an article.
+        self.create_article('/in_a_timely_manner')
+        sleep(0.1)
+
+        # Bob edits the article to create a new version.
+        edit_page = self.testapp.get('/_edit/in_a_timely_manner')
+        self.fill_form(edit_page, head="Too Late")
+        sleep(0.1)
+
+        # ...and once more.
+        edit_page = self.testapp.get('/_edit/in_a_timely_manner')
+        self.fill_form(edit_page, head='Just In Time!')
+
+        article = Article.by_url('/in_a_timely_manner')
+        version_ids = [v.key().id() for v in article.version_set]
+
+        # Bob consecutively tries to open view pages for different article
+        # versions by direct url. He succeeds.
+        for vid in version_ids:
+            response = self.testapp.get(
+                '/in_a_timely_manner/_history/{}'.format(vid))
+            self.assertEqual(response.status_int, 200)
