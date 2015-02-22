@@ -1,9 +1,8 @@
 # coding=utf-8
-from datetime import datetime, timedelta
+from datetime import datetime
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
-from model import Article
 
 
 class BasicHistoryPageTest(BaseTestCase):
@@ -168,14 +167,3 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertTrue(
             bool(datetime.strptime(
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
-
-
-class HistoryUnitTests(BaseTestCase):
-    def test_version_timestamp_stores_a_correct_value(self):
-        # Bob signs up and creates a new article.
-        self.create_article('/kittens')
-        t = datetime.utcnow()
-
-        # Timestamp for article's first version is written correctly.
-        version_ts = Article.latest_version('/kittens').modified
-        self.assertAlmostEqual(t, version_ts, delta=timedelta(seconds=1))

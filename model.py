@@ -51,6 +51,10 @@ class Article(BaseModel):
         q = self.version_set
         return q.order('-created')
 
+    def first_version(self):
+        version = self.version_set.order('created').get()
+        return self.project(version)
+
     def new_version(self, head, body):
         version = Version(
             article=self, head=head, body=body, parent=GLOBAL_PARENT)
@@ -65,13 +69,15 @@ class Article(BaseModel):
 
         return projection
 
+    def latest_version(self):
+        version = self.version_set.order('-created').get()
+        return self.project(version)
+
     @classmethod
-    def latest_version(cls, url):
+    def by_url(cls, url):
         article = cls.by_prop('url', url)
         if article is not None:
-            version = article.version_set.order('-created').get()
-            if version is not None:
-                return article.project(version)
+            return article.latest_version()
 
     @classmethod
     def new(cls, url, head, body):

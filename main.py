@@ -231,7 +231,7 @@ class ViewPage(BaseHandler):
         self.render()
 
     def _get(self, url):
-        article = Article.latest_version(url)
+        article = Article.by_url(url)
         if article is None:
             if url == '/':
                 default_body = (
@@ -258,7 +258,7 @@ class HistoryPage(BaseHandler):
         super(HistoryPage, self).dispatch()
 
     def _get(self, url):
-        article = Article.latest_version(url)
+        article = Article.by_url(url)
         self.context.update({'article': article, 'user': self.user})
         self.render()
 
@@ -282,7 +282,7 @@ class EditPage(BaseHandler):
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
 
         form = EditForm()
-        article = Article.latest_version(url)
+        article = Article.by_url(url)
 
         if article is None:
             if url == '/':
@@ -307,7 +307,7 @@ class EditPage(BaseHandler):
             self.redirect('/login', abort=True)
 
         form = EditForm(self.request.params)
-        article = Article.latest_version(url)
+        article = Article.by_url(url)
 
         if article is None:
             self.context['state'] = 'new'
