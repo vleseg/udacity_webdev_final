@@ -11,7 +11,7 @@ class ArticleVersionTest(BaseTestCase):
         t = datetime.utcnow()
 
         version_ts = Article.by_url('/kittens').modified
-        self.assertAlmostEqual(t, version_ts, delta=timedelta(milliseconds=750))
+        self.assertAlmostEqual(t, version_ts, delta=timedelta(1))
 
     def test_version_ids_are_sequential(self):
         a = Article.new('/jazz', 'Jazz', '')

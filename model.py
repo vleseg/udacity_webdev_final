@@ -75,7 +75,8 @@ class Article(BaseModel):
 
     def version_by_id(self, version_id):
         version = Version.get_by_id(int(version_id), parent=GLOBAL_PARENT)
-        return self.project(version)
+        if version is not None:
+            return self.project(version)
 
     @classmethod
     def by_url(cls, url, version=None):
@@ -84,7 +85,8 @@ class Article(BaseModel):
             if version is None:
                 return article.latest_version()
             else:
-                return article.version_by_id(version)
+                p = article.version_by_id(version)
+                return p if p is not None else article.latest_version()
 
     @classmethod
     def new(cls, url, head, body):

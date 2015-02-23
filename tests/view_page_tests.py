@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime, timedelta
+from random import randint
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
@@ -88,7 +89,7 @@ class TimestampTest(BaseTestCase):
         # modification (i. e. current version creation date and time).
         ts = article.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
-        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
 
     def test_another_version_of_article_displays_with_current_timestamp(self):
         # Bob signs up and creates a new article.
@@ -113,13 +114,13 @@ class TimestampTest(BaseTestCase):
             '/wag_the_dog/_version/{}'.format(version_ids[0]))
         ts = first_version.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
-        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
 
         seconds_version = self.testapp.get(
             '/wag_the_dog/_version/{}'.format(version_ids[1]))
         ts = seconds_version.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
-        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
     #
     # def test_version_ts_for_newly_created_article_is_labeled_new(self):
     #     # Bob signs up and creates a new article.
@@ -186,3 +187,25 @@ class VersionsTest(BaseTestCase):
         omv_body = one_more_version.pyquery('#wiki-body')
         self.assertEqual(omv_head.text(), 'Gloating')
         self.assertEqual(omv_body.text(), 'Never mind...')
+
+    def test_accessing_nonexistent_version_delivers_latest(self):
+        # Bob sings up and creates an article.
+        self.create_article('/vita_nostra_brevis_est')
+
+        # He edits the article once to create another version.
+        self.edit_article('/vita_nostra_brevis_est', head='Brevi Finietur')
+
+        article = Article.by_url('/vita_nostra_brevis_est')
+        version_ids = sorted([v.key().id() for v in article.version_set])
+
+        random_id = randint(0, 10)
+        while random_id in version_ids:
+            random_id = randint(0, 10)
+
+        # Bob tries to fetch article's version, which does not exist by direct
+        # url.
+        response = self.testapp.get(
+            '/vita_nostra_brevis_est/_version/{}'.format(random_id))
+
+        # Current version is delivered to him.
+        self.assertTitleEqual(response, u'MyWiki — Brevi Finietur')
