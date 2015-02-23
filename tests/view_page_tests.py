@@ -88,14 +88,45 @@ class TimestampTest(BaseTestCase):
         # modification (i. e. current version creation date and time).
         ts = article.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
-        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
+
+    def test_another_version_of_article_displays_with_current_timestamp(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/wag_the_dog')
+        t = datetime.utcnow()
+        sleep(1)
+
+        # He creates several versions of article with short delays between them.
+        self.edit_article('/wag_the_dog', head='Wag The Wig')
+        t2 = datetime.utcnow()
+        sleep(1)
+        self.edit_article('/wag_the_dog', head='Dig The Big')
+        sleep(1)
+
+        article = Article.by_url('/wag_the_dog')
+        version_ids = sorted([v.key().id() for v in article.version_set])
+
+        # Bob consecutively opens article's first and second versions by direct
+        # urls. Timestamps on page in both cases indicate time, when
+        # corresponding version was created.
+        first_version = self.testapp.get(
+            '/wag_the_dog/_version/{}'.format(version_ids[0]))
+        ts = first_version.pyquery('#ts-version>.timestamp')
+        ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
+
+        seconds_version = self.testapp.get(
+            '/wag_the_dog/_version/{}'.format(version_ids[1]))
+        ts = seconds_version.pyquery('#ts-version>.timestamp')
+        ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
+        self.assertAlmostEqual(t, ts_parsed, delta=timedelta(milliseconds=750))
     #
     # def test_version_ts_for_newly_created_article_is_labeled_new(self):
     #     # Bob signs up and creates a new article.
     #     new_article = self.create_article('/its_nothing')
     #
-    #     # There's a version timestamp on view page for newly created article. It
-    #     # is labeled as "new article".
+    #     # There's a version timestamp on view page for newly created article.
+    #     # It is labeled as "new article".
     #     label = new_article.pyquery('.distinction-label')
     #     self.assertTrue(bool(label))
     #     ts = new_article.pyquery('#ts-version')
