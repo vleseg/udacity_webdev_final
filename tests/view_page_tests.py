@@ -74,16 +74,14 @@ class TimestampTest(BaseTestCase):
         self.create_article('/so_where_do_we_begin')
         sleep(1)
 
-        # After a while Bob edits the article.
-        edit_page = self.testapp.get('/_edit/so_where_do_we_begin')
-        self.fill_form(
-            edit_page, body="<span>And what else can we say?</span>").submit()
+        # After a while Bob edits the article two times with a little pause
+        # between edits.
+        self.edit_article(
+            '/so_where_do_we_begin',
+            body='<span>And what else can we say?</span>')
         sleep(1)
-
-        # And again.
-        edit_page = self.testapp.get('/_edit/so_where_do_we_begin')
-        article = self.fill_form(
-            edit_page, head='Drifting In And Out').submit().follow()
+        article = self.edit_article(
+            '/so_where_do_we_begin', head='Drifting In And Out')
         t = datetime.utcnow()
 
         # Version timestamp on page shows timestamp of article's last
@@ -109,13 +107,9 @@ class VersionsTest(BaseTestCase):
         # Bob signs up and creates an article.
         self.create_article('/in_a_timely_manner')
 
-        # Bob edits the article to create a new version.
-        edit_page = self.testapp.get('/_edit/in_a_timely_manner')
-        self.fill_form(edit_page, head="Too Late").submit()
-
-        # ...and once more.
-        edit_page = self.testapp.get('/_edit/in_a_timely_manner')
-        self.fill_form(edit_page, head='Just In Time!').submit()
+        # Bob edits the article two times to create more versions.
+        self.edit_article('/in_a_timely_manner', head='Too Late')
+        self.edit_article('/in_a_timely_manner', head='Just In Time')
 
         article = Article.by_url('/in_a_timely_manner')
         version_ids = [v.key().id() for v in article.version_set]
@@ -131,14 +125,10 @@ class VersionsTest(BaseTestCase):
         # Bob signs up and creates an article.
         self.create_article('/schadenfreude')
 
-        # TODO: extract edit page logic to a method
         # He edits it several times, so that it has more versions.
-        edit_page = self.testapp.get('/_edit/schadenfreude')
-        self.fill_form(edit_page, head='Gloating').submit()
-        edit_page = self.testapp.get('/_edit/schadenfreude')
-        self.fill_form(edit_page, body='Never mind...').submit()
-        edit_page = self.testapp.get('/_edit/schadenfreude')
-        self.fill_form(edit_page, head='Compassion').submit()
+        self.edit_article('/schadenfreude', head='Gloating')
+        self.edit_article('/schadenfreude', body='Never mind...')
+        self.edit_article('/schadenfreude', head='Compassion')
 
         article = Article.by_url('/schadenfreude')
         version_ids = sorted([v.key().id() for v in article.version_set])

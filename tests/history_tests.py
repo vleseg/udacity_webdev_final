@@ -95,13 +95,12 @@ class HistoryPageLayoutTest(BaseTestCase):
                  'life. See that girl, watch that scene, dig in the Dancing '
                  'Queen.</p>')
 
-        # After a short delay he opens it for editing again.
+        # After a short delay he opens an edit page for the article and clears
+        # article's body.
         sleep(1)
-        edit_page = self.testapp.get('/_edit/dancing_queen')
+        self.edit_article('/dancing_queen', body='')
 
-        # Bob deletes article's body and saves it. Then he opens the history
-        # page.
-        self.fill_form(edit_page, body='').submit()
+        # The he opens the history page.
         history_page = self.testapp.get('/_history/dancing_queen')
 
         # History page has an "Edit Article" link in navigation panel at the
@@ -116,13 +115,11 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(edit_page.form['body'].value, '')
 
     def test_first_version_on_history_page_is_labeled_new_article(self):
-        # Bob signs up and creates a new article and then opens it for editing
-        # again
+        # Bob signs up and creates a new article.
         self.create_article('/no_nay_never_no_more')
-        edit_page = self.testapp.get('/_edit/no_nay_never_no_more')
 
         # Bob edits article's body and saves it. Then he opens the history page.
-        self.fill_form(edit_page, body='<span>Bogus!</span>').submit()
+        self.edit_article('/no_nay_never_no_more', body='<span>Bogus!</span>')
         history_page = self.testapp.get('/_history/no_nay_never_no_more')
 
         # History page has two versions.
@@ -136,13 +133,12 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(label.text(), '(new article)')
 
     def test_last_version_on_history_page_is_labeled_current(self):
-        # Bob sings up and  creates a new article and then opens it for editing
-        # again.
+        # Bob sings up and creates a new article.
         self.create_article('/remember_remember')
-        edit_page = self.testapp.get('/_edit/remember_remember')
 
         # Bob edits article's body and saves it. Then he opens the history page.
-        self.fill_form(edit_page, body='<p>the fifth of november</p>')
+        self.edit_article(
+            '/remember_remember', body='<p>the fifth of november</p>')
         history_page = self.testapp.get('/_history/remember_remember')
 
         # History page has two versions. The top one is the newest one. It is
@@ -151,7 +147,7 @@ class HistoryPageLayoutTest(BaseTestCase):
         newest_version = versions_list.eq(0)
         label = newest_version.find('.distinction-label')
         self.assertEqual(len(label), 1)
-        self.assertEqual(label.text(), '(new article)')
+        self.assertEqual(label.text(), '(current)')
 
     def test_version_timestamp_is_human_readable(self):
         # Bob signs up and creates a new article.

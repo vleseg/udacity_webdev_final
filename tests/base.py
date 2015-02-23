@@ -25,6 +25,12 @@ class BaseTestCase(unittest.TestCase):
 
         return new_page
 
+    def edit_article(self, url, **fields):
+        edit_page = self.testapp.get('/_edit' + url)
+        modified_page = self.fill_form(edit_page, **fields).submit().follow()
+
+        return modified_page
+
     def fill_form(self, page, **fields):
         form = page.form
         for f in fields:
