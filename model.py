@@ -73,11 +73,18 @@ class Article(BaseModel):
         version = self.version_set.order('-created').get()
         return self.project(version)
 
+    def version_by_id(self, version_id):
+        version = Version.get_by_id(int(version_id), parent=GLOBAL_PARENT)
+        return self.project(version)
+
     @classmethod
-    def by_url(cls, url):
+    def by_url(cls, url, version=None):
         article = cls.by_prop('url', url)
         if article is not None:
-            return article.latest_version()
+            if version is None:
+                return article.latest_version()
+            else:
+                return article.version_by_id(version)
 
     @classmethod
     def new(cls, url, head, body):

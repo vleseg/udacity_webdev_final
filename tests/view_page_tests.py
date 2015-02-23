@@ -126,5 +126,5 @@ class VersionsTest(BaseTestCase):
         # versions by direct url. He succeeds.
         for vid in version_ids:
             response = self.testapp.get(
-                '/in_a_timely_manner/_history/{}'.format(vid))
+                '/in_a_timely_manner/_version/{}'.format(vid))
             self.assertEqual(response.status_int, 200)

@@ -230,8 +230,11 @@ class ViewPage(BaseHandler):
 
         self.render()
 
-    def _get(self, url):
-        article = Article.by_url(url)
+    def _get(self, url, version=None):
+        if version is None:
+            article = Article.by_url(url)
+        else:
+            article = Article.by_url(url, version)
         if article is None:
             if url == '/':
                 default_body = (
@@ -331,6 +334,7 @@ handlers = [
     ('/logout', Logout),
     ('/_edit' + ARTICLE_RE, EditPage),
     ('/_history' + ARTICLE_RE, HistoryPage),
+    (ARTICLE_RE + '/_version/' + r'(\d+)', ViewPage),
     (ARTICLE_RE, ViewPage)
 ]
 app = webapp2.WSGIApplication(handlers, debug=True)
