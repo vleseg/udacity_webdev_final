@@ -106,18 +106,16 @@ class TimestampTest(BaseTestCase):
 
 class VersionsTest(BaseTestCase):
     def test_can_open_view_page_for_different_article_version(self):
-        # Bob sings up and creates an article.
+        # Bob signs up and creates an article.
         self.create_article('/in_a_timely_manner')
-        sleep(0.1)
 
         # Bob edits the article to create a new version.
         edit_page = self.testapp.get('/_edit/in_a_timely_manner')
-        self.fill_form(edit_page, head="Too Late")
-        sleep(0.1)
+        self.fill_form(edit_page, head="Too Late").submit()
 
         # ...and once more.
         edit_page = self.testapp.get('/_edit/in_a_timely_manner')
-        self.fill_form(edit_page, head='Just In Time!')
+        self.fill_form(edit_page, head='Just In Time!').submit()
 
         article = Article.by_url('/in_a_timely_manner')
         version_ids = [v.key().id() for v in article.version_set]
@@ -128,3 +126,42 @@ class VersionsTest(BaseTestCase):
             response = self.testapp.get(
                 '/in_a_timely_manner/_version/{}'.format(vid))
             self.assertEqual(response.status_int, 200)
+
+    def test_requesting_article_version_by_url_opens_that_version(self):
+        # Bob signs up and creates an article.
+        self.create_article('/schadenfreude')
+
+        # TODO: extract edit page logic to a method
+        # He edits it several times, so that it has more versions.
+        edit_page = self.testapp.get('/_edit/schadenfreude')
+        self.fill_form(edit_page, head='Gloating').submit()
+        edit_page = self.testapp.get('/_edit/schadenfreude')
+        self.fill_form(edit_page, body='Never mind...').submit()
+        edit_page = self.testapp.get('/_edit/schadenfreude')
+        self.fill_form(edit_page, head='Compassion').submit()
+
+        article = Article.by_url('/schadenfreude')
+        version_ids = sorted([v.key().id() for v in article.version_set])
+
+        # He gets different versions of article by their direct urls and
+        # ensures, that they reflect the timeline of changes correctly.
+        first_version = self.testapp.get(
+            '/schadenfreude/_version/{}'.format(version_ids[0]))
+        fv_head = first_version.pyquery('#wiki-head')
+        fv_body = first_version.pyquery('#wiki-body')
+        self.assertEqual(fv_head.text(), 'Schadenfreude')
+        self.assertEqual(fv_body.text(), '')
+
+        latest_version = self.testapp.get(
+            '/schadenfreude/_version/{}'.format(version_ids[-1]))
+        lv_head = latest_version.pyquery('#wiki-head')
+        lv_body = latest_version.pyquery('#wiki-body')
+        self.assertEqual(lv_head.text(), 'Compassion')
+        self.assertEqual(lv_body.text(), 'Never mind...')
+
+        one_more_version = self.testapp.get(
+            '/schadenfreude/_version/{}'.format(version_ids[2]))
+        omv_head = one_more_version.pyquery('#wiki-head')
+        omv_body = one_more_version.pyquery('#wiki-body')
+        self.assertEqual(omv_head.text(), 'Gloating')
+        self.assertEqual(omv_body.text(), 'Never mind...')
