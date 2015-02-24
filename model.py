@@ -20,6 +20,11 @@ class SimpleProjection(object):
 
 
 class BaseModel(db.Model):
+    def __getattr__(self, item):
+        if item == 'id':
+            return self.key().id()
+        raise AttributeError(item)
+
     @classmethod
     def by_prop(cls, prop_name, value, ancestor=GLOBAL_PARENT):
         q = cls.all().ancestor(ancestor).filter('{} ='.format(prop_name), value)
