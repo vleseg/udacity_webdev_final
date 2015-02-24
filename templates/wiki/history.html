@@ -10,6 +10,7 @@
         {% elif loop.first %}
           <span class="distinction-label">(current)</span>
         {%- endif %}
+      | <a class="version-view-link" href="{{ version.key().id() }}">view</a>
       </li>
     {% endfor %}
   </ul>

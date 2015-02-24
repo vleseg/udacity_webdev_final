@@ -3,6 +3,7 @@ from datetime import datetime
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
+from model import Article
 
 
 class BasicHistoryPageTest(BaseTestCase):
@@ -163,3 +164,34 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertTrue(
             bool(datetime.strptime(
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
+
+    # TODO: extract version ids fetching logic to a BaseTEstCAse method
+    # TODO: make id of a model accessible via __getattr__
+    def test_versions_are_displayed_with_links_to_view_them(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/time_has_come')
+
+        # He edits it several times to create more versions.
+        self.edit_article('/time_has_come', head='This Is The End')
+        sleep(0.1)
+        self.edit_article('/time_has_come', body='<p>Are you ready?</p>')
+        sleep(0.1)
+        self.edit_article('/time_has_come', head='The Day Of Wrath')
+
+        article = Article.by_url('/time_has_come')
+        version_ids = [v.key().id() for v in article.version_set]
+        urls_from_db = [
+            '/time_has_come/_version/{}'.format(vid) for vid in version_ids]
+
+        # Bob opens article's history page. It lists four versions, each has a
+        # link to view page.
+        history_page = self.testapp.get('/_history/time_has_come')
+        page_links_to_versions = history_page.pyquery(
+            '#versions>li>.version-view-link')
+        urls_from_page = page_links_to_versions.attr('href')
+
+        self.assertEqual(len(page_links_to_versions), 4)
+        self.assertSetEqual(set(urls_from_db), set(urls_from_page))
+
+        link_text = page_links_to_versions.text()[0]
+        self.assertEqual(link_text, 'view')
