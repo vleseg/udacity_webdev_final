@@ -188,10 +188,10 @@ class HistoryPageLayoutTest(BaseTestCase):
         history_page = self.testapp.get('/_history/time_has_come')
         page_links_to_versions = history_page.pyquery(
             '#versions>li>.version-view-link')
-        urls_from_page = page_links_to_versions.attr('href')
+        urls_from_page = [p.attrib['href'] for p in page_links_to_versions]
 
         self.assertEqual(len(page_links_to_versions), 4)
         self.assertSetEqual(set(urls_from_db), set(urls_from_page))
 
-        link_text = page_links_to_versions.text()[0]
+        link_text = page_links_to_versions[0].text
         self.assertEqual(link_text, 'view')
