@@ -3,7 +3,6 @@ from datetime import datetime
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
-from model import Article
 
 
 class BasicHistoryPageTest(BaseTestCase):
@@ -166,7 +165,6 @@ class HistoryPageLayoutTest(BaseTestCase):
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
 
     # TODO: extract version ids fetching logic to a BaseTEstCAse method
-    # TODO: make id of a model accessible via __getattr__
     def test_versions_are_displayed_with_links_to_view_them(self):
         # Bob signs up and creates a new article.
         self.create_article('/time_has_come')
@@ -178,10 +176,9 @@ class HistoryPageLayoutTest(BaseTestCase):
         sleep(0.1)
         self.edit_article('/time_has_come', head='The Day Of Wrath')
 
-        article = Article.by_url('/time_has_come')
-        version_ids = [v.key().id() for v in article.version_set]
         urls_from_db = [
-            '/time_has_come/_version/{}'.format(vid) for vid in version_ids]
+            '/time_has_come/_version/{}'.format(vid) for vid in
+            self.fetch_version_ids('/time_has_come')]
 
         # Bob opens article's history page. It lists four versions, each has a
         # link to view page.

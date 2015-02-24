@@ -23,7 +23,7 @@ class ArticleVersionTest(BaseTestCase):
         v_list = list(a.version_set)
 
         version_by_created = sorted(v_list, key=lambda v: v.created)
-        version_by_id = sorted(v_list, key=lambda v: v.key().id())
+        version_by_id = sorted(v_list, key=lambda v: v.id)
         self.assertListEqual(version_by_created, version_by_id)
 
     def test_first_and_latest_version_pointers_are_stored_correctly(self):

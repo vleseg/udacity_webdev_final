@@ -4,7 +4,6 @@ from random import randint
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
-from model import Article
 
 
 class BasicViewPageTest(BaseTestCase):
@@ -104,8 +103,7 @@ class TimestampTest(BaseTestCase):
         self.edit_article('/wag_the_dog', head='Dig The Big')
         sleep(1)
 
-        article = Article.by_url('/wag_the_dog')
-        version_ids = sorted([v.key().id() for v in article.version_set])
+        version_ids = self.fetch_version_ids('/wag_the_dog')
 
         # Bob consecutively opens article's first and second versions by direct
         # urls. Timestamps on page in both cases indicate time, when
@@ -143,8 +141,7 @@ class VersionsTest(BaseTestCase):
         self.edit_article('/in_a_timely_manner', head='Too Late')
         self.edit_article('/in_a_timely_manner', head='Just In Time')
 
-        article = Article.by_url('/in_a_timely_manner')
-        version_ids = [v.key().id() for v in article.version_set]
+        version_ids = self.fetch_version_ids('/in_a_timely_manner')
 
         # Bob consecutively tries to open view pages for different article
         # versions by direct url. He succeeds.
@@ -162,8 +159,7 @@ class VersionsTest(BaseTestCase):
         self.edit_article('/schadenfreude', body='Never mind...')
         self.edit_article('/schadenfreude', head='Compassion')
 
-        article = Article.by_url('/schadenfreude')
-        version_ids = sorted([v.key().id() for v in article.version_set])
+        version_ids = self.fetch_version_ids('/schadenfreude')
 
         # He gets different versions of article by their direct urls and
         # ensures, that they reflect the timeline of changes correctly.
@@ -195,8 +191,7 @@ class VersionsTest(BaseTestCase):
         # He edits the article once to create another version.
         self.edit_article('/vita_nostra_brevis_est', head='Brevi Finietur')
 
-        article = Article.by_url('/vita_nostra_brevis_est')
-        version_ids = sorted([v.key().id() for v in article.version_set])
+        version_ids = self.fetch_version_ids('/vita_nostra_brevis_est')
 
         random_id = randint(0, 10)
         while random_id in version_ids:
