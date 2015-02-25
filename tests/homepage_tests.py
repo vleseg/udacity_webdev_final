@@ -35,7 +35,7 @@ class BasicHomepageTest(BaseTestCase):
             top_panel, '#login-link', text='Sign In', href='/login')
 
     def test_homepage_panel_displays_correct_things_to_authorized_user(self):
-        # Bob sings up for MyWiki
+        # Bob signs up for MyWiki
         self.sign_up()
 
         # Then he opens MyWiki's homepage.

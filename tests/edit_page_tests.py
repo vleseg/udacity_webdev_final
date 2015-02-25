@@ -247,7 +247,7 @@ class NewArticleTest(BaseTestCase):
 
 class EditPageValidationTest(BaseTestCase):
     def test_article_title_cannot_be_empty(self):
-        # Bob sings up and goes straight to edit page for MyWiki's homepage.
+        # Bob signs up and goes straight to edit page for MyWiki's homepage.
         self.sign_up()
         edit_page = self.testapp.get('/_edit/')
 

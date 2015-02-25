@@ -133,7 +133,7 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(label.text(), '(new article)')
 
     def test_last_version_on_history_page_is_labeled_current(self):
-        # Bob sings up and creates a new article.
+        # Bob signs up and creates a new article.
         self.create_article('/remember_remember')
 
         # Bob edits article's body and saves it. Then he opens the history page.
@@ -164,7 +164,6 @@ class HistoryPageLayoutTest(BaseTestCase):
             bool(datetime.strptime(
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
 
-    # TODO: extract version ids fetching logic to a BaseTEstCAse method
     def test_versions_are_displayed_with_links_to_view_them(self):
         # Bob signs up and creates a new article.
         self.create_article('/time_has_come')

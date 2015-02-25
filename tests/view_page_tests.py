@@ -119,17 +119,66 @@ class TimestampTest(BaseTestCase):
         ts = seconds_version.pyquery('#ts-version>.timestamp')
         ts_parsed = datetime.strptime(ts.text(), '%d %B %Y, %H:%M:%S')
         self.assertAlmostEqual(t, ts_parsed, delta=timedelta(1))
-    #
-    # def test_version_ts_for_newly_created_article_is_labeled_new(self):
-    #     # Bob signs up and creates a new article.
-    #     new_article = self.create_article('/its_nothing')
-    #
-    #     # There's a version timestamp on view page for newly created article.
-    #     # It is labeled as "new article".
-    #     label = new_article.pyquery('.distinction-label')
-    #     self.assertTrue(bool(label))
-    #     ts = new_article.pyquery('#ts-version')
-    #     self.assertIn('(new article)', ts.text())
+
+    def test_version_ts_for_newly_created_article_is_labeled_new(self):
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/its_nothing')
+
+        # There's a version timestamp on view page for newly created article.
+        # It is labeled "new article".
+        label = new_article.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        ts = new_article.pyquery('#ts-version')
+        self.assertIn('(new article)', ts.text())
+
+    # TODO: remove excess calls to time.sleep() from tests.
+    # TODO: extract label assertion logic to a BaseTestCase method.
+    def test_version_ts_for_any_article_is_labeled_current(self):
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/horses')
+
+        # There's a version timestamp on view page for newly created article.
+        # It is labeled "current".
+        label = new_article.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        ts = new_article.pyquery('#ts-version')
+        self.assertIn('(current)', ts.text())
+
+        # Bob creates another article.
+        self.create_article('/cows', sign_up=False)
+
+        # He edits it several times to make more versions.
+        self.edit_article('/cows', head='Goats')
+        second_article = self.edit_article(
+            '/cows', body='<span>Mere cattle.</span>')
+
+        # There's a version timestamp on view page for the modified article. It
+        # is labeled "current".
+        label = new_article.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        ts = new_article.pyquery('#ts-version')
+        self.assertIn('(current)', ts.text())
+
+    def test_version_ts_for_first_version_of_the_article_is_labeled_new(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/viz_a_viz')
+
+        # He edits the article several times to make more versions.
+        self.edit_article('/viz_a_viz', body="C'est la vie!")
+        self.edit_article('/viz_a_viz', head='Bonjour!')
+
+        first_version_id = self.fetch_version_ids('/viz_a_viz')[0]
+
+        # Bob opens view page for the very first version of the article.
+        first_version_page = self.testapp.get(
+            '/viz_a_viz/_version/{}'.format(first_version_id))
+
+        # There's a version timestamp on view page for the modified article. It
+        # is labeled "current".
+        label = first_version_page.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        ts = first_version_page.pyquery('#ts-version')
+        self.assertIn('(new article)', ts.text())
 
 
 class VersionsTest(BaseTestCase):
@@ -185,7 +234,7 @@ class VersionsTest(BaseTestCase):
         self.assertEqual(omv_body.text(), 'Never mind...')
 
     def test_accessing_nonexistent_version_delivers_latest(self):
-        # Bob sings up and creates an article.
+        # Bob signs up and creates an article.
         self.create_article('/vita_nostra_brevis_est')
 
         # He edits the article once to create another version.
