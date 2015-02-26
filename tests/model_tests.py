@@ -28,17 +28,17 @@ class ArticleVersionTest(BaseTestCase):
 
     def test_first_and_latest_version_pointers_are_stored_correctly(self):
         a = Article.new('/test', 'Test', '')
-        self.assertEqual(a.first_version().head, 'Test')
-        self.assertEqual(a.first_version().body, '')
-        self.assertEqual(a.latest_version().head, 'Test')
-        self.assertEqual(a.latest_version().body, '')
+        self.assertEqual(a.get_first_version().head, 'Test')
+        self.assertEqual(a.get_first_version().body, '')
+        self.assertEqual(a.get_latest_version().head, 'Test')
+        self.assertEqual(a.get_latest_version().body, '')
 
         a.new_version('Testing', 'abc')
-        self.assertEqual(a.latest_version().head, 'Testing')
-        self.assertEqual(a.latest_version().body, 'abc')
+        self.assertEqual(a.get_latest_version().head, 'Testing')
+        self.assertEqual(a.get_latest_version().body, 'abc')
 
         a.new_version('The End', 'xyz')
-        self.assertEqual(a.latest_version().head, 'The End')
-        self.assertEqual(a.latest_version().body, 'xyz')
-        self.assertEqual(a.first_version().head, 'Test')
-        self.assertEqual(a.first_version().body, '')
+        self.assertEqual(a.get_latest_version().head, 'The End')
+        self.assertEqual(a.get_latest_version().body, 'xyz')
+        self.assertEqual(a.get_first_version().head, 'Test')
+        self.assertEqual(a.get_first_version().body, '')

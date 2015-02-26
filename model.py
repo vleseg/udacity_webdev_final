@@ -50,20 +50,29 @@ class Session(BaseModel):
 
 
 class Article(BaseModel):
+    # Reference class is not set, because Version class is defined lower in this
+    # file and interpreter would not see it.
+    # Both first_version and latest_version must actually be set to
+    # required=True, but this is not done due to technical limitations.
+    first_version = db.ReferenceProperty()
+    # Collection name won't be used; this is to suppress DuplicatePropertyError.
+    latest_version = db.ReferenceProperty(collection_name='_')
     url = db.StringProperty(required=True)
 
     def all_versions(self):
         q = self.version_set
         return q.order('-created')
 
-    def first_version(self):
-        version = self.version_set.order('created').get()
-        return self.project(version)
+    def get_first_version(self):
+        return self.project(self.first_version)
 
     def new_version(self, head, body):
         version = Version(
             article=self, head=head, body=body, parent=GLOBAL_PARENT)
         version.put()
+
+        self.latest_version = version
+        self.put()
 
     def project(self, version):
         projection = SimpleProjection(self)
@@ -71,12 +80,12 @@ class Article(BaseModel):
         projection.head = version.head
         projection.body = version.body
         projection.modified = version.created
+        projection.version = version
 
         return projection
 
-    def latest_version(self):
-        version = self.version_set.order('-created').get()
-        return self.project(version)
+    def get_latest_version(self):
+        return self.project(self.latest_version)
 
     def version_by_id(self, version_id):
         version = Version.get_by_id(int(version_id), parent=GLOBAL_PARENT)
@@ -88,18 +97,25 @@ class Article(BaseModel):
         article = cls.by_prop('url', url)
         if article is not None:
             if version is None:
-                return article.latest_version()
+                return article.get_latest_version()
             else:
                 p = article.version_by_id(version)
-                return p if p is not None else article.latest_version()
+                return p if p is not None else article.get_latest_version()
 
     @classmethod
+    @db.transactional
     def new(cls, url, head, body):
         article = cls(url=url, parent=GLOBAL_PARENT)
         article.put()
+
         first_version = Version(
             article=article, head=head, body=body, parent=GLOBAL_PARENT)
         first_version.put()
+
+        article.first_version = first_version
+        article.latest_version = first_version
+        article.put()
+
         return article.project(first_version)
 
 
@@ -108,3 +124,9 @@ class Version(BaseModel):
     created = db.DateTimeProperty(auto_now_add=True)
     head = db.StringProperty(required=True)
     body = db.TextProperty()
+
+    def is_first(self):
+        return self.key() == self.article.first_version.key()
+
+    def is_latest(self):
+        return self.key() == self.article.latest_version.key()
