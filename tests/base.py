@@ -2,7 +2,6 @@ import unittest
 # Third-party imports
 from google.appengine.ext import testbed
 from webtest import TestApp, TestResponse
-from model import Article
 
 
 class BaseTestCase(unittest.TestCase):
@@ -33,6 +32,7 @@ class BaseTestCase(unittest.TestCase):
         return modified_page
 
     def fetch_version_ids(self, article_url, rev_sort=False):
+        from model import Article
         article = Article.by_url(article_url)
         version_ids = [v.id for v in article.version_set]
         if rev_sort:

@@ -131,7 +131,6 @@ class TimestampTest(BaseTestCase):
         ts = new_article.pyquery('#ts-version')
         self.assertIn('(new article)', ts.text())
 
-    # TODO: make it possible to run separate tests.
     def test_version_ts_for_any_article_is_labeled_current(self):
         # Bob signs up and creates a new article.
         new_article = self.create_article('/horses')
