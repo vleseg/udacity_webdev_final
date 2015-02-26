@@ -1,6 +1,5 @@
 # coding=utf-8
 from datetime import datetime
-from time import sleep
 # Internal project imports
 from base import BaseTestCase
 
@@ -97,7 +96,6 @@ class HistoryPageLayoutTest(BaseTestCase):
 
         # After a short delay he opens an edit page for the article and clears
         # article's body.
-        sleep(1)
         self.edit_article('/dancing_queen', body='')
 
         # The he opens the history page.
@@ -170,9 +168,7 @@ class HistoryPageLayoutTest(BaseTestCase):
 
         # He edits it several times to create more versions.
         self.edit_article('/time_has_come', head='This Is The End')
-        sleep(0.1)
         self.edit_article('/time_has_come', body='<p>Are you ready?</p>')
-        sleep(0.1)
         self.edit_article('/time_has_come', head='The Day Of Wrath')
 
         urls_from_db = [

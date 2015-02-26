@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from time import sleep
 # Internal project imports
 from base import BaseTestCase
 from model import Article
@@ -15,11 +14,8 @@ class ArticleVersionTest(BaseTestCase):
 
     def test_version_ids_are_sequential(self):
         a = Article.new('/jazz', 'Jazz', '')
-        sleep(0.1)
         a.new_version('Jazz', 'Pass me the jazz')
-        sleep(0.1)
         a.new_version('Buzz', 'Biz')
-        sleep(0.1)
         v_list = list(a.version_set)
 
         version_by_created = sorted(v_list, key=lambda v: v.created)
