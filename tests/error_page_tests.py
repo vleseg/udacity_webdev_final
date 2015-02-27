@@ -89,3 +89,12 @@ class NotFoundErrorPageTest(BaseTestCase):
         self.assertTitleEqual(response, 'MyWiki *** New Article')
         self.assertEqual(edit_form['head'].value, 'Those Cozy Sharks')
         self.assertEqual(edit_form['body'].value, '')
+
+    def test_404_page_has_no_history_link(self):
+        # Bob tries to fetch an article, that certainly does not exist. He
+        # receives a 404.
+        error_page = self.testapp.get('/dont_open_me', expect_errors=True)
+
+        # He notices, that this page does not have a link to history.
+        history_link = error_page.pyquery('a#history-link')
+        self.assertFalse(bool(history_link))
