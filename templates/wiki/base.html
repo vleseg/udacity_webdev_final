@@ -8,7 +8,7 @@
           <a href="/" id="homepage-link">Home</a>
         </span>
       {% endif %}
-      {% if state == 'view' %}
+      {% if state == 'view' or state == 'edit' %}
         <span class="top-panel-section">
           <a id="history-link" href="/_history{{ article.url }}">History</a>
         </span>
