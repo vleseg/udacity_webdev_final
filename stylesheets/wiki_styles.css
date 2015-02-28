@@ -21,6 +21,12 @@ textarea {
     padding-right: 5px;
 }
 
+#ts-version {
+    font-size: small;
+    color: grey;
+    margin-top: -1em;
+}
+
 #username {
     font-weight: bold;
 }

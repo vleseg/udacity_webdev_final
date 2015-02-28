@@ -6,7 +6,7 @@
       Version of <span class="timestamp">{{ article.modified|timestampformat }}</span>
       {% if article.version.is_first() -%}
         <span class="distinction-label">(new article)</span>
-      {%- endif -%}
+      {%- endif %}
       {% if article.version.is_latest() -%}
         <span class="distinction-label">(current)</span>
       {%- endif -%}
