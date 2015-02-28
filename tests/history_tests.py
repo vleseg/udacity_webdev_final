@@ -162,6 +162,8 @@ class HistoryPageLayoutTest(BaseTestCase):
             bool(datetime.strptime(
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
 
+
+class HistoryActionsTest(BaseTestCase):
     def test_versions_are_displayed_with_links_to_view_them(self):
         # Bob signs up and creates a new article.
         self.create_article('time_has_come')
@@ -187,3 +189,30 @@ class HistoryPageLayoutTest(BaseTestCase):
 
         link_text = page_links_to_versions[0].text
         self.assertEqual(link_text, 'view')
+
+    def test_homepage_view_version_links_work(self):
+        # Bob sings up and goes to home page to initialize it.
+        self.sign_up()
+        self.testapp.get('/')
+
+        # He edits homepage to add a new version to it. After that he goes to
+        # homepage's history page.
+        homepage = self.edit_article('', title='Get The Hell Out Of Here!')
+        history_page = homepage.click(linkid='history-link')
+
+        # There are two links on history page.
+        urls = [
+            link.attrib('href')
+            for link in history_page.pyquery('a.version-view-link')]
+        self.assertEqual(len(urls), 2)
+
+        # Both of them work: requesting them delivers page with correct
+        # content.
+        version_1 = self.testapp.get(urls[0])
+        self.assertTitleEqual(version_1, u'MyWiki — Get The Hell Out Of Here!')
+        head = version_1.pyquery('#wiki-head')
+        self.assertTitleEqual(head.text(), 'Get The Hell Out Of Here')
+        version_2 = self.testapp.get(urls[0])
+        self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki!')
+        head = version_2.pyquery('#wiki-head')
+        self.assertTitleEqual(head.text(), 'Welcome to MyWiki!')
