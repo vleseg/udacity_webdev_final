@@ -6,14 +6,14 @@ from model import Article
 
 class ArticleVersionTest(BaseTestCase):
     def test_version_timestamp_stores_a_correct_value(self):
-        self.create_article('/kittens')
+        self.create_article('kittens')
         t = datetime.utcnow()
 
-        version_ts = Article.by_url('/kittens').modified
+        version_ts = Article.by_url('kittens').modified
         self.assertAlmostEqual(t, version_ts, delta=timedelta(1))
 
     def test_version_ids_are_sequential(self):
-        a = Article.new('/jazz', 'Jazz', '')
+        a = Article.new('jazz', 'Jazz', '')
         a.new_version('Jazz', 'Pass me the jazz')
         a.new_version('Buzz', 'Biz')
         v_list = list(a.version_set)
@@ -23,7 +23,7 @@ class ArticleVersionTest(BaseTestCase):
         self.assertListEqual(version_by_created, version_by_id)
 
     def test_first_and_latest_version_pointers_are_stored_correctly(self):
-        a = Article.new('/test', 'Test', '')
+        a = Article.new('test', 'Test', '')
         self.assertEqual(a.get_first_version().head, 'Test')
         self.assertEqual(a.get_first_version().body, '')
         self.assertEqual(a.get_latest_version().head, 'Test')

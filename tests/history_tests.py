@@ -19,7 +19,7 @@ class BasicHistoryPageTest(BaseTestCase):
             history_page, u'MyWiki — Welcome to MyWiki! (history)')
 
         # Bob signs up and creates an article.
-        new_article = self.create_article('/kittens')
+        new_article = self.create_article('kittens')
 
         # There is a link to edit history page. Bob clicks that link.
         self.assertHasLink(
@@ -50,7 +50,7 @@ class BasicHistoryPageTest(BaseTestCase):
 
     def test_first_version_of_any_page_can_be_found_on_its_history_page(self):
         # Bob signs up and creates a new article.
-        new_article = self.create_article('/russia_strong')
+        new_article = self.create_article('russia_strong')
 
         # He clicks the "History" link to see article's edit history.
         history_page = new_article.click(linkid='history-link')
@@ -66,7 +66,7 @@ class BasicHistoryPageTest(BaseTestCase):
 
     def test_after_page_was_edited_new_version_is_created(self):
         # Bob signs up and creates a new article.
-        new_article = self.create_article('/white_rabbit')
+        new_article = self.create_article('white_rabbit')
 
         # Bob clicks "Edit Article" link. Edit page opens again.
         edit_page = new_article.click(linkid='edit-article-link')
@@ -89,14 +89,14 @@ class HistoryPageLayoutTest(BaseTestCase):
     def test_history_page_has_a_link_to_edit_articles_current_version(self):
         # Bob signs up and creates a new article with a short body.
         self.create_article(
-            '/dancing_queen',
+            'dancing_queen',
             body='<p>You can dance, you can jive, having the time of your '
                  'life. See that girl, watch that scene, dig in the Dancing '
                  'Queen.</p>')
 
         # After a short delay he opens an edit page for the article and clears
         # article's body.
-        self.edit_article('/dancing_queen', body='')
+        self.edit_article('dancing_queen', body='')
 
         # The he opens the history page.
         history_page = self.testapp.get('/_history/dancing_queen')
@@ -114,10 +114,10 @@ class HistoryPageLayoutTest(BaseTestCase):
 
     def test_first_version_on_history_page_is_labeled_new_article(self):
         # Bob signs up and creates a new article.
-        self.create_article('/no_nay_never_no_more')
+        self.create_article('no_nay_never_no_more')
 
         # Bob edits article's body and saves it. Then he opens the history page.
-        self.edit_article('/no_nay_never_no_more', body='<span>Bogus!</span>')
+        self.edit_article('no_nay_never_no_more', body='<span>Bogus!</span>')
         history_page = self.testapp.get('/_history/no_nay_never_no_more')
 
         # History page has two versions.
@@ -132,11 +132,11 @@ class HistoryPageLayoutTest(BaseTestCase):
 
     def test_last_version_on_history_page_is_labeled_current(self):
         # Bob signs up and creates a new article.
-        self.create_article('/remember_remember')
+        self.create_article('remember_remember')
 
         # Bob edits article's body and saves it. Then he opens the history page.
         self.edit_article(
-            '/remember_remember', body='<p>the fifth of november</p>')
+            'remember_remember', body='<p>the fifth of november</p>')
         history_page = self.testapp.get('/_history/remember_remember')
 
         # History page has two versions. The top one is the newest one. It is
@@ -149,7 +149,7 @@ class HistoryPageLayoutTest(BaseTestCase):
 
     def test_version_timestamp_is_human_readable(self):
         # Bob signs up and creates a new article.
-        self.create_article('/cogito_ergo_sum')
+        self.create_article('cogito_ergo_sum')
 
         # He opens article's history page.
         history_page = self.testapp.get('/_history/cogito_ergo_sum')
@@ -164,16 +164,16 @@ class HistoryPageLayoutTest(BaseTestCase):
 
     def test_versions_are_displayed_with_links_to_view_them(self):
         # Bob signs up and creates a new article.
-        self.create_article('/time_has_come')
+        self.create_article('time_has_come')
 
         # He edits it several times to create more versions.
-        self.edit_article('/time_has_come', head='This Is The End')
-        self.edit_article('/time_has_come', body='<p>Are you ready?</p>')
-        self.edit_article('/time_has_come', head='The Day Of Wrath')
+        self.edit_article('time_has_come', head='This Is The End')
+        self.edit_article('time_has_come', body='<p>Are you ready?</p>')
+        self.edit_article('time_has_come', head='The Day Of Wrath')
 
         urls_from_db = [
             '/time_has_come/_version/{}'.format(vid) for vid in
-            self.fetch_version_ids('/time_has_come')]
+            self.fetch_version_ids('time_has_come')]
 
         # Bob opens article's history page. It lists four versions, each has a
         # link to view page.

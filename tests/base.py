@@ -20,13 +20,13 @@ class BaseTestCase(unittest.TestCase):
     def create_article(self, url, sign_up=True, **fields):
         if sign_up:
             self.sign_up()
-        edit_page = self.testapp.get('/_edit' + url)
+        edit_page = self.testapp.get('/_edit/' + url)
         new_page = self.fill_form(edit_page, **fields).submit().follow()
 
         return new_page
 
     def edit_article(self, url, **fields):
-        edit_page = self.testapp.get('/_edit' + url)
+        edit_page = self.testapp.get('/_edit/' + url)
         modified_page = self.fill_form(edit_page, **fields).submit().follow()
 
         return modified_page

@@ -57,7 +57,9 @@ class Article(BaseModel):
     first_version = db.ReferenceProperty()
     # Collection name won't be used; this is to suppress DuplicatePropertyError.
     latest_version = db.ReferenceProperty(collection_name='_')
-    url = db.StringProperty(required=True)
+    # String property is actually required, but can be empty. GAE DB
+    # unfortunately does not support both.
+    url = db.StringProperty()
 
     def all_versions(self):
         q = self.version_set

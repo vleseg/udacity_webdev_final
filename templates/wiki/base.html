@@ -3,20 +3,21 @@
 {% block content %}
   <div id="top-panel-wrapper">
     <div id="top-panel">
-      {% if state != 'view' or article.url != '/' %}
+      {% if state != 'view' or article.url != '' %}
         <span class="top-panel-section">
           <a href="/" id="homepage-link">Home</a>
         </span>
       {% endif %}
       {% if state == 'view' or state == 'edit' %}
         <span class="top-panel-section">
-          <a id="history-link" href="/_history{{ article.url }}">History</a>
+          <a id="history-link" href="/_history/{{ article.url }}">History</a>
         </span>
       {% endif %}
       {% if user %}
         {% if state == 'view' or state == 'history' %}
           <span class="top-panel-section">
-            <a href="/_edit{{ article.url }}" id="edit-article-link">Edit Article</a>
+            <a href="/_edit/{{ article.url }}"
+               id="edit-article-link">Edit Article</a>
           </span>
         {% endif %}
         <span class="top-panel-section">
