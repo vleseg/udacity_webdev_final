@@ -111,21 +111,39 @@ class EditPageBehaviourTest(BaseTestCase):
 
     def test_logging_out_on_edit_page_redirects_to_corresponding_article(self):
         # Bob signs up and immediately creates a new article.
-        self.sign_up()
-        edit_page = self.testapp.get('/_edit/kittens')
-
-        # Bob enters some data into edit page and saves the article.
-        new_article = self.fill_form(
-            edit_page, body='Kittens are cute and cuddly.').submit().follow()
+        new_article = self.create_article(
+            '/kittens', body="Kittens are cute and cuddly.")
 
         # Bob clicks "Edit Article" link to introduce more changes into page,
-        #  but changes his mind and on edit page, which was delivered by
+        # but changes his mind and on edit page, which was delivered by
         # browser, he clicks "Sign Out".
         edit_page = new_article.click(linkid='edit-article-link')
         response = edit_page.click(linkid='logout-link').follow()
 
         # He's redirected to the article he was about to edit.
         self.assertTitleEqual(response, u'MyWiki — Kittens')
+
+    def test_edit_page_has_link_to_history_in_edit_article_mode(self):
+        # Bob sings up and immediately creates a new article.
+        new_article = self.create_article('/elephants')
+
+        # He clicks "Edit Article" link to open edit page for the newly created
+        # article.
+        edit_page = new_article.click(linkid='edit-article-link')
+
+        # He notices a link to history on this page.
+        history_link = edit_page.pyquery('a#history-link')
+        self.assertTrue(bool(history_link))
+
+    def test_edit_page_does_not_have_link_to_history_in_new_article_mode(self):
+        # Bob signs up and immediately opens an edit page to create a new
+        # article.
+        self.sign_up()
+        edit_page = self.testapp.get('/_edit/sequoia')
+
+        # He notices, that this page does not have a history link.
+        history_link = edit_page.pyquery('a#history-link')
+        self.assertFalse(bool(history_link))
 
 
 class NewArticleTest(BaseTestCase):
