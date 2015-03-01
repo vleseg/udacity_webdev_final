@@ -14,7 +14,7 @@
         </span>
         <span class="history-element-section">
           <a class="version-view-link"
-             href="/{{ article.url }}/_version/{{ version.id }}">view</a>
+             href="{{ version_url(article.url, version.id) }}">view</a>
         </span>
       </li>
     {% endfor %}

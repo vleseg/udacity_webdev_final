@@ -236,17 +236,17 @@ class ViewPage(BaseHandler):
         else:
             article = Article.by_url(url, version)
         if article is None:
-            if url == '':
+            if url == '/':
                 default_body = (
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
                 article = Article.new(
-                    url='', body=default_body, head='Welcome to MyWiki!')
+                    url='/', body=default_body, head='Welcome to MyWiki!')
             elif self.user is None:
-                self.context['edit_url'] = '/_edit/' + url
+                self.context['edit_url'] = '/_edit' + url
                 self.abort(404)
             else:
-                self.redirect('/_edit/' + url, abort=True)
+                self.redirect('/_edit' + url, abort=True)
         self.context.update({'article': article, 'user': self.user})
 
         self.render()
@@ -283,17 +283,16 @@ class EditPage(BaseHandler):
     def _get(self, url):
         if self.user is None:
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
-
         form = EditForm()
         article = Article.by_url(url)
 
         if article is None:
-            if url == '':
+            if url == '/':
                 default_body = (
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
                 article = Article.new(
-                    url='', body=default_body, head='Welcome to MyWiki!')
+                    url='/', body=default_body, head='Welcome to MyWiki!')
             else:
                 self.context.update({'state': 'new', 'logout_url': '/'})
                 form.head.data = self.form_head_from_path(url)
@@ -320,21 +319,20 @@ class EditPage(BaseHandler):
                 Article.new(url, form.head.data, form.body.data)
             else:
                 article.new_version(form.head.data, form.body.data)
-            self.redirect('/' + url)
+            self.redirect(url)
         else:
             self.context.update(
                 {'user': self.user, 'form': form, 'article': article})
             self.render()
 
-
-ARTICLE_RE = r'([a-zA-Z0-9_-]*)'
+ARTICLE_RE = r'((?:/[a-zA-Z0-9_-]*)+?)/?'
 handlers = [
-    ('/signup', SignupPage),
-    ('/login', LoginPage),
-    ('/logout', Logout),
-    ('/_edit/' + ARTICLE_RE, EditPage),
-    ('/_history/' + ARTICLE_RE, HistoryPage),
-    (r'/' + ARTICLE_RE + '/_version/' + r'(\d+)', ViewPage),
-    (r'/' + ARTICLE_RE, ViewPage)
+    (r'/signup', SignupPage),
+    (r'/login', LoginPage),
+    (r'/logout', Logout),
+    (r'/_edit' + ARTICLE_RE, EditPage),
+    (r'/_history' + ARTICLE_RE, HistoryPage),
+    (ARTICLE_RE + r'_version/' + r'(\d+)', ViewPage),
+    (ARTICLE_RE, ViewPage)
 ]
 app = webapp2.WSGIApplication(handlers, debug=True)

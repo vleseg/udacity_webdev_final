@@ -112,7 +112,7 @@ class EditPageBehaviourTest(BaseTestCase):
     def test_logging_out_on_edit_page_redirects_to_corresponding_article(self):
         # Bob signs up and immediately creates a new article.
         new_article = self.create_article(
-            'kittens', body="Kittens are cute and cuddly.")
+            '/kittens', body="Kittens are cute and cuddly.")
 
         # Bob clicks "Edit Article" link to introduce more changes into page,
         # but changes his mind and on edit page, which was delivered by
@@ -125,7 +125,7 @@ class EditPageBehaviourTest(BaseTestCase):
 
     def test_edit_page_has_link_to_history_in_edit_article_mode(self):
         # Bob sings up and immediately creates a new article.
-        new_article = self.create_article('elephants')
+        new_article = self.create_article('/elephants')
 
         # He clicks "Edit Article" link to open edit page for the newly created
         # article.

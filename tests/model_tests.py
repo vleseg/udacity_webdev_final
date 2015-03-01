@@ -6,10 +6,10 @@ from model import Article
 
 class ArticleVersionTest(BaseTestCase):
     def test_version_timestamp_stores_a_correct_value(self):
-        self.create_article('kittens')
+        self.create_article('/kittens')
         t = datetime.utcnow()
 
-        version_ts = Article.by_url('kittens').modified
+        version_ts = Article.by_url('/kittens').modified
         self.assertAlmostEqual(t, version_ts, delta=timedelta(1))
 
     def test_version_ids_are_sequential(self):
