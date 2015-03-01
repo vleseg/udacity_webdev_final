@@ -3,15 +3,19 @@
   <ul id="versions">
     {% for version in article.all_versions() %}
       <li>
-        Version of
-        <span class="timestamp">{{ version.created|timestampformat }}</span>
-        {% if loop.last %}
-          <span class="distinction-label">(new article)</span>
-        {% elif loop.first %}
-          <span class="distinction-label">(current)</span>
-        {%- endif %}
-      | <a class="version-view-link"
-           href="/{{ article.url }}/_version/{{ version.id }}">view</a>
+        <span class="history-element-section">
+          Version of
+          <span class="timestamp">{{ version.created|timestampformat }}</span>
+            {% if loop.last %}
+              <span class="distinction-label">(new article)</span>
+            {% elif loop.first %}
+              <span class="distinction-label">(current)</span>
+            {%- endif %}
+        </span>
+        <span class="history-element-section">
+          <a class="version-view-link"
+             href="/{{ article.url }}/_version/{{ version.id }}">view</a>
+        </span>
       </li>
     {% endfor %}
   </ul>
