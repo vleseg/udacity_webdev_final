@@ -4,6 +4,7 @@ from random import randint
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
+from model import Article
 
 
 class BasicViewPageTest(BaseTestCase):
@@ -177,6 +178,22 @@ class TimestampTest(BaseTestCase):
         self.assertTrue(bool(label))
         ts = first_version_page.pyquery('#ts-version')
         self.assertIn('(new article)', ts.text())
+
+    def test_version_ts_doesnt_have_a_leading_0_in_days_less_than_10(self):
+        # Bob sings up and creates an article.
+        self.create_article('/back_in_the_future')
+
+        # Suddenly, time shifts! It is 5th January 1990!
+        article_obj = Article.all().get()
+        article_obj.first_version.created = datetime(day=5, month=1, year=1990)
+
+        # Bob opens newly created article.
+        new_article = self.testapp.get('/back_in_the_future')
+
+        # There is a version timestamp on article page. Days in it are expressed
+        # with one-digit number. That's it: without leading zero!
+        ts = new_article.pyquery('#ts-version>.timestamp')
+        self.assertTrue(ts.text().startswith('5'))
 
 
 class VersionsTest(BaseTestCase):

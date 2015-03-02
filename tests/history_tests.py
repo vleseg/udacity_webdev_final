@@ -2,6 +2,7 @@
 from datetime import datetime
 # Internal project imports
 from base import BaseTestCase
+from model import Article
 
 
 class BasicHistoryPageTest(BaseTestCase):
@@ -161,6 +162,23 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertTrue(
             bool(datetime.strptime(
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
+
+    def test_version_ts_doesnt_have_a_leading_0_in_days_less_than_10(self):
+        # Bob sings up and creates an article.
+        self.create_article('/tardis')
+
+        # Suddenly, time shifts! It is 7th March 2001!
+        article_obj = Article.all().get()
+        article_obj.first_version.created = datetime(day=7, month=3, year=2001)
+
+        # Bob opens the history page for newly created article.
+        new_article = self.testapp.get('/_history/tardis')
+
+        # There is one version on history page for this article. It has a
+        # timestamp in which days are expressed with one-digit number. That's
+        # it: without leading zero!
+        ts = new_article.pyquery('.timestamp')
+        self.assertTrue(ts.text().startswith('5'))
 
 
 class HistoryActionsTest(BaseTestCase):
