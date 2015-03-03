@@ -6,9 +6,10 @@
         <span class="history-element-section">
           Version of
           <span class="timestamp">{{ version.created|timestampformat }}</span>
-            {% if loop.last %}
+            {% if loop.last -%}
               <span class="distinction-label">(new article)</span>
-            {% elif loop.first %}
+            {%- endif %}
+            {% if loop.first -%}
               <span class="distinction-label">(current)</span>
             {%- endif %}
         </span>
