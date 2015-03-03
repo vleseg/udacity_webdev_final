@@ -4,7 +4,7 @@ import jinja2
 
 
 def timestamp_format(value, f="%d %B %Y, %H:%M:%S"):
-    return value.strftime(f)
+    return value.strftime(f).lstrip('0')
 
 
 def version_url(article_url, version_id):

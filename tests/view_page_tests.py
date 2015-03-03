@@ -185,7 +185,9 @@ class TimestampTest(BaseTestCase):
 
         # Suddenly, time shifts! It is 5th January 1990!
         article_obj = Article.all().get()
-        article_obj.first_version.created = datetime(day=5, month=1, year=1990)
+        fv = article_obj.first_version
+        fv.created = datetime(day=5, month=1, year=1990)
+        fv.put()
 
         # Bob opens newly created article.
         new_article = self.testapp.get('/back_in_the_future')

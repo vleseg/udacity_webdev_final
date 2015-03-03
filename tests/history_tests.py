@@ -169,7 +169,9 @@ class HistoryPageLayoutTest(BaseTestCase):
 
         # Suddenly, time shifts! It is 7th March 2001!
         article_obj = Article.all().get()
-        article_obj.first_version.created = datetime(day=7, month=3, year=2001)
+        fv = article_obj.first_version
+        fv.created = datetime(day=7, month=3, year=2001)
+        fv.put()
 
         # Bob opens the history page for newly created article.
         new_article = self.testapp.get('/_history/tardis')
@@ -178,7 +180,7 @@ class HistoryPageLayoutTest(BaseTestCase):
         # timestamp in which days are expressed with one-digit number. That's
         # it: without leading zero!
         ts = new_article.pyquery('.timestamp')
-        self.assertTrue(ts.text().startswith('5'))
+        self.assertTrue(ts.text().startswith('7'))
 
 
 class HistoryActionsTest(BaseTestCase):
