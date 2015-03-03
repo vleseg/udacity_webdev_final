@@ -148,6 +148,21 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.assertEqual(len(label), 1)
         self.assertEqual(label.text(), '(current)')
 
+    def test_the_only_version_is_labeled_both_current_and_new_article(self):
+        # Bob signs up and creates a new article.
+        new_article = self.create_article('/one_more_step')
+
+        # Bob clicks on "History" link and browser delivers him the history
+        # page for the article.
+        history_page = new_article.click(linkid='history-link')
+
+        # There is only one version on this page. It is labeled as both, "new
+        # page" and "current".
+        labels = history_page.pyquery('.distinction-label')
+        self.assertEqual(len(labels), 2)
+        self.assertIn('(new article)', labels.text())
+        self.assertIn('(current)', labels.text())
+
     def test_version_timestamp_is_human_readable(self):
         # Bob signs up and creates a new article.
         self.create_article('/cogito_ergo_sum')
