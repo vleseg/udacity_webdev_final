@@ -324,3 +324,46 @@ class EditPageValidationTest(BaseTestCase):
         form = edit_response.form
         self.assertEqual(form['head'].value, overly_long_head)
         self.assertEqual(form['body'].value, 'Test body')
+
+
+class VersionEditTest(BaseTestCase):
+    def test_can_open_edit_page_for_version_by_direct_url(self):
+        # Bob sings up and creates a new article.
+        self.create_article('/mindfulness')
+
+        # He edits it several times to make more versions.
+        self.edit_article('/mindfulness', body='<p>Open your mind.</p>')
+        self.edit_article('/mindfulness', body='<div>Express yourself.</div>')
+        self.edit_article('/mindfulness', head='Insight')
+
+        version_ids = self.fetch_version_ids('/mindfulness')
+
+        # Bob opens the edit page for the first version by direct url. It
+        # renders correctly.
+        fv_edit_page = self.testapp.get(
+            '/_edit/mindfulness/_version/{}'.format(version_ids[0]))
+        self.assertIn('wiki-edit-form', fv_edit_page.forms)
+
+        form = fv_edit_page.form
+        self.assertEqual(form['head'].value, 'Mindfulness')
+        self.assertEqual(form['body'].value, '')
+
+        # Bob opens the edit page for the last version by direct url. It also
+        # renders correctly.
+        lv_edit_page = self.testapp.get(
+            '/_edit/mindfulness/_version/{}'.format(version_ids[-1]))
+        self.assertIn('wiki-edit-form', lv_edit_page.forms)
+
+        form = lv_edit_page.form
+        self.assertEqual(form['head'].value, 'Insight')
+        self.assertEqual(form['body'].value, '<div>Express yourself.</div>')
+
+        # Bob opens the edit page for the second version by direct url. It
+        # renders correctly as well.
+        edit_page = self.testapp.get(
+            '/_edit/mindfulness/_version/{}'.format(version_ids[1]))
+        self.assertIn('wiki-edit-form', edit_page.forms)
+
+        form = edit_page.form
+        self.assertEqual(form['head'].value, 'Mindfulness')
+        self.assertEqual(form['body'].value, '<p>Open your mind.</p>')
