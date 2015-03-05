@@ -328,7 +328,7 @@ class EditPageValidationTest(BaseTestCase):
 
 class VersionEditTest(BaseTestCase):
     def test_can_open_edit_page_for_version_by_direct_url(self):
-        # Bob sings up and creates a new article.
+        # Bob signs up and creates a new article.
         self.create_article('/mindfulness')
 
         # He edits it several times to make more versions.
@@ -367,3 +367,62 @@ class VersionEditTest(BaseTestCase):
         form = edit_page.form
         self.assertEqual(form['head'].value, 'Mindfulness')
         self.assertEqual(form['body'].value, '<p>Open your mind.</p>')
+
+    def test_saving_edited_version_creates_new_version(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/future')
+
+        # He edits it several times to create more versions.
+        self.edit_article('/future', title='Not Past')
+        self.edit_article('/future', body='<div>It awaits!</div>')
+
+        version_ids = self.fetch_version_ids('/future')
+
+        # Bob opens edit page for the second version of the article using
+        # direct url.
+        fv_edit_page = self.testapp.get(
+            '/_edit/future/_version/{}'.format(version_ids[1]))
+
+        # He changes body and saves the article.
+        self.fill_form(
+            fv_edit_page, body='<p>Do not be cruel to me.</p>').submit()
+
+        # Bob opens article. Latest version is served by the browser. Bob can
+        # see, that it reflects changes, which he introduced to the second
+        # version.
+        article = self.testapp.get('/future')
+        head = article.pyquery('#wiki-head')
+        body = article.pyquery('#wiki-body')
+        self.assertEqual(head.text(), 'Not Past')
+        self.assertEqual(body.text(), 'Do not be cruel to me.')
+
+        label = article.pyquery('.distinction-label')
+        self.assertTrue(bool(label))
+        self.assertEqual(label.text(), '(current)')
+
+    def test_old_version_is_not_changed_when_it_is_edited(self):
+        # Bob sings up and creates a new article.
+        self.create_article('/earth', body='<p>Our home.</p>')
+
+        # He edits the article, to create one more version.
+        self.edit_article('/earth', head='Solar System')
+
+        version_ids = self.fetch_version_ids('/earth')
+
+        # Bob opens the first version of the article for editing.
+        fv_edit_page = self.testapp.get(
+            '/_edit/earth/_version/{}'.format(version_ids[0]))
+
+        # Bob introduces some changes and saves them.
+        self.fill_form(
+            fv_edit_page, head='Universe',
+            body='<div>Our playground</div>').submit()
+
+        # He opens the view page for the first version of the article. As he can
+        # see, it hasn't changed.
+        first_version = self.testapp.get(
+            '/earth/_version/{}'.format(version_ids[0]))
+        head = first_version.pyquery('#wiki-head')
+        body = first_version.pyquery('#wiki-body')
+        self.assertEqual(head.text(), 'Earth')
+        self.assertEqual(body.text(), 'Our home.')
