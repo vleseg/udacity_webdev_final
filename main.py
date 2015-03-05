@@ -280,11 +280,14 @@ class EditPage(BaseHandler):
         words = path.strip('/').split('_')
         return ' '.join([w.capitalize() for w in words])
 
-    def _get(self, url):
+    def _get(self, url, version=None):
         if self.user is None:
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
         form = EditForm()
-        article = Article.by_url(url)
+        if version is None:
+            article = Article.by_url(url)
+        else:
+            article = Article.by_url(url, version)
 
         if article is None:
             if url == '/':
@@ -330,6 +333,7 @@ handlers = [
     (r'/signup', SignupPage),
     (r'/login', LoginPage),
     (r'/logout', Logout),
+    (r'/_edit' + ARTICLE_RE + r'_version/' + r'(\d+)', EditPage),
     (r'/_edit' + ARTICLE_RE, EditPage),
     (r'/_history' + ARTICLE_RE, HistoryPage),
     (ARTICLE_RE + r'_version/' + r'(\d+)', ViewPage),
