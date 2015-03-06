@@ -409,7 +409,7 @@ class VersionEditTest(BaseTestCase):
 
         version_ids = self.fetch_version_ids('/earth')
 
-        # Bob opens the first version of the article for editing.
+        # Bob opens the first version of the article for editing by direct url.
         fv_edit_page = self.testapp.get(
             '/_edit/earth/_version/{}'.format(version_ids[0]))
 
@@ -426,3 +426,22 @@ class VersionEditTest(BaseTestCase):
         body = first_version.pyquery('#wiki-body')
         self.assertEqual(head.text(), 'Earth')
         self.assertEqual(body.text(), 'Our home.')
+
+    def test_clicking_edit_on_version_view_page_edits_this_version(self):
+        # /Bob sings up and creates a new article. He edits it once to add a new
+        # version.
+        self.create_article('/moon', body='<div>Goddess of mystery.</div>')
+        self.edit_article('/moon', head='Selena', body='')
+
+        version_ids = self.fetch_version_ids('/earth')
+
+        # Bob opens the view page for the first version of the article. There he
+        # clicks "Edit Article" link.
+        first_version = self.testapp.get(
+            '/moon/_version/{}'.format(version_ids[0]))
+        response = first_version.click(linkid='edit-article-link')
+
+        # The first version of the article is opened for editing.
+        form = response.form
+        self.assertEqual(form['head'].value, 'Moon')
+        self.assertEqual(form['body'].value, '<div>Goddess of mystery.</div>')
