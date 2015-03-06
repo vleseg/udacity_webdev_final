@@ -373,7 +373,7 @@ class VersionEditTest(BaseTestCase):
         self.create_article('/future')
 
         # He edits it several times to create more versions.
-        self.edit_article('/future', title='Not Past')
+        self.edit_article('/future', head='Not Past')
         self.edit_article('/future', body='<div>It awaits!</div>')
 
         version_ids = self.fetch_version_ids('/future')

@@ -307,12 +307,15 @@ class EditPage(BaseHandler):
             {'form': form, 'article': article, 'user': self.user})
         self.render()
 
-    def _post(self, url):
+    def _post(self, url, version=None):
         if self.user is None:
             self.redirect('/login', abort=True)
 
         form = EditForm(self.request.params)
-        article = Article.by_url(url)
+        if version is None:
+            article = Article.by_url(url)
+        else:
+            article = Article.by_url(url, version)
 
         if article is None:
             self.context['state'] = 'new'
