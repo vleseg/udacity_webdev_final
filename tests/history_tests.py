@@ -302,6 +302,6 @@ class HistoryActionsTest(BaseTestCase):
         self.assertEqual(form['head'].value, 'So Good To See You Here!')
 
         version_2 = self.testapp.get(urls[1])
-        self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki!')
+        self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki! (edit)')
         form = version_2.form
         self.assertEqual(form['head'].value, 'Welcome to MyWiki!')
