@@ -433,7 +433,7 @@ class VersionEditTest(BaseTestCase):
         self.create_article('/moon', body='<div>Goddess of mystery.</div>')
         self.edit_article('/moon', head='Selena', body='')
 
-        version_ids = self.fetch_version_ids('/earth')
+        version_ids = self.fetch_version_ids('/moon')
 
         # Bob opens the view page for the first version of the article. There he
         # clicks "Edit Article" link.

@@ -16,8 +16,13 @@
       {% if user %}
         {% if state == 'view' or state == 'history' %}
           <span class="top-panel-section">
+          {% if article.version.is_latest() %}
             <a href="/_edit{{ article.url }}"
                id="edit-article-link">Edit Article</a>
+          {% else %}
+            <a href="/_edit{{ article.url }}/_version/{{ article.version.id }}"
+               id="edit-article-link">Edit Article</a>
+          {% endif %}
           </span>
         {% endif %}
         <span class="top-panel-section">
