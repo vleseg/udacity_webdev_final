@@ -246,7 +246,62 @@ class HistoryActionsTest(BaseTestCase):
         self.assertTitleEqual(version_1, u'MyWiki — Get The Hell Out Of Here!')
         head = version_1.pyquery('#wiki-head')
         self.assertEqual(head.text(), 'Get The Hell Out Of Here!')
+
         version_2 = self.testapp.get(urls[1])
         self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki!')
         head = version_2.pyquery('#wiki-head')
         self.assertEqual(head.text(), 'Welcome to MyWiki!')
+
+    def test_versions_are_displayed_with_links_to_edit_them(self):
+        # Bob sings up and creates a new article.
+        self.create_article('/test')
+
+        # He edits the page several times to make new versions.
+        self.edit_article('/test', head='Check')
+        self.edit_article('/test', body='<span>Some filler text.</span>')
+        self.edit_article('/test', body='<p>Imagination has broken.</p>')
+
+        urls_from_db = [
+            '/_edit/test/_version/{}'.format(vid) for vid in
+            self.fetch_version_ids('/test')]
+
+        # Bob opens article's history page. It lists four versions, each has a
+        # link to edit page.
+        history_page = self.testapp.get('/_history/test')
+        page_links_to_versions = history_page.pyquery('.version-edit-link')
+        urls_from_page = [p.attrib['href'] for p in page_links_to_versions]
+
+        self.assertEqual(len(page_links_to_versions), 4)
+        self.assertSetEqual(set(urls_from_db), set(urls_from_page))
+
+        link_text = page_links_to_versions[0].text
+        self.assertEqual(link_text, 'edit')
+
+    def test_homepage_edit_version_links_work(self):
+        # Bob sings up and goes to home page to initialize it.
+        self.sign_up()
+        self.testapp.get('/')
+
+        # He edits homepage to add a new version to it. After that he goes to
+        # homepage's history page.
+        homepage = self.edit_article('/', head='So Good To See You Here!')
+        history_page = homepage.click(linkid='history-link')
+
+        # There are two links on history page.
+        urls = [
+            link.attrib['href']
+            for link in history_page.pyquery('a.version-edit-link')]
+        self.assertEqual(len(urls), 2)
+
+        # Both of them work: requesting them delivers page with correct
+        # content.
+        version_1 = self.testapp.get(urls[0])
+        self.assertTitleEqual(
+            version_1, u'MyWiki — So Good To See You Here! (edit)')
+        form = version_1.form
+        self.assertEqual(form['head'].value, 'So Good To See You Here!')
+
+        version_2 = self.testapp.get(urls[1])
+        self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki!')
+        form = version_2.form
+        self.assertEqual(form['head'].value, 'Welcome to MyWiki!')
