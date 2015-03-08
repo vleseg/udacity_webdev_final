@@ -1,4 +1,6 @@
 from base import BaseTestCase
+# Internal project imports.
+from model import Article
 
 
 class BasicDeleteVersionTest(BaseTestCase):
@@ -46,3 +48,23 @@ class BasicDeleteVersionTest(BaseTestCase):
         version_ids = self.fetch_version_ids('/test_deleting')
         self.assertNotIn(to_delete_id_1, version_ids)
         self.assertNotIn(to_delete_id_2, version_ids)
+
+    # TODO: find and replace "def tets_*" with "def test_*"
+    def test_when_latest_version_is_deleted_shift_pointer(self):
+        # Bob sings up and creates an article. He modifies it several times
+        # to add more versions.
+        self.create_article('/test_shifting_pointer')
+        self.edit_article(
+            '/test_shifting_pointer', title="Test Deleting Latest Version")
+        self.edit_article('/test_shifting_pointer')
+
+        ver_ids = self.fetch_version_ids('/test_shifting_pointer')
+
+        # Bob deletes latest version of the article by triggering the delete
+        # handler.
+        self.testapp.get(
+            '/_delete/test_shifting_pointer/_version/{}'.format(ver_ids[-1]))
+
+        # Former second (middle) version becomes the latest.
+        latest_version = Article.by_url('/test_shifting_pointer').latest_version
+        self.assertEqual(latest_version.id, ver_ids[1])
