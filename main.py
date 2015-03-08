@@ -334,7 +334,10 @@ class EditPage(BaseHandler):
 
 class DeleteVersion(BaseHandler):
     def _get(self, url, version):
-        Article.by_url(url, version).version.delete()
+        if not self.user:
+            pass
+        else:
+            Article.by_url(url, version).version.delete()
 
 
 ARTICLE_RE = r'((?:/[a-zA-Z0-9_-]*)+?)/?'
