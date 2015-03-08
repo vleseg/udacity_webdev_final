@@ -53,7 +53,8 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.create_article('/test_shifting_pointer')
         self.edit_article(
             '/test_shifting_pointer', head="Test Deleting Latest Version")
-        self.edit_article('/test_shifting_pointer')
+        self.edit_article(
+            '/test_shifting_pointer', body='<p>Pointer shifts backwards.</p>')
 
         ver_ids = self.fetch_version_ids('/test_shifting_pointer')
 
@@ -66,3 +67,24 @@ class BasicDeleteVersionTest(BaseTestCase):
         latest_version = self.article_model.by_url(
             '/test_shifting_pointer').latest_version
         self.assertEqual(latest_version.id, ver_ids[1])
+
+    def test_when_first_version_is_deleted_shift_pointer(self):
+        # Bob sings up and creates an article. He modifies it several times
+        # to add more versions.
+        self.create_article('/test_shifting_pointer')
+        self.edit_article(
+            '/test_shifting_pointer', head='Test Deleting First Version')
+        self.edit_article(
+            '/test_shifting_pointer', body='<p>Pointer shifts forwards.</p>')
+
+        ver_ids = self.fetch_version_ids('/test_shifting_pointer')
+
+        # Bob deletes first version of the article by triggering the delete
+        # handler.
+        self.testapp.get(
+            '/_delete/test_shifting_pointer/_version/{}'.format(ver_ids[0]))
+
+        # Former second (middle) version becomes the first.
+        first_version = self.article_model.by_url(
+            '/test_shifting_pointer').first_version
+        self.assertEqual(first_version.id, ver_ids[1])
