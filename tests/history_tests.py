@@ -2,7 +2,6 @@
 from datetime import datetime
 # Internal project imports
 from base import BaseTestCase
-from model import Article
 
 
 class BasicHistoryPageTest(BaseTestCase):
@@ -183,7 +182,7 @@ class HistoryPageLayoutTest(BaseTestCase):
         self.create_article('/tardis')
 
         # Suddenly, time shifts! It is 7th March 2001!
-        article_obj = Article.all().get()
+        article_obj = self.article_model.all().get()
         fv = article_obj.first_version
         fv.created = datetime(day=7, month=3, year=2001)
         fv.put()

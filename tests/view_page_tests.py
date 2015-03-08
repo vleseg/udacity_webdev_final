@@ -4,7 +4,6 @@ from random import randint
 from time import sleep
 # Internal project imports
 from base import BaseTestCase
-from model import Article
 
 
 class BasicViewPageTest(BaseTestCase):
@@ -184,7 +183,7 @@ class TimestampTest(BaseTestCase):
         self.create_article('/back_in_the_future')
 
         # Suddenly, time shifts! It is 5th January 1990!
-        article_obj = Article.all().get()
+        article_obj = self.article_model.all().get()
         fv = article_obj.first_version
         fv.created = datetime(day=5, month=1, year=1990)
         fv.put()

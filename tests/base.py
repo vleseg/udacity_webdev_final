@@ -9,10 +9,15 @@ class BaseTestCase(unittest.TestCase):
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_datastore_v3_stub()
-        # This is import is here because another import inside starts using
+        # This import is here, because another import inside starts using
         # datastore right away.
         from main import app
         self.testapp = TestApp(app)
+        # The following is done because importing Article from inside test
+        # modules fails, when one tries to run a separate test (not the whole
+        # project).
+        from model import Article
+        self.article_model = Article
 
     def tearDown(self):
         self.testbed.deactivate()
@@ -32,8 +37,7 @@ class BaseTestCase(unittest.TestCase):
         return modified_page
 
     def fetch_version_ids(self, article_url, rev_sort=False):
-        from model import Article
-        article = Article.by_url(article_url)
+        article = self.article_model.by_url(article_url)
         version_ids = [v.id for v in article.version_set]
         if rev_sort:
             return reversed(sorted(version_ids))
