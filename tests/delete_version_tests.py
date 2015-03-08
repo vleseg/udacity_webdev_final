@@ -88,3 +88,22 @@ class BasicDeleteVersionTest(BaseTestCase):
         first_version = self.article_model.by_url(
             '/test_shifting_pointer').first_version
         self.assertEqual(first_version.id, ver_ids[1])
+
+    def test_only_authorized_users_can_delete_versions(self):
+        # Bob sings up and creates and article. He modifies it once to create a
+        # new version.
+        self.create_article('/test_auth_delete')
+        self.edit_article(
+            '/test_auth_delete', body='<p>Will not be able to delete.</p>')
+
+        # Bob sings out.
+        self.testapp.get('/logout')
+
+        fv_id = self.fetch_version_ids('/test_auth_delete')[0]
+
+        # He tries to access delete handler to delete the first version of the
+        # article.
+        self.testapp.get('/_delete/test_auth_delete/_version/{}'.format(fv_id))
+
+        # Version is not deleted.
+        self.assertEqual(len(self.fetch_version_ids('/test_auth_delete')), 2)
