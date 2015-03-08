@@ -125,10 +125,15 @@ class Version(BaseModel):
     def delete(self):
         article = self.article
         is_latest = self.is_latest()
+        is_first = self.is_first()
         super(Version, self).delete()
         if is_latest:
             new_latest = article.version_set.order('-created').get()
             self.article.latest_version = new_latest
+            self.article.put()
+        elif is_first:
+            new_first = article.version_set.order('created').get()
+            self.article.first_version = new_first
             self.article.put()
 
     def is_first(self):
