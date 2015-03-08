@@ -63,9 +63,6 @@ class Article(BaseModel):
         q = self.version_set
         return q.order('-created')
 
-    def get_first_version(self):
-        return self.project(self.first_version)
-
     def new_version(self, head, body):
         version = Version(
             article=self, head=head, body=body, parent=GLOBAL_PARENT)
@@ -84,7 +81,6 @@ class Article(BaseModel):
 
         return projection
 
-    # TODO: see if I can get rid of this
     def get_latest_version(self):
         return self.project(self.latest_version)
 

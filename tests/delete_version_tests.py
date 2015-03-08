@@ -47,7 +47,6 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertNotIn(to_delete_id_1, version_ids)
         self.assertNotIn(to_delete_id_2, version_ids)
 
-    # TODO: find and replace "def tets_*" with "def test_*"
     def test_when_latest_version_is_deleted_shift_pointer(self):
         # Bob sings up and creates an article. He modifies it several times
         # to add more versions.
