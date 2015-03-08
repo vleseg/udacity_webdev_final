@@ -1,9 +1,10 @@
+# coding=utf-8
 from base import BaseTestCase
 
 
 class BasicDeleteVersionTest(BaseTestCase):
     def test_delete_handler_is_accessible_by_direct_url(self):
-        # Bob sings up and creates a new article. He modifies the article to
+        # Bob signs up and creates a new article. He modifies the article to
         # create a new version.
         self.create_article('/delete_my_version')
         self.edit_article(
@@ -22,7 +23,7 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertNotEqual(response_2.status_int, 404)
 
     def test_touching_delete_handler_deletes_corresponding_version(self):
-        # Bob sings up and creates a new article. He modifies it several times
+        # Bob signs up and creates a new article. He modifies it several times
         # to create more versions.
         self.create_article('/test_deleting')
         self.edit_article(
@@ -47,8 +48,59 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertNotIn(to_delete_id_1, version_ids)
         self.assertNotIn(to_delete_id_2, version_ids)
 
+    def test_only_authorized_users_can_delete_versions(self):
+        # Bob signs up and creates a new article. He modifies it once to create
+        # a new version.
+        self.create_article('/test_auth_delete')
+        self.edit_article(
+            '/test_auth_delete', body='<p>Will not be able to delete.</p>')
+
+        # Bob sings out.
+        self.testapp.get('/logout')
+
+        fv_id = self.fetch_version_ids('/test_auth_delete')[0]
+
+        # He tries to access delete handler to delete the first version of the
+        # article.
+        self.testapp.get('/_delete/test_auth_delete/_version/{}'.format(fv_id))
+
+        # Version is not deleted.
+        self.assertEqual(len(self.fetch_version_ids('/test_auth_delete')), 2)
+
+    def test_redirect_to_latest_version_after_deleting(self):
+        # Bob signs up and creates an article. He modifies it several times to
+        # create more versions.
+        self.create_article('/test_redirecting')
+        self.edit_article('/test_redirecting', head='Must Redirect')
+        self.edit_article('/test_redirecting', head='Will Redirect')
+        self.edit_article('/test_redirecting', body='<p>In any case.</p>')
+
+        version_ids = self.fetch_version_ids('/test_redirecting')
+
+        # Bob deletes the second version via delete handler. Handler redirects
+        # him to the latest version.
+        response = self.testapp.get(
+            '/_delete/test_redirecting/_version/{}'.format(
+                version_ids[1])).follow()
+        self.assertTitleEqual(response, u'MyWiki — Will Redirect')
+        self.assertEqual(response.pyquery('#wiki-head').text(), 'Will Redirect')
+        self.assertEqual(
+            response.pyquery('#wiki-body').text(), '<p>In any case.</p>')
+
+        # After that Bob deletes the latest version via delete handler. Handler
+        # redirects him to the former third version, which has now become the
+        # latest.
+        response = self.testapp.get(
+            '/_delete/test_redirecting/_version/{}'.format(
+                version_ids[-1])).follow()
+        self.assertTitleEqual(response, u'MyWiki — Will Redirect')
+        self.assertEqual(response.pyquery('#wiki-head').text(), 'Will Redirect')
+        self.assertEqual(response.pyquery('#wiki-body').text(), '')
+
+
+class PointerTest(BaseTestCase):
     def test_when_latest_version_is_deleted_shift_pointer(self):
-        # Bob sings up and creates an article. He modifies it several times
+        # Bob signs up and creates an article. He modifies it several times
         # to add more versions.
         self.create_article('/test_shifting_pointer')
         self.edit_article(
@@ -69,7 +121,7 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertEqual(latest_version.id, ver_ids[1])
 
     def test_when_first_version_is_deleted_shift_pointer(self):
-        # Bob sings up and creates an article. He modifies it several times
+        # Bob signs up and creates an article. He modifies it several times
         # to add more versions.
         self.create_article('/test_shifting_pointer')
         self.edit_article(
@@ -88,22 +140,3 @@ class BasicDeleteVersionTest(BaseTestCase):
         first_version = self.article_model.by_url(
             '/test_shifting_pointer').first_version
         self.assertEqual(first_version.id, ver_ids[1])
-
-    def test_only_authorized_users_can_delete_versions(self):
-        # Bob sings up and creates and article. He modifies it once to create a
-        # new version.
-        self.create_article('/test_auth_delete')
-        self.edit_article(
-            '/test_auth_delete', body='<p>Will not be able to delete.</p>')
-
-        # Bob sings out.
-        self.testapp.get('/logout')
-
-        fv_id = self.fetch_version_ids('/test_auth_delete')[0]
-
-        # He tries to access delete handler to delete the first version of the
-        # article.
-        self.testapp.get('/_delete/test_auth_delete/_version/{}'.format(fv_id))
-
-        # Version is not deleted.
-        self.assertEqual(len(self.fetch_version_ids('/test_auth_delete')), 2)

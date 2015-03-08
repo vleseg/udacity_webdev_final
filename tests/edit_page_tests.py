@@ -124,7 +124,7 @@ class EditPageBehaviourTest(BaseTestCase):
         self.assertTitleEqual(response, u'MyWiki — Kittens')
 
     def test_edit_page_has_link_to_history_in_edit_article_mode(self):
-        # Bob sings up and immediately creates a new article.
+        # Bob signs up and immediately creates a new article.
         new_article = self.create_article('/elephants')
 
         # He clicks "Edit Article" link to open edit page for the newly created
@@ -401,7 +401,7 @@ class VersionEditTest(BaseTestCase):
         self.assertEqual(label.text(), '(current)')
 
     def test_old_version_is_not_changed_when_it_is_edited(self):
-        # Bob sings up and creates a new article.
+        # Bob signs up and creates a new article.
         self.create_article('/earth', body='<p>Our home.</p>')
 
         # He edits the article, to create one more version.
@@ -428,7 +428,7 @@ class VersionEditTest(BaseTestCase):
         self.assertEqual(body.text(), 'Our home.')
 
     def test_clicking_edit_on_version_view_page_edits_this_version(self):
-        # /Bob sings up and creates a new article. He edits it once to add a new
+        # /Bob signs up and creates a new article. He edits it once to add a new
         # version.
         self.create_article('/moon', body='<div>Goddess of mystery.</div>')
         self.edit_article('/moon', head='Selena', body='')

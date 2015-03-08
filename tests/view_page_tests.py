@@ -179,7 +179,7 @@ class TimestampTest(BaseTestCase):
         self.assertIn('(new article)', ts.text())
 
     def test_version_ts_doesnt_have_a_leading_0_in_days_less_than_10(self):
-        # Bob sings up and creates an article.
+        # Bob signs up and creates an article.
         self.create_article('/back_in_the_future')
 
         # Suddenly, time shifts! It is 5th January 1990!

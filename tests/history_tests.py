@@ -178,7 +178,7 @@ class HistoryPageLayoutTest(BaseTestCase):
                 version_timestamp.text(), '%d %B %Y, %H:%M:%S')))
 
     def test_version_ts_doesnt_have_a_leading_0_in_days_less_than_10(self):
-        # Bob sings up and creates an article.
+        # Bob signs up and creates an article.
         self.create_article('/tardis')
 
         # Suddenly, time shifts! It is 7th March 2001!
@@ -224,7 +224,7 @@ class HistoryActionsTest(BaseTestCase):
         self.assertEqual(link_text, 'view')
 
     def test_homepage_view_version_links_work(self):
-        # Bob sings up and goes to home page to initialize it.
+        # Bob signs up and goes to home page to initialize it.
         self.sign_up()
         self.testapp.get('/')
 
@@ -252,7 +252,7 @@ class HistoryActionsTest(BaseTestCase):
         self.assertEqual(head.text(), 'Welcome to MyWiki!')
 
     def test_versions_are_displayed_with_links_to_edit_them(self):
-        # Bob sings up and creates a new article.
+        # Bob signs up and creates a new article.
         self.create_article('/test')
 
         # He edits the page several times to make new versions.
@@ -277,7 +277,7 @@ class HistoryActionsTest(BaseTestCase):
         self.assertEqual(link_text, 'edit')
 
     def test_homepage_edit_version_links_work(self):
-        # Bob sings up and goes to home page to initialize it.
+        # Bob signs up and goes to home page to initialize it.
         self.sign_up()
         self.testapp.get('/')
 
