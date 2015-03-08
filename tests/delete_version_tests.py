@@ -1,6 +1,4 @@
 from base import BaseTestCase
-# Internal project imports.
-from model import Article
 
 
 class BasicDeleteVersionTest(BaseTestCase):
@@ -55,7 +53,7 @@ class BasicDeleteVersionTest(BaseTestCase):
         # to add more versions.
         self.create_article('/test_shifting_pointer')
         self.edit_article(
-            '/test_shifting_pointer', title="Test Deleting Latest Version")
+            '/test_shifting_pointer', head="Test Deleting Latest Version")
         self.edit_article('/test_shifting_pointer')
 
         ver_ids = self.fetch_version_ids('/test_shifting_pointer')
@@ -66,5 +64,6 @@ class BasicDeleteVersionTest(BaseTestCase):
             '/_delete/test_shifting_pointer/_version/{}'.format(ver_ids[-1]))
 
         # Former second (middle) version becomes the latest.
-        latest_version = Article.by_url('/test_shifting_pointer').latest_version
+        latest_version = self.article_model.by_url(
+            '/test_shifting_pointer').latest_version
         self.assertEqual(latest_version.id, ver_ids[1])

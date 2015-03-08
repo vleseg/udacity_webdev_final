@@ -84,6 +84,7 @@ class Article(BaseModel):
 
         return projection
 
+    # TODO: see if I can get rid of this
     def get_latest_version(self):
         return self.project(self.latest_version)
 
@@ -124,6 +125,15 @@ class Version(BaseModel):
     created = db.DateTimeProperty(auto_now_add=True)
     head = db.StringProperty(required=True)
     body = db.TextProperty()
+
+    def delete(self):
+        article = self.article
+        is_latest = self.is_latest()
+        super(Version, self).delete()
+        if is_latest:
+            new_latest = article.version_set.order('-created').get()
+            self.article.latest_version = new_latest
+            self.article.put()
 
     def is_first(self):
         return self.key() == self.article.first_version.key()

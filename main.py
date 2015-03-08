@@ -331,11 +331,18 @@ class EditPage(BaseHandler):
                 {'user': self.user, 'form': form, 'article': article})
             self.render()
 
+
+class DeleteVersion(BaseHandler):
+    def _get(self, url, version):
+        Article.by_url(url, version).version.delete()
+
+
 ARTICLE_RE = r'((?:/[a-zA-Z0-9_-]*)+?)/?'
 handlers = [
     (r'/signup', SignupPage),
     (r'/login', LoginPage),
     (r'/logout', Logout),
+    (r'/_delete' + ARTICLE_RE + r'_version/' + r'(\d+)', DeleteVersion),
     (r'/_edit' + ARTICLE_RE + r'_version/' + r'(\d+)', EditPage),
     (r'/_edit' + ARTICLE_RE, EditPage),
     (r'/_history' + ARTICLE_RE, HistoryPage),
