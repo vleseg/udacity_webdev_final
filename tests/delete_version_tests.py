@@ -97,6 +97,39 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertEqual(response.pyquery('#wiki-body').text(), '')
 
 
+class ErrorTest(BaseTestCase):
+    def test_403_when_attempting_to_delete_the_only_version(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/one_version')
+
+        ver_id = self.fetch_version_ids('/one_version')[0]
+
+        # Bob tries to delete article's sole version. Error 403 is returned
+        # to him.
+        response = self.testapp.get(
+            '/_delete/one_version/_version/{}'.format(ver_id))
+        self.assertEqual(response.status_int, 403)
+
+    def test_do_not_delete_the_only_version(self):
+        # Bob sings up and creates a new article.
+        self.create_article(
+            '/you_cant_delete_me', body='<div>Not worth trying.</div>')
+
+        ver_id = self.fetch_version_ids('/you_cant_delete_me')[0]
+
+        # Bob tries to delete article's sole version.
+        self.testapp.get(
+            '/_delete/you_cant_delete_me/_version/{}'.format(ver_id))
+
+        # Version is not removed: Bob can request the article and its first
+        # version will be returned.
+        article = self.testapp.get('/you_cant_delete_me')
+        self.assertTitleEqual(article, u'MyWiki — You Cant Delete Me')
+        self.assertEqual(article.pyquery('#wiki-head'), 'You Cant Delete Me')
+        self.assertEqual(
+            article.pyquery('#wiki-body'), '<div>Not worth trying.</div>')
+
+
 class PointerTest(BaseTestCase):
     def test_when_latest_version_is_deleted_shift_pointer(self):
         # Bob signs up and creates an article. He modifies it several times
