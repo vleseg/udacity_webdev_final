@@ -75,7 +75,7 @@ class BaseHandler(webapp2.RequestHandler):
             'view': lambda c: c['article'].head,
             'edit': lambda c: '{} (edit)'.format(c['article'].head),
             'history': lambda c: '{} (history)'.format(c['article'].head),
-            'error': lambda c: c['error']
+            'error': lambda c: c['error_text']
         }
         state = self.context['state']
         sep = u'—' if state in ['view', 'edit', 'history'] else '***'
@@ -222,8 +222,8 @@ class ViewPage(BaseHandler):
 
         if exception.status_int == 404:
             self.context.update(
-                {'error': 'Article not found', 'state': 'error',
-                 'logout_url': '/'})
+                {'error_text': 'Article not found', 'state': 'error',
+                 'logout_url': '/', 'error_type': 'not_found'})
             self.response.set_status(404)
         else:
             super(ViewPage, self)._handle_exception(exception, debug)
@@ -333,6 +333,19 @@ class EditPage(BaseHandler):
 
 
 class DeleteVersion(BaseHandler):
+    def _handle_exception(self, exception, debug):
+        self.template = "wiki/error.html"
+
+        if exception.status_int == 403:
+            self.context.update(
+                {'error_text': 'Operation forbidden', 'state': 'error',
+                 'logout_url': '/', 'error_type': 'sole_version_del_attempt'})
+            self.response.set_status(403)
+        else:
+            super(DeleteVersion, self)._handle_exception(exception, debug)
+
+        self.render()
+
     def _get(self, url, version):
         if not self.user:
             pass

@@ -148,8 +148,8 @@ class ErrorTest(BaseTestCase):
         # The application responds with an error, which tells Bob why he can't
         # delete the version.
         message = response.pyquery('h1#error-message')
-        detail = response.pyquery('#error_detail')
-        self.assertEqual(message.text(), "Operation is forbidden")
+        detail = response.pyquery('#error-detail')
+        self.assertEqual(message.text(), 'Operation forbidden')
         self.assertEqual(
             detail.text(), "You can't delete article's sole version.")
 

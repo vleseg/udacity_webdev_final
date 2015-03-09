@@ -35,7 +35,7 @@ class NotFoundErrorPageTest(BaseTestCase):
 
         # However, he sees, that page offers him to log in or sign up to create
         # the article he requested.
-        auth_offer = error_page.pyquery('#auth-offer')
+        auth_offer = error_page.pyquery('#error-detail')
         self.assertTrue(bool(auth_offer))
         self.assertEqual(
             auth_offer.text(),
