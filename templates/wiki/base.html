@@ -3,19 +3,18 @@
 {% block content %}
   <div id="top-panel-wrapper">
     <div id="top-panel">
-      {# TODO: rename 'state' to 'mode' #}
-      {% if state != 'view' or article.url != '/' %}
+      {% if mode != 'view' or article.url != '/' %}
         <span class="top-panel-section">
           <a href="/" id="homepage-link">Home</a>
         </span>
       {% endif %}
-      {% if state == 'view' or state == 'edit' %}
+      {% if mode == 'view' or mode == 'edit' %}
         <span class="top-panel-section">
           <a id="history-link" href="/_history{{ article.url }}">History</a>
         </span>
       {% endif %}
       {% if user %}
-        {% if state == 'view' or state == 'history' %}
+        {% if mode == 'view' or mode == 'history' %}
           <span class="top-panel-section">
           {% if article.version.is_latest() %}
             <a href="/_edit{{ article.url }}"

@@ -16,6 +16,10 @@ textarea {
     padding-right: 5px;
 }
 
+#error-detail, #wiki-body {
+    margin: 1.12em 0
+}
+
 #top-panel-wrapper {
     width: 100%;
     padding-bottom: 10px;
@@ -34,8 +38,6 @@ textarea {
 #username {
     font-weight: bold;
 }
-
-/* TODO: Add margin between head and body in view and error modes */
 
 #wiki-content {
     margin: 15px;

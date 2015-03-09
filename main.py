@@ -70,16 +70,16 @@ class BaseHandler(webapp2.RequestHandler):
 
     # Render & write methods
     def set_title(self):
-        state_to_title = {
+        mode_to_title = {
             'new': 'New Article', 'signup': 'Sign Up', 'login': 'Login',
             'view': lambda c: c['article'].head,
             'edit': lambda c: '{} (edit)'.format(c['article'].head),
             'history': lambda c: '{} (history)'.format(c['article'].head),
             'error': lambda c: c['error_text']
         }
-        state = self.context['state']
-        sep = u'—' if state in ['view', 'edit', 'history'] else '***'
-        title_handler = state_to_title[state]
+        mode = self.context['mode']
+        sep = u'—' if mode in ['view', 'edit', 'history'] else '***'
+        title_handler = mode_to_title[mode]
         if callable(title_handler):
             self.context['title'] = u'MyWiki {0} {1}'.format(
                 sep, title_handler(self.context))
@@ -139,7 +139,7 @@ class SignupPage(AuthPageHandler):
     template = "auth/signup.html"
 
     def dispatch(self):
-        self.context['state'] = 'signup'
+        self.context['mode'] = 'signup'
         super(SignupPage, self).dispatch()
 
     def _get(self):
@@ -178,7 +178,7 @@ class LoginPage(AuthPageHandler):
     template = "auth/login.html"
 
     def dispatch(self):
-        self.context['state'] = 'login'
+        self.context['mode'] = 'login'
         super(LoginPage, self).dispatch()
 
     def _get(self):
@@ -214,7 +214,7 @@ class ViewPage(BaseHandler):
     template = "wiki/view_page.html"
 
     def dispatch(self):
-        self.context.update({'state': 'view', 'logout_url': self.request.url})
+        self.context.update({'mode': 'view', 'logout_url': self.request.url})
         super(ViewPage, self).dispatch()
 
     def _handle_exception(self, exception, debug):
@@ -222,7 +222,7 @@ class ViewPage(BaseHandler):
 
         if exception.status_int == 404:
             self.context.update(
-                {'error_text': 'Article not found', 'state': 'error',
+                {'error_text': 'Article not found', 'mode': 'error',
                  'logout_url': '/', 'error_type': 'not_found'})
             self.response.set_status(404)
         else:
@@ -257,7 +257,7 @@ class HistoryPage(BaseHandler):
 
     def dispatch(self):
         self.context.update(
-            {'state': 'history', 'logout_url': self.request.url})
+            {'mode': 'history', 'logout_url': self.request.url})
         super(HistoryPage, self).dispatch()
 
     def _get(self, url):
@@ -271,7 +271,7 @@ class EditPage(BaseHandler):
 
     def dispatch(self):
         self.context.update(
-            {'state': 'edit',
+            {'mode': 'edit',
              'logout_url': self.request.url.split('_edit')[-1]})
         super(EditPage, self).dispatch()
 
@@ -297,7 +297,7 @@ class EditPage(BaseHandler):
                 article = Article.new(
                     url='/', body=default_body, head='Welcome to MyWiki!')
             else:
-                self.context.update({'state': 'new', 'logout_url': '/'})
+                self.context.update({'mode': 'new', 'logout_url': '/'})
                 form.head.data = self.form_head_from_path(url)
         else:
             form.head.data = article.head
@@ -318,10 +318,10 @@ class EditPage(BaseHandler):
             article = Article.by_url(url, version)
 
         if article is None:
-            self.context['state'] = 'new'
+            self.context['mode'] = 'new'
 
         if form.validate():
-            if self.context['state'] == 'new':
+            if self.context['mode'] == 'new':
                 Article.new(url, form.head.data, form.body.data)
             else:
                 article.new_version(form.head.data, form.body.data)
@@ -338,7 +338,7 @@ class DeleteVersion(BaseHandler):
 
         if exception.status_int == 403:
             self.context.update(
-                {'error_text': 'Operation forbidden', 'state': 'error',
+                {'error_text': 'Operation forbidden', 'mode': 'error',
                  'logout_url': '/', 'error_type': 'sole_version_del_attempt'})
             self.response.set_status(403)
         else:
