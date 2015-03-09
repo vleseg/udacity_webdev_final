@@ -35,6 +35,8 @@ textarea {
     font-weight: bold;
 }
 
+/* TODO: Add margin between head and body in view and error modes */
+
 #wiki-content {
     margin: 15px;
 }

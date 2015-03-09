@@ -3,6 +3,7 @@
 {% block content %}
   <div id="top-panel-wrapper">
     <div id="top-panel">
+      {# TODO: rename 'state' to 'mode' #}
       {% if state != 'view' or article.url != '/' %}
         <span class="top-panel-section">
           <a href="/" id="homepage-link">Home</a>
