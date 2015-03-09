@@ -15,9 +15,11 @@ class BasicDeleteVersionTest(BaseTestCase):
         # He tries to access the delete handler for both versions of the page
         # consecutively. The handler is accessible.
         response_1 = self.testapp.get(
-            '/_delete/delete_my_version/_version/{}'.format(version_ids[0]))
+            '/_delete/delete_my_version/_version/{}'.format(version_ids[0]),
+            expect_errors=True)
         response_2 = self.testapp.get(
-            '/_delete/delete_my_version/_version/{}'.format(version_ids[1]))
+            '/_delete/delete_my_version/_version/{}'.format(version_ids[1]),
+            expect_errors=True)
 
         self.assertNotEqual(response_1.status_int, 404)
         self.assertNotEqual(response_2.status_int, 404)
@@ -107,7 +109,8 @@ class ErrorTest(BaseTestCase):
         # Bob tries to delete article's sole version. Error 403 is returned
         # to him.
         response = self.testapp.get(
-            '/_delete/one_version/_version/{}'.format(ver_id))
+            '/_delete/one_version/_version/{}'.format(ver_id),
+            expect_errors=True)
         self.assertEqual(response.status_int, 403)
 
     def test_do_not_delete_the_only_version(self):
@@ -119,15 +122,17 @@ class ErrorTest(BaseTestCase):
 
         # Bob tries to delete article's sole version.
         self.testapp.get(
-            '/_delete/you_cant_delete_me/_version/{}'.format(ver_id))
+            '/_delete/you_cant_delete_me/_version/{}'.format(ver_id),
+            expect_errors=True)
 
         # Version is not removed: Bob can request the article and its first
         # version will be returned.
         article = self.testapp.get('/you_cant_delete_me')
         self.assertTitleEqual(article, u'MyWiki — You Cant Delete Me')
-        self.assertEqual(article.pyquery('#wiki-head'), 'You Cant Delete Me')
         self.assertEqual(
-            article.pyquery('#wiki-body'), '<div>Not worth trying.</div>')
+            article.pyquery('#wiki-head').text(), 'You Cant Delete Me')
+        self.assertEqual(
+            article.pyquery('#wiki-body').text(), 'Not worth trying.')
 
 
 class PointerTest(BaseTestCase):

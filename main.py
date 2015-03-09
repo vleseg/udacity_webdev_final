@@ -337,7 +337,11 @@ class DeleteVersion(BaseHandler):
         if not self.user:
             pass
         else:
-            Article.by_url(url, version).version.delete()
+            version = Article.by_url(url, version).version
+            # If it is article's sole version.
+            if version.is_first() and version.is_latest():
+                self.abort(403)
+            version.delete()
             self.redirect(url)
 
 
