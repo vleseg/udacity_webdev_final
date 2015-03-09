@@ -338,6 +338,7 @@ class DeleteVersion(BaseHandler):
             pass
         else:
             Article.by_url(url, version).version.delete()
+            self.redirect(url)
 
 
 ARTICLE_RE = r'((?:/[a-zA-Z0-9_-]*)+?)/?'

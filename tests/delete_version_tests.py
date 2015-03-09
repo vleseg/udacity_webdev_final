@@ -84,8 +84,7 @@ class BasicDeleteVersionTest(BaseTestCase):
                 version_ids[1])).follow()
         self.assertTitleEqual(response, u'MyWiki — Will Redirect')
         self.assertEqual(response.pyquery('#wiki-head').text(), 'Will Redirect')
-        self.assertEqual(
-            response.pyquery('#wiki-body').text(), '<p>In any case.</p>')
+        self.assertEqual(response.pyquery('#wiki-body').text(), 'In any case.')
 
         # After that Bob deletes the latest version via delete handler. Handler
         # redirects him to the former third version, which has now become the
