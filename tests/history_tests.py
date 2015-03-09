@@ -304,3 +304,72 @@ class HistoryActionsTest(BaseTestCase):
         self.assertTitleEqual(version_2, u'MyWiki — Welcome to MyWiki! (edit)')
         form = version_2.form
         self.assertEqual(form['head'].value, 'Welcome to MyWiki!')
+
+    def test_versions_are_displayed_with_links_to_delete_them(self):
+        # Bob signs up and creates an article. He edits it several times to make
+        # more versions.
+        self.create_article('/red')
+        self.edit_article('/red', body='<p>Like blood.</p>')
+        self.edit_article('/red', body='<p>Like roses.</p>')
+
+        urls_from_db = [
+            '/_delete/red/_version/{}'.format(vid)
+            for vid in self.fetch_version_ids('/red')]
+
+        # Bob goes to new article's history page. There are three entries. All
+        # of them have a "delete" link associated with them.
+        history_page = self.testapp.get('/_history/red')
+        urls_from_page = [
+            link.attrib['href']
+            for link in history_page.pyquery('a.version-delete-link')]
+
+        self.assertEqual(len(urls_from_page), 4)
+        self.assertSetEqual(set(urls_from_db), set(urls_from_page))
+
+        link_text = history_page.pyquery('a.version-delete-link')[0].text()
+        self.assertEqual(link_text, 'delete')
+
+    def test_delete_link_is_not_displayed_for_the_only_version(self):
+        # Bob signs up and creates a new article.
+        self.create_article('/green')
+
+        # He opens article's history page. There is only one entry. There is no
+        # "delete" link near to it since it is the only version of this article.
+        history_page = self.testapp.get('/_history/green')
+
+        self.assertRaises(
+            AssertionError, self.assertHasLink, history_page,
+            'a.version-delete-link')
+
+    def test_delete_link_is_not_displayed_for_unauthorized_users(self):
+        # Bob signs up and creates a new article. He edits it several times to
+        # make more versions.
+        self.create_article('/blue')
+        self.edit_article('/blue', body='<p>Like sky.</p>')
+        self.edit_article('/blue', body='<p>Like her eyes.</p>')
+
+        # Bob sings out and immediately opens the history page for the article.
+        self.testapp.get('/logout')
+        history_page = self.testapp.get('/_history/green')
+
+        # There are no "delete" links present at all.
+        self.assertRaises(
+            AssertionError, self.assertHasLink, history_page,
+            'a.version-delete-link')
+
+    def test_homepage_delete_version_links_work(self):
+        # Bob signs up and immediately edits MyWiki's homepage to initialize it
+        # and to create one more version of it.
+        self.sign_up()
+        self.edit_article('/', title='Welcome to YourWiki!')
+
+        # Bob then opens the history page. There are two versions, each has
+        # "delete" links.
+        history_page = self.testapp.get('/_history/')
+        delete_links = history_page.pyquery('a.version-delete-link')
+        self.assertEqual(len(delete_links), 2)
+
+        # Those links work.
+        history_page.click(description='delete', index=0)
+        version_ids = self.fetch_version_ids('/')
+        self.assertEqual(len(version_ids), 1)
