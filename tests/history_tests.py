@@ -323,23 +323,22 @@ class HistoryActionsTest(BaseTestCase):
             link.attrib['href']
             for link in history_page.pyquery('a.version-delete-link')]
 
-        self.assertEqual(len(urls_from_page), 4)
+        self.assertEqual(len(urls_from_page), 3)
         self.assertSetEqual(set(urls_from_db), set(urls_from_page))
 
-        link_text = history_page.pyquery('a.version-delete-link')[0].text()
+        link_text = history_page.pyquery('a.version-delete-link')[0].text
         self.assertEqual(link_text, 'delete')
 
     def test_delete_link_is_not_displayed_for_the_only_version(self):
         # Bob signs up and creates a new article.
-        self.create_article('/green')
+        article = self.create_article('/green')
 
         # He opens article's history page. There is only one entry. There is no
         # "delete" link near to it since it is the only version of this article.
-        history_page = self.testapp.get('/_history/green')
+        history_page = article.click(linkid='history-link')
+        delete_link = history_page.pyquery('a.version-delete-link')
 
-        self.assertRaises(
-            AssertionError, self.assertHasLink, history_page,
-            'a.version-delete-link')
+        self.assertEqual(len(delete_link), 0)
 
     def test_delete_link_is_not_displayed_for_unauthorized_users(self):
         # Bob signs up and creates a new article. He edits it several times to
@@ -350,7 +349,7 @@ class HistoryActionsTest(BaseTestCase):
 
         # Bob sings out and immediately opens the history page for the article.
         self.testapp.get('/logout')
-        history_page = self.testapp.get('/_history/green')
+        history_page = self.testapp.get('/_history/blue')
 
         # There are no "delete" links present at all.
         self.assertRaises(
@@ -361,7 +360,7 @@ class HistoryActionsTest(BaseTestCase):
         # Bob signs up and immediately edits MyWiki's homepage to initialize it
         # and to create one more version of it.
         self.sign_up()
-        self.edit_article('/', title='Welcome to YourWiki!')
+        self.edit_article('/', head='Welcome to YourWiki!')
 
         # Bob then opens the history page. There are two versions, each has
         # "delete" links.

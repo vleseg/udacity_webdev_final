@@ -21,6 +21,13 @@
           <a class="version-edit-link"
              href="{{ edit_version_url(article.url, version.id) }}">edit</a>
         </span>
+        {# if this is the only version OR if user is unauthorized#}
+        {% if not (loop.first and loop.last) and user -%}
+          <span class="history-element-section">
+            <a class="version-delete-link"
+               href="{{ delete_version_url(article.url, version.id) }}">delete</a>
+          </span>
+        {%- endif %}
       </li>
     {% endfor %}
   </ul>
