@@ -98,3 +98,26 @@ class NotFoundErrorPageTest(BaseTestCase):
         # He notices, that this page does not have a link to history.
         history_link = error_page.pyquery('a#history-link')
         self.assertFalse(bool(history_link))
+
+
+class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):
+    def test_error_page_displays_correctly_for_logged_in_user(self):
+        # Bob sings up and immediately creates an article.
+        self.create_article('/cyan')
+        ver_id = self.fetch_version_ids('/cyan')[0]
+
+        # After that he tries to delete article's single version by direct url.
+        response = self.testapp.get(
+            '/_delete/cyan/_version/{}'.format(ver_id), expect_errors=True)
+
+        # Error page is displayed to him. This page has bob's name, link to
+        # homepage and link to logout handler.
+        username = response.pyquery('span#username')
+        homepage_link = response.pyquery('a#homepage-link')
+        logout_link = response.pyquery('a#logout-link')
+
+        self.assertTrue(bool(username))
+        self.assertTrue(bool(homepage_link))
+        self.assertTrue(bool(logout_link))
+
+        self.assertEqual(username.text(), 'bob')
