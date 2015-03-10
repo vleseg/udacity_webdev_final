@@ -339,7 +339,8 @@ class DeleteVersion(BaseHandler):
         if exception.status_int == 403:
             self.context.update(
                 {'error_text': 'Operation forbidden', 'mode': 'error',
-                 'logout_url': '/', 'error_type': 'sole_version_del_attempt'})
+                 'logout_url': '/', 'error_type': 'sole_version_del_attempt',
+                 'user': self.user})
             self.response.set_status(403)
         else:
             super(DeleteVersion, self)._handle_exception(exception, debug)
