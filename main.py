@@ -86,6 +86,14 @@ class BaseHandler(webapp2.RequestHandler):
         else:
             self.context['title'] = u'MyWiki {0} {1}'.format(sep, title_handler)
 
+    def render_404(self):
+        self.template = 'wiki/error.html'
+        self.context.update(
+            {'error_text': 'Article not found', 'mode': 'error',
+             'logout_url': '/', 'error_type': 'not_found'})
+        self.response.set_status(404)
+        self.render()
+
     @staticmethod
     def render_str(template, **context):
         t = jinja_environment.get_template(template)
@@ -218,17 +226,10 @@ class ViewPage(BaseHandler):
         super(ViewPage, self).dispatch()
 
     def _handle_exception(self, exception, debug):
-        self.template = "wiki/error.html"
-
         if exception.status_int == 404:
-            self.context.update(
-                {'error_text': 'Article not found', 'mode': 'error',
-                 'logout_url': '/', 'error_type': 'not_found'})
-            self.response.set_status(404)
+            self.render_404()
         else:
             super(ViewPage, self)._handle_exception(exception, debug)
-
-        self.render()
 
     def _get(self, url, version=None):
         if version is None:
@@ -260,8 +261,20 @@ class HistoryPage(BaseHandler):
             {'mode': 'history', 'logout_url': self.request.url})
         super(HistoryPage, self).dispatch()
 
+    def _handle_exception(self, exception, debug):
+        if exception.status_int == 404:
+            self.render_404()
+        else:
+            super(HistoryPage, self)._handle_exception(exception, debug)
+
     def _get(self, url):
         article = Article.by_url(url)
+        if article is None:
+            if self.user is None:
+                self.abort(404)
+            else:
+                self.redirect('/_edit' + url, abort=True)
+
         self.context.update({'article': article, 'user': self.user})
         self.render()
 

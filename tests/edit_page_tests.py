@@ -155,6 +155,21 @@ class NewArticleTest(BaseTestCase):
         # The edit page opens up.
         self.assertTitleEqual(response, 'MyWiki *** New Article')
 
+    # nea = non-existent article
+    def test_requesting_history_of_nea_by_authorized_user_opens_edit_page(self):
+        # Bob sings up and tries to request history of an article, that doesn't
+        # exist yet.
+        self.sign_up()
+        response = self.testapp.get('/_history/i_never_existed').follow()
+
+        # The edit page opens up.
+        self.assertTitleEqual(response, 'MyWiki *** New Article')
+
+        # It has a pre-filled "head" field, whose content is formed from
+        # requested article's url.
+        head_field = response.form['head']
+        self.assertEqual(head_field.value, 'I Never Existed')
+
     def test_edit_page_makes_up_a_title_from_path(self):
         # Bob signs up and tries to request an article, that doesn't exist yet.
         self.sign_up()

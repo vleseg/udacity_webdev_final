@@ -19,6 +19,18 @@ class NotFoundErrorPageTest(BaseTestCase):
         # There is also a link to the homepage.
         self.assertHasLinkToHomepage(response)
 
+    def test_404_when_history_for_ne_page_is_requested_by_anonymous_user(self):
+        # Bob tries to fetch a history page for an article, that certainly does
+        # not exist.
+        response = self.testapp.get(
+            '/_history/this_never_was', expect_errors=True)
+
+        # He receives a 404 and a brief error text.
+        self.assertTitleEqual(response, 'MyWiki *** Article not found')
+        self.assertEqual(response.status_int, 404)
+        self.assertEqual(
+            response.pyquery('#error-message').text(), 'Article not found')
+
     def logging_out_at_error_page_redirects_to_homepage(self):
         # Bob tries to fetch an article, that certainly does not exist. He
         # receives a 404.
