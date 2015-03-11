@@ -1,8 +1,11 @@
 # coding=utf-8
+from random import randint
+# Internal project imports
 from base import BaseTestCase
 
 
 class NotFoundErrorPageTest(BaseTestCase):
+    # TODO: move this to view_page_tests
     def test_404_is_returned_when_nonexistent_page_is_requested(self):
         # Bob tries to fetch an article, that certainly does not exist.
         response = self.testapp.get('/i_do_not_exist', expect_errors=True)
@@ -19,6 +22,7 @@ class NotFoundErrorPageTest(BaseTestCase):
         # There is also a link to the homepage.
         self.assertHasLinkToHomepage(response)
 
+    # TODO: move this to view_page_tests
     def test_404_when_history_for_ne_page_is_requested_by_anonymous_user(self):
         # Bob tries to fetch a history page for an article, that certainly does
         # not exist.
@@ -110,6 +114,30 @@ class NotFoundErrorPageTest(BaseTestCase):
         # He notices, that this page does not have a link to history.
         history_link = error_page.pyquery('a#history-link')
         self.assertFalse(bool(history_link))
+
+
+class VersionNotFoundErrorPageTest(BaseTestCase):
+    def test_error_page_displays_correctly(self):
+        # Bob signs up and creates an article.
+        self.create_article('/navy_blue')
+
+        real_version_id = self.fetch_version_ids('/navy_blue')[0]
+        fake_version_id = randint(0, 10)
+        while real_version_id == fake_version_id:
+            fake_version_id = randint(0, 10)
+
+        # Bob tries to delete article's version, which certainly does not exist
+        # via direct url. He receives an error page.
+        error_page = self.testapp.get('/navy_blue')
+
+        # This page has a correct title and head.
+        head = error_page.pyquery('#error-message')
+        body = error_page.pyquery('#error-detail')
+
+        self.assertTitleEqual('MyWiki *** Version not found')
+        self.assertEqual(head.text(), 'Version not found')
+        self.assertEqual(
+            body.text(), 'Version with the requested id does not exist.')
 
 
 class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):

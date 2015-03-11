@@ -1,4 +1,6 @@
 # coding=utf-8
+from random import randint
+# Internal project imports
 from base import BaseTestCase
 
 
@@ -134,6 +136,7 @@ class ErrorTest(BaseTestCase):
         self.assertEqual(
             article.pyquery('#wiki-body').text(), 'Not worth trying.')
 
+    # TODO: move this to error_page_tests
     def test_error_message_tells_that_you_cant_delete_the_only_version(self):
         # Bob sings up and creates a new article.
         self.create_article('/lone_version')
@@ -152,6 +155,22 @@ class ErrorTest(BaseTestCase):
         self.assertEqual(message.text(), 'Operation forbidden')
         self.assertEqual(
             detail.text(), "You can't delete article's sole version.")
+
+    def test_404_when_trying_to_delete_nonexistent_version(self):
+        # Bob signs up and creates an article.
+        self.create_article('/delete_random')
+
+        real_version_id = self.fetch_version_ids('/delete_random')[0]
+        fake_version_id = randint(0, 10)
+        while fake_version_id == real_version_id:
+            fake_version_id = randint(0, 10)
+        # Bob tries to delete version that certainly does not exist via direct
+        # url
+        response = self.testapp.get(
+            '/_delete/delete_random/_version/{}'.format(fake_version_id),
+            expect_errors=True)
+        # He gets a 404.
+        self.assertEqual(response.status_int, 404)
 
 
 class PointerTest(BaseTestCase):
