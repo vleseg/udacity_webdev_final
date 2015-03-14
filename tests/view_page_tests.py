@@ -47,6 +47,22 @@ class BasicViewPageTest(BaseTestCase):
             new_article, '#history-link', text='History',
             href='/_history/kittens')
 
+    def test_404_is_returned_when_nonexistent_page_is_requested(self):
+        # Bob tries to fetch an article, that certainly does not exist.
+        response = self.testapp.get('/i_do_not_exist', expect_errors=True)
+
+        # He receives a 404 and a brief error text.
+        self.assertTitleEqual(response, 'MyWiki *** Article not found')
+        self.assertEqual(response.status_int, 404)
+        self.assertEqual(
+            response.pyquery('#error-message').text(), 'Article not found')
+
+        # Top panel is present on the page too.
+        self.assertEqual(len(response.pyquery('#top-panel')), 1)
+
+        # There is also a link to the homepage.
+        self.assertHasLinkToHomepage(response)
+
 
 class TimestampTest(BaseTestCase):
     def test_there_is_a_timestamp_of_currently_viewed_version(self):

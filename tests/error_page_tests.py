@@ -5,36 +5,6 @@ from base import BaseTestCase
 
 
 class NotFoundErrorPageTest(BaseTestCase):
-    # TODO: move this to view_page_tests
-    def test_404_is_returned_when_nonexistent_page_is_requested(self):
-        # Bob tries to fetch an article, that certainly does not exist.
-        response = self.testapp.get('/i_do_not_exist', expect_errors=True)
-
-        # He receives a 404 and a brief error text.
-        self.assertTitleEqual(response, 'MyWiki *** Article not found')
-        self.assertEqual(response.status_int, 404)
-        self.assertEqual(
-            response.pyquery('#error-message').text(), 'Article not found')
-
-        # Top panel is present on the page too.
-        self.assertEqual(len(response.pyquery('#top-panel')), 1)
-
-        # There is also a link to the homepage.
-        self.assertHasLinkToHomepage(response)
-
-    # TODO: move this to view_page_tests
-    def test_404_when_history_for_ne_page_is_requested_by_anonymous_user(self):
-        # Bob tries to fetch a history page for an article, that certainly does
-        # not exist.
-        response = self.testapp.get(
-            '/_history/this_never_was', expect_errors=True)
-
-        # He receives a 404 and a brief error text.
-        self.assertTitleEqual(response, 'MyWiki *** Article not found')
-        self.assertEqual(response.status_int, 404)
-        self.assertEqual(
-            response.pyquery('#error-message').text(), 'Article not found')
-
     def logging_out_at_error_page_redirects_to_homepage(self):
         # Bob tries to fetch an article, that certainly does not exist. He
         # receives a 404.
@@ -163,3 +133,22 @@ class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):
         self.assertTrue(bool(logout_link))
 
         self.assertEqual(username.text(), 'bob')
+
+    def test_error_message_tells_that_you_cant_delete_the_only_version(self):
+        # Bob sings up and creates a new article.
+        self.create_article('/lone_version')
+
+        ver_id = self.fetch_version_ids('/lone_version')[0]
+
+        # Bob tries to delete article's only version.
+        response = self.testapp.get(
+            '/_delete/lone_version/_version/{}'.format(ver_id),
+            expect_errors=True)
+
+        # The application responds with an error, which tells Bob why he can't
+        # delete the version.
+        message = response.pyquery('h1#error-message')
+        detail = response.pyquery('#error-detail')
+        self.assertEqual(message.text(), 'Operation forbidden')
+        self.assertEqual(
+            detail.text(), "You can't delete article's sole version.")

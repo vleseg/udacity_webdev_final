@@ -84,6 +84,18 @@ class BasicHistoryPageTest(BaseTestCase):
         versions = history_page.pyquery('ul#versions>li')
         self.assertEqual(len(versions), 2)
 
+    def test_404_when_history_for_ne_page_is_requested_by_anonymous_user(self):
+        # Bob tries to fetch a history page for an article, that certainly does
+        # not exist.
+        response = self.testapp.get(
+            '/_history/this_never_was', expect_errors=True)
+
+        # He receives a 404 and a brief error text.
+        self.assertTitleEqual(response, 'MyWiki *** Article not found')
+        self.assertEqual(response.status_int, 404)
+        self.assertEqual(
+            response.pyquery('#error-message').text(), 'Article not found')
+
 
 class HistoryPageLayoutTest(BaseTestCase):
     def test_history_page_has_a_link_to_edit_articles_current_version(self):

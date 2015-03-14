@@ -136,26 +136,6 @@ class ErrorTest(BaseTestCase):
         self.assertEqual(
             article.pyquery('#wiki-body').text(), 'Not worth trying.')
 
-    # TODO: move this to error_page_tests
-    def test_error_message_tells_that_you_cant_delete_the_only_version(self):
-        # Bob sings up and creates a new article.
-        self.create_article('/lone_version')
-
-        ver_id = self.fetch_version_ids('/lone_version')[0]
-
-        # Bob tries to delete article's only version.
-        response = self.testapp.get(
-            '/_delete/lone_version/_version/{}'.format(ver_id),
-            expect_errors=True)
-
-        # The application responds with an error, which tells Bob why he can't
-        # delete the version.
-        message = response.pyquery('h1#error-message')
-        detail = response.pyquery('#error-detail')
-        self.assertEqual(message.text(), 'Operation forbidden')
-        self.assertEqual(
-            detail.text(), "You can't delete article's sole version.")
-
     def test_404_when_trying_to_delete_nonexistent_version(self):
         # Bob signs up and creates an article.
         self.create_article('/delete_random')
