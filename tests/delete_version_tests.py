@@ -155,8 +155,6 @@ class ErrorTest(BaseTestCase):
         self.assertEqual(response.status_int, 404)
 
     # TODO: check if version and article requested for deleting are related
-    # TODO: generalize exception handling
-    # TODO: on error page offer to create the requested article
     def test_404_when_trying_to_delete_version_of_nonexistent_article(self):
         # Bob signs up and immediately checks if he can delete a nonexistent
         # version of a nonexistent article.

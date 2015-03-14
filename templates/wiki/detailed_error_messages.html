@@ -1,0 +1,18 @@
+{% macro not_found() -%}
+  <a id="login-offer-link" href="/login?return_to=/_edit{{ url }}">Sign in</a> or
+  <a id="signup-offer-link" href="/signup?return_to=/_edit{{ url }}">sign up</a>
+  to create the article you requested.
+{%- endmacro %}
+
+{% macro sole_version_del_attempt() -%}
+  You can't delete article's sole version.
+{%- endmacro %}
+
+{% macro version_not_found() -%}
+  Version with the requested id does not exist.
+{%- endmacro %}
+
+{% macro not_found_dv() -%}
+  You can create this article;
+  <a id="new-article-offer-link" href="/_edit{{ url }}">click here</a> to do so.
+{%- endmacro %}

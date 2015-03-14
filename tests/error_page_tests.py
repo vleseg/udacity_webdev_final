@@ -88,6 +88,7 @@ class NotFoundErrorPageTest(BaseTestCase):
     def test_404_when_del_ver_of_ne_article_offers_to_create_this_article(self):
         # Bob sings up and immediately tries to delete a version of non-existent
         # article by direct url.
+        self.sign_up()
         response = self.testapp.get(
             '/_delete/i_do_not_exist/_version/{}'.format(randint(0, 10)),
             expect_errors=True)
@@ -104,7 +105,7 @@ class NotFoundErrorPageTest(BaseTestCase):
         self.assertEqual(
             body.text(), 'You can create this article; click here to do so.')
         self.assertEqual(offer_link.text(), 'click here')
-        self.assertEqual(offer_link.attrib['href'], '/_edit/i_do_not_exist')
+        self.assertEqual(offer_link.attr('href'), '/_edit/i_do_not_exist')
 
 
 class VersionNotFoundErrorPageTest(BaseTestCase):

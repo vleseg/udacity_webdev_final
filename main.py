@@ -5,7 +5,7 @@ import webapp2
 # Project-specific imports
 from forms import EditForm, LoginForm, SignupForm
 from hashutils import encrypt, make_hash, make_salt
-from jinjacfg import jinja_environment
+from jinjacfg import jinja_environment, resolve_msg_from_errtype
 from model import GLOBAL_PARENT, User, Session, Article, Version
 
 # Setup logging
@@ -75,7 +75,7 @@ class BaseHandler(webapp2.RequestHandler):
             'view': lambda c: c['article'].head,
             'edit': lambda c: '{} (edit)'.format(c['article'].head),
             'history': lambda c: '{} (history)'.format(c['article'].head),
-            'error': lambda c: c['error_text']
+            'error': lambda c: resolve_msg_from_errtype(c['error_type'])
         }
         mode = self.context['mode']
         sep = u'—' if mode in ['view', 'edit', 'history'] else '***'
@@ -86,11 +86,10 @@ class BaseHandler(webapp2.RequestHandler):
         else:
             self.context['title'] = u'MyWiki {0} {1}'.format(sep, title_handler)
 
-    def render_404(self):
+    def render_regular_not_found(self):
         self.template = 'wiki/error.html'
         self.context.update(
-            {'error_text': 'Article not found', 'mode': 'error',
-             'logout_url': '/', 'error_type': 'not_found'})
+            {'mode': 'error', 'error_type': 'not_found', 'logout_url': '/'})
         self.response.set_status(404)
         self.render()
 
@@ -227,7 +226,7 @@ class ViewPage(BaseHandler):
 
     def _handle_exception(self, exception, debug):
         if exception.status_int == 404:
-            self.render_404()
+            self.render_regular_not_found()
         else:
             super(ViewPage, self)._handle_exception(exception, debug)
 
@@ -244,7 +243,7 @@ class ViewPage(BaseHandler):
                 article = Article.new(
                     url='/', body=default_body, head='Welcome to MyWiki!')
             elif self.user is None:
-                self.context['edit_url'] = '/_edit' + url
+                self.context['url'] = url
                 self.abort(404)
             else:
                 self.redirect('/_edit' + url, abort=True)
@@ -263,7 +262,7 @@ class HistoryPage(BaseHandler):
 
     def _handle_exception(self, exception, debug):
         if exception.status_int == 404:
-            self.render_404()
+            self.render_regular_not_found()
         else:
             super(HistoryPage, self)._handle_exception(exception, debug)
 
@@ -349,18 +348,19 @@ class DeleteVersion(BaseHandler):
     def _handle_exception(self, exception, debug):
         self.template = "wiki/error.html"
 
+        self.response.set_status(exception.status_int)
+        self.context.update({'mode': 'error', 'user': self.user})
         if exception.status_int == 403:
-            self.context.update(
-                {'error_text': 'Operation forbidden', 'mode': 'error',
-                 'logout_url': '/', 'error_type': 'sole_version_del_attempt',
-                 'user': self.user})
-            self.response.set_status(403)
+            self.context.update({
+                'error_type': 'sole_version_del_attempt', 'logout_url': '/'
+            })
         elif exception.status_int == 404:
-            self.context.update(
-                {'error_text': 'Version not found', 'mode': 'error',
-                 'logout_url': '/', 'error_type': 'version_not_found',
-                 'user': self.user})
-            self.response.set_status(404)
+            error_type = 'not_found_dv'
+            if self.context.pop('article_exists', False):
+                error_type = 'version_not_found'
+            self.context.update({
+                'error_type': error_type, 'logout_url': '/'
+            })
         else:
             super(DeleteVersion, self)._handle_exception(exception, debug)
 
@@ -372,10 +372,12 @@ class DeleteVersion(BaseHandler):
         else:
             article = Article.by_url(url, project_with_version=False)
             if article is None:
+                self.context['url'] = url
                 self.abort(404)
 
             version = Version.by_id(int(version_id))
             if version is None:
+                self.context['article_exists'] = True
                 self.abort(404)
 
             # If it is article's sole version.
