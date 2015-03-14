@@ -370,7 +370,10 @@ class DeleteVersion(BaseHandler):
         if not self.user:
             pass
         else:
-            # article = Article.by_url(url, project_with_version=False)
+            article = Article.by_url(url, project_with_version=False)
+            if article is None:
+                self.abort(404)
+
             version = Version.by_id(int(version_id))
             if version is None:
                 self.abort(404)

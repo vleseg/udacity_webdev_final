@@ -160,8 +160,10 @@ class ErrorTest(BaseTestCase):
     def test_404_when_trying_to_delete_version_of_nonexistent_article(self):
         # Bob signs up and immediately checks if he can delete a nonexistent
         # version of a nonexistent article.
+        self.sign_up()
         response = self.testapp.get(
-            '/_delete/i_do_not_exist/_version/{}'.format(randint(0, 10))
+            '/_delete/i_do_not_exist/_version/{}'.format(randint(0, 10)),
+            expect_errors=True
         )
 
         # Of course he can't.
