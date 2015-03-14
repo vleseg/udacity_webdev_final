@@ -85,6 +85,27 @@ class NotFoundErrorPageTest(BaseTestCase):
         history_link = error_page.pyquery('a#history-link')
         self.assertFalse(bool(history_link))
 
+    def test_404_when_del_ver_of_ne_article_offers_to_create_this_article(self):
+        # Bob sings up and immediately tries to delete a version of non-existent
+        # article by direct url.
+        response = self.testapp.get(
+            '/_delete/i_do_not_exist/_version/{}'.format(randint(0, 10)),
+            expect_errors=True)
+
+        # Of course, he gets an error.
+        head = response.pyquery('#error-message')
+        self.assertTitleEqual(response, 'MyWiki *** Article not found')
+        self.assertEqual(head.text(), 'Article not found')
+
+        # Error message offers Bob to create a new article with the requested
+        # url.
+        body = response.pyquery('#error-detail')
+        offer_link = response.pyquery('a#new-article-offer-link')
+        self.assertEqual(
+            body.text(), 'You can create this article; click here to do so.')
+        self.assertEqual(offer_link.text(), 'click here')
+        self.assertEqual(offer_link.attrib['href'], '/_edit/i_do_not_exist')
+
 
 class VersionNotFoundErrorPageTest(BaseTestCase):
     def test_error_page_displays_correctly(self):
