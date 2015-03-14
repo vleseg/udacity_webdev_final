@@ -193,6 +193,27 @@ class ErrorTest(BaseTestCase):
         self.assertEqual(len(version_ids_1), 2)
         self.assertEqual(len(version_ids_2), 2)
 
+    def test_403_when_unauthorized_user_tries_to_delete_a_version(self):
+        # Bob sings up and creates an article. He edits it to add a spare
+        # version.
+        self.create_article('/bugs')
+        self.edit_article('/bugs', body='<div>A lot of them.</div>')
+
+        version_ids = self.fetch_version_ids('/bugs')
+
+        # Bob signs out and then tries to delete one of article's version via
+        # direct url.
+        self.testapp.get('/logout')
+        response = self.testapp.get(
+            '/_delete/bugs/_version/{}'.format(version_ids[0]))
+
+        # A 403 error is delivered to him.
+        self.assertEqual(response.status_int, 403)
+
+        # Article's versions are not affected.
+        version_ids = self.fetch_version_ids('/bugs')
+        self.assertEqual(len(version_ids), 2)
+
 
 class PointerTest(BaseTestCase):
     def test_when_latest_version_is_deleted_shift_pointer(self):

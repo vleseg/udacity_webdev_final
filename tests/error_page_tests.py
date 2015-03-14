@@ -174,3 +174,40 @@ class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):
         self.assertEqual(message.text(), 'Operation forbidden')
         self.assertEqual(
             detail.text(), "You can't delete article's sole version.")
+
+
+class UnauthorizedDeleteAttemptErrorTest(BaseTestCase):
+    def test_error_message_offers_unauthorized_user_to_sign_up_or_login(self):
+        # Bob sings up and creates a new article. He edits it to add a spare
+        # version.
+        self.create_article('/people')
+        self.edit_article('/people', body='<div>All so different.</div>')
+
+        version_ids = self.fetch_version_ids('/people')
+
+        # Bob signs out and tries to delete one of article's version via direct
+        # url.
+        error_page = self.testapp.get(
+            '/_delete/people/_version/{}'.format(version_ids[0]))
+
+        # Error page is served for Bob.
+        head = error_page.pyquery('#error-message')
+        body = error_page.pyquery('#error-detail')
+        self.assertTitleEqual(error_page, 'MyWiki *** Operation forbidden')
+        self.assertEqual(head.text(), 'Operation forbidden')
+        self.assertEqual(
+            body.text(),
+            "This operation is not allowed for unauthorized users. Sign up or "
+            "log in and try again.")
+
+        # Detailed error message contains links to sign up and login page.
+        signup_offer_link = error_page.pyquery('#signup-offer-link')
+        login_offer_link = error_page.pyquery('a#login-offer-link')
+
+        self.assertEqual(signup_offer_link.text(), 'Sign up')
+        self.assertEqual(login_offer_link.text(), 'sign in')
+        response_1 = error_page.click(linkid='signup-offer-link')
+        response_2 = error_page.click(linkid='login-offer-link')
+
+        self.assertTitleEqual(response_1, 'MyWiki *** Sign Up')
+        self.assertTitleEqual(response_2, 'MyWiki *** Login')
