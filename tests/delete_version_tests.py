@@ -154,6 +154,19 @@ class ErrorTest(BaseTestCase):
         # He gets a 404.
         self.assertEqual(response.status_int, 404)
 
+    # TODO: check if version and article requested for deleting are related
+    # TODO: generalize exception handling
+    # TODO: on error page offer to create the requested article
+    def test_404_when_trying_to_delete_version_of_nonexistent_article(self):
+        # Bob signs up and immediately checks if he can delete a nonexistent
+        # version of a nonexistent article.
+        response = self.testapp.get(
+            '/_delete/i_do_not_exist/_version/{}'.format(randint(0, 10))
+        )
+
+        # Of course he can't.
+        self.assertEqual(response.status_int, 404)
+
 
 class PointerTest(BaseTestCase):
     def test_when_latest_version_is_deleted_shift_pointer(self):
