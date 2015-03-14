@@ -128,6 +128,9 @@ class Version(BaseModel):
     def by_id(cls, version_id):
         return cls.get_by_id(version_id, parent=GLOBAL_PARENT)
 
+    def belongs_to_article(self, article):
+        return self.article.key() == article.key()
+
     def delete(self):
         article = self.article
         is_latest = self.is_latest()

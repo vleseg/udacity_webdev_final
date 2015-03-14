@@ -376,7 +376,8 @@ class DeleteVersion(BaseHandler):
                 self.abort(404)
 
             version = Version.by_id(int(version_id))
-            if version is None:
+
+            if version is None or not version.belongs_to_article(article):
                 self.context['article_exists'] = True
                 self.abort(404)
 

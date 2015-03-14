@@ -154,7 +154,6 @@ class ErrorTest(BaseTestCase):
         # He gets a 404.
         self.assertEqual(response.status_int, 404)
 
-    # TODO: pass sigh_up=False, when article is creates several times
     def test_404_when_trying_to_delete_version_of_nonexistent_article(self):
         # Bob signs up and immediately checks if he can delete a nonexistent
         # version of a nonexistent article.
