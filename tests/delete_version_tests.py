@@ -154,7 +154,7 @@ class ErrorTest(BaseTestCase):
         # He gets a 404.
         self.assertEqual(response.status_int, 404)
 
-    # TODO: check if version and article requested for deleting are related
+    # TODO: pass sigh_up=False, when article is creates several times
     def test_404_when_trying_to_delete_version_of_nonexistent_article(self):
         # Bob signs up and immediately checks if he can delete a nonexistent
         # version of a nonexistent article.
@@ -166,6 +166,33 @@ class ErrorTest(BaseTestCase):
 
         # Of course he can't.
         self.assertEqual(response.status_int, 404)
+
+    def test_404_if_article_and_version_are_not_related(self):
+        # Bob signs up and creates two articles.
+        self.create_article('/life')
+        self.create_article('/death', sign_up=False)
+
+        # He edits both articles to add a version to each.
+        self.edit_article('/life', body='<p>Make most of out it.</p>')
+        self.edit_article('/death', body='<p>Meet it with dignity.</p>')
+
+        version_ids_1 = self.fetch_version_ids('/life')
+
+        # Bob tries to delete a version which does not belong to the article
+        # defined in url alongside with version id.
+        response = self.testapp.get(
+            '/_delete/death/_version/{}'.format(version_ids_1[0]),
+            expect_errors=True)
+
+        # A 404 page is returned to him.
+        self.assertEqual(response.status_int, 404)
+
+        # Versions in both articles are kept intact.
+        version_ids_1 = self.fetch_version_ids('/life')
+        version_ids_2 = self.fetch_version_ids('/death')
+
+        self.assertEqual(len(version_ids_1), 2)
+        self.assertEqual(len(version_ids_2), 2)
 
 
 class PointerTest(BaseTestCase):
