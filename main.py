@@ -6,7 +6,7 @@ import webapp2
 from forms import EditForm, LoginForm, SignupForm
 from hashutils import encrypt, make_hash, make_salt
 from jinjacfg import jinja_environment
-from model import GLOBAL_PARENT, User, Session, Article
+from model import GLOBAL_PARENT, User, Session, Article, Version
 
 # Setup logging
 import logging
@@ -355,16 +355,26 @@ class DeleteVersion(BaseHandler):
                  'logout_url': '/', 'error_type': 'sole_version_del_attempt',
                  'user': self.user})
             self.response.set_status(403)
+        elif exception.status_int == 404:
+            self.context.update(
+                {'error_text': 'Version not found', 'mode': 'error',
+                 'logout_url': '/', 'error_type': 'version_not_found',
+                 'user': self.user})
+            self.response.set_status(404)
         else:
             super(DeleteVersion, self)._handle_exception(exception, debug)
 
         self.render()
 
-    def _get(self, url, version):
+    def _get(self, url, version_id):
         if not self.user:
             pass
         else:
-            version = Article.by_url(url, version).version
+            # article = Article.by_url(url, project_with_version=False)
+            version = Version.by_id(int(version_id))
+            if version is None:
+                self.abort(404)
+
             # If it is article's sole version.
             if version.is_first() and version.is_latest():
                 self.abort(403)

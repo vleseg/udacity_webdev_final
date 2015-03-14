@@ -90,11 +90,13 @@ class Article(BaseModel):
             return self.project(version)
 
     @classmethod
-    def by_url(cls, url, version=None):
+    def by_url(cls, url, version=None, project_with_version=True):
         article = cls.by_prop('url', url)
         if article is not None:
             if version is None:
-                return article.get_latest_version()
+                if project_with_version:
+                    return article.get_latest_version()
+                return article
             else:
                 p = article.version_by_id(version)
                 return p if p is not None else article.get_latest_version()
@@ -121,6 +123,10 @@ class Version(BaseModel):
     created = db.DateTimeProperty(auto_now_add=True)
     head = db.StringProperty(required=True)
     body = db.TextProperty()
+
+    @classmethod
+    def by_id(cls, version_id):
+        return cls.get_by_id(version_id, parent=GLOBAL_PARENT)
 
     def delete(self):
         article = self.article

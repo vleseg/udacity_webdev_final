@@ -128,13 +128,15 @@ class VersionNotFoundErrorPageTest(BaseTestCase):
 
         # Bob tries to delete article's version, which certainly does not exist
         # via direct url. He receives an error page.
-        error_page = self.testapp.get('/navy_blue')
+        error_page = self.testapp.get(
+            '/_delete/navy_blue/_version/{}'.format(fake_version_id),
+            expect_errors=True)
 
         # This page has a correct title and head.
         head = error_page.pyquery('#error-message')
         body = error_page.pyquery('#error-detail')
 
-        self.assertTitleEqual('MyWiki *** Version not found')
+        self.assertTitleEqual(error_page, 'MyWiki *** Version not found')
         self.assertEqual(head.text(), 'Version not found')
         self.assertEqual(
             body.text(), 'Version with the requested id does not exist.')

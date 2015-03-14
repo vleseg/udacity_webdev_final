@@ -6,8 +6,10 @@
       <a id="login-offer-link" href="/login?return_to={{ edit_url }}">Sign in</a> or
       <a id="signup-offer-link" href="/signup?return_to={{ edit_url }}">sign up</a>
       to create the article you requested.
-    {% else %} {# if error_type == 'sole_version_del_attempt' #}
+    {% elif error_type == 'sole_version_del_attempt' %}
       You can't delete article's sole version.
+    {% else %}  {# if error_type == 'version_not_found' #}
+      Version with the requested id does not exist.
     {% endif %}
   </div>
 {% endblock %}

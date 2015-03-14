@@ -164,11 +164,13 @@ class ErrorTest(BaseTestCase):
         fake_version_id = randint(0, 10)
         while fake_version_id == real_version_id:
             fake_version_id = randint(0, 10)
+
         # Bob tries to delete version that certainly does not exist via direct
         # url
         response = self.testapp.get(
             '/_delete/delete_random/_version/{}'.format(fake_version_id),
             expect_errors=True)
+
         # He gets a 404.
         self.assertEqual(response.status_int, 404)
 
