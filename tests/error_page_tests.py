@@ -213,3 +213,68 @@ class UnauthorizedDeleteAttemptErrorTest(BaseTestCase):
 
         self.assertTitleEqual(response_1, 'MyWiki *** Sign Up')
         self.assertTitleEqual(response_2, 'MyWiki *** Login')
+
+    def test_redirect_to_latest_version_after_sign_up_via_error_page_link(self):
+        # Bob signs up and creates a new article. He edits it a couple of times
+        # to make more versions.
+        self.create_article(
+            '/keep_talking', body="<p>There's a silence surrounding me</p>")
+        self.edit_article(
+            '/keep_talking', body="<p>I can't seem to think straight</p>")
+        self.edit_article(
+            '/keep_talking', body="<p>I'll sit in the corner</p>")
+
+        version_ids = self.fetch_version_ids('/keep_talking')
+
+        # He signs out and tries to delete one of article's versions via direct
+        # url. An error page is served. He clicks a "Sign up" link on that page.
+        self.testapp.get('/logout')
+        response = self.testapp.get(
+            '/_delete/keep_talking/_version/{}'.format(version_ids[0]),
+            expect_errors=True)
+        signup_page = response.click(linkid='signup-offer-link')
+
+        # On sighup page, Bob registers again as another person.
+        response = self.fill_form(
+            signup_page, username='claudia', password='test',
+            verify='test').submit().follow()
+
+        # Bob (or Claudia) is redirected back to "Keep Talking" page -- namely
+        # to its latest version.
+        head = response.pyquery('#wiki-head')
+        body = response.pyquery('#wiki-body')
+        self.assertTitleEqual(response, u'MyWiki — Keep Talking')
+        self.assertEqual(head.text(), 'Keep Talking')
+        self.assertEqual(body.text(), "I'll sit in the corner")
+
+    def test_redirect_to_latest_version_after_login_via_error_page_link(self):
+        # Bob signs up and creates a new article. He edits it a couple of times
+        # to make more versions.
+        self.create_article(
+            '/black', body="<span>Like northern night.</span>")
+        self.edit_article(
+            '/black', body="<span>Like sinner's heart.</span>")
+        self.edit_article(
+            '/black', body="<span>Like my funeral suit.</span>")
+
+        version_ids = self.fetch_version_ids('/black')
+
+        # He signs out and tries to delete one of article's versions via direct
+        # url. An error page is served. He clicks a "sign in" link on that page.
+        self.testapp.get('/logout')
+        response = self.testapp.get(
+            '/_delete/black/_version/{}'.format(version_ids[0]),
+            expect_errors=True)
+        login_page = response.click(linkid='login-offer-link')
+
+        # On login page, Bob authenticates in the app again.
+        response = self.fill_form(
+            login_page, username='bob', password='test123').submit().follow()
+
+        # Bob (or Claudia) is redirected back to "Keep Talking" page -- namely
+        # to its latest version.
+        head = response.pyquery('#wiki-head')
+        body = response.pyquery('#wiki-body')
+        self.assertTitleEqual(response, u'MyWiki — Black')
+        self.assertEqual(head.text(), 'Black')
+        self.assertEqual(body.text(), "Like my funeral suit.")

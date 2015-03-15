@@ -365,12 +365,12 @@ class DeleteVersion(BaseHandler):
         self.render()
 
     def _get(self, url, version_id):
+        self.context['url'] = url
         if not self.user:
             self.abort(403)
         else:
             article = Article.by_url(url, project_with_version=False)
             if article is None:
-                self.context['url'] = url
                 self.abort(404)
 
             version = Version.by_id(int(version_id))

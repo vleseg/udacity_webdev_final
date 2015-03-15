@@ -19,7 +19,7 @@
 
 {% macro unauthorized_del_attempt() %}
   This operation is not allowed for unauthorized users.
-  <a id="signup-offer-link" href="/signup?return_to=/{{ url }}">Sign up</a> or
+  <a id="signup-offer-link" href="/signup?return_to={{ url }}">Sign up</a> or
   <a id="login-offer-link" href="/login?return_to={{ url }}">sign in</a>
   and try again.
 {% endmacro %}
