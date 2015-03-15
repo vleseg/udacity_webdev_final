@@ -72,9 +72,9 @@ class BaseHandler(webapp2.RequestHandler):
     def set_title(self):
         mode_to_title = {
             'new': 'New Article', 'signup': 'Sign Up', 'login': 'Login',
-            'view': lambda c: c['article'].head,
-            'edit': lambda c: '{} (edit)'.format(c['article'].head),
-            'history': lambda c: '{} (history)'.format(c['article'].head),
+            'view': 'Article',
+            'edit': 'Editing Article',
+            'history': 'Article History',
             'error': lambda c: resolve_msg_from_errtype(c['error_type'])
         }
         mode = self.context['mode']
@@ -237,11 +237,11 @@ class ViewPage(BaseHandler):
             article = Article.by_url(url, version)
         if article is None:
             if url == '/':
-                default_body = (
+                default_content = (
+                    '<h1>Welcome to MyWiki!</h1>'
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                article = Article.new(
-                    url='/', body=default_body, head='Welcome to MyWiki!')
+                article = Article.new(url='/', content=default_content)
             elif self.user is None:
                 self.context['url'] = url
                 self.abort(404)
@@ -287,11 +287,6 @@ class EditPage(BaseHandler):
              'logout_url': self.request.url.split('_edit')[-1]})
         super(EditPage, self).dispatch()
 
-    @staticmethod
-    def form_head_from_path(path):
-        words = path.strip('/').split('_')
-        return ' '.join([w.capitalize() for w in words])
-
     def _get(self, url, version=None):
         if self.user is None:
             self.redirect_with_cookie('/login', {'referrer': self.request.url})
@@ -303,17 +298,15 @@ class EditPage(BaseHandler):
 
         if article is None:
             if url == '/':
-                default_body = (
+                default_content = (
+                    '<h1>Welcome to MyWiki!</h1>'
                     '<p>You are free to create new articles and edit existing '
                     'ones.</p>')
-                article = Article.new(
-                    url='/', body=default_body, head='Welcome to MyWiki!')
+                article = Article.new(url='/', content=default_content)
             else:
                 self.context.update({'mode': 'new', 'logout_url': '/'})
-                form.head.data = self.form_head_from_path(url)
         else:
-            form.head.data = article.head
-            form.body.data = article.body
+            form.content.data = article.content
 
         self.context.update(
             {'form': form, 'article': article, 'user': self.user})
@@ -323,45 +316,26 @@ class EditPage(BaseHandler):
         if self.user is None:
             self.redirect('/login', abort=True)
 
-        logging.info('url: {}'.format(url))
-        logging.info('version: {}'.format(version))
-        logging.info('user: {}'.format(self.user))
-
-        head = self.request.params.get('head', self.form_head_from_path(url))
-        body = self.request.params.get('content')
-
-        logging.info('head: {}'.format(head))
-        logging.info('body: {}'.format(body))
-
-        form = EditForm()
-        logging.info(form.data)
+        form = EditForm(self.request.params)
 
         if version is None:
             article = Article.by_url(url)
         else:
             article = Article.by_url(url, version)
 
-        logging.info('article: {}'.format(article))
-
         if article is None:
             self.context['mode'] = 'new'
 
         if form.validate():
-            logging.info('Form validated successfully.')
             if self.context['mode'] == 'new':
-                logging.info('Edit mode: new article.')
-                Article.new(url, form.head.data, form.body.data)
+                Article.new(url, form.content.data)
             else:
-                logging.info('Edit mode: editing article.')
-                article.new_version(form.head.data, form.body.data)
+                article.new_version(form.content.data)
             self.redirect(url)
         else:
-            logging.info('Form validation failed.')
-            logging.info(form.errors)
             self.context.update(
                 {'user': self.user, 'form': form, 'article': article})
             self.render()
-        logging.info("Handler's context: {}".format(self.context))
 
 
 class DeleteVersion(BaseHandler):

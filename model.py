@@ -63,9 +63,8 @@ class Article(BaseModel):
         q = self.version_set
         return q.order('-created')
 
-    def new_version(self, head, body):
-        version = Version(
-            article=self, head=head, body=body, parent=GLOBAL_PARENT)
+    def new_version(self, content):
+        version = Version(article=self, content=content, parent=GLOBAL_PARENT)
         version.put()
 
         self.latest_version = version
@@ -74,8 +73,7 @@ class Article(BaseModel):
     def project(self, version):
         projection = SimpleProjection(self)
         projection.url = self.url
-        projection.head = version.head
-        projection.body = version.body
+        projection.content = version.content
         projection.modified = version.created
         projection.version = version
 
@@ -103,12 +101,12 @@ class Article(BaseModel):
 
     @classmethod
     @db.transactional
-    def new(cls, url, head, body):
+    def new(cls, url, content):
         article = cls(url=url, parent=GLOBAL_PARENT)
         article.put()
 
         first_version = Version(
-            article=article, head=head, body=body, parent=GLOBAL_PARENT)
+            article=article, content=content, parent=GLOBAL_PARENT)
         first_version.put()
 
         article.first_version = first_version
@@ -121,8 +119,7 @@ class Article(BaseModel):
 class Version(BaseModel):
     article = db.ReferenceProperty(Article, required=True)
     created = db.DateTimeProperty(auto_now_add=True)
-    head = db.StringProperty(required=True)
-    body = db.TextProperty()
+    content = db.TextProperty()
 
     @classmethod
     def by_id(cls, version_id):

@@ -1,7 +1,6 @@
 {% extends "wiki/base.html" %}
 {% block wiki_content %}
   <div id="wiki-article">
-    <h1 id="wiki-head">{{ article.head }}</h1>
     <div id="ts-version">
       Version of <span class="timestamp">{{ article.modified|timestampformat }}</span>
       {% if article.version.is_first() -%}
@@ -12,7 +11,7 @@
       {%- endif -%}
     </div>
     <div id="wiki-body">
-      {{ article.body|safe }}
+      {{ article.content|safe }}
     </div>
   </div>
 {% endblock %}

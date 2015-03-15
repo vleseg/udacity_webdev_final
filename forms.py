@@ -82,13 +82,5 @@ class LoginForm(Form):
 
 
 class EditForm(Form):
-    head = StringField(
-        'Article head',
-        [validators.input_required('Head cannot be empty!'),
-         validators.length(
-            max=256,
-            message="Article head is too long! Must not exceed 256 "
-                    "characters")],
-        id='wiki-head')
-    body = TextAreaField('Article body', id='wiki-body')
+    content = TextAreaField('Article content', id='wiki-body')
     submit = SubmitField('Save')

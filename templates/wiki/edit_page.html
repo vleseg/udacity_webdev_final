@@ -2,8 +2,7 @@
 {% from "macros.html" import form_errors %}
 {% block wiki_content %}
   <form method="post" id="wiki-edit-form">
-    {{ form.head }}
-    {{ form.body(rows=35) }}
+    {{ form.content(rows=35) }}
     {{ form_errors(form) }}
     {{ form.submit }}
   </form>
