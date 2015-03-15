@@ -52,25 +52,6 @@ class BasicDeleteVersionTest(BaseTestCase):
         self.assertNotIn(to_delete_id_1, version_ids)
         self.assertNotIn(to_delete_id_2, version_ids)
 
-    def test_only_authorized_users_can_delete_versions(self):
-        # Bob signs up and creates a new article. He modifies it once to create
-        # a new version.
-        self.create_article('/test_auth_delete')
-        self.edit_article(
-            '/test_auth_delete', body='<p>Will not be able to delete.</p>')
-
-        # Bob sings out.
-        self.testapp.get('/logout')
-
-        fv_id = self.fetch_version_ids('/test_auth_delete')[0]
-
-        # He tries to access delete handler to delete the first version of the
-        # article.
-        self.testapp.get('/_delete/test_auth_delete/_version/{}'.format(fv_id))
-
-        # Version is not deleted.
-        self.assertEqual(len(self.fetch_version_ids('/test_auth_delete')), 2)
-
     def test_redirect_to_latest_version_after_deleting(self):
         # Bob signs up and creates an article. He modifies it several times to
         # create more versions.
@@ -205,7 +186,8 @@ class ErrorTest(BaseTestCase):
         # direct url.
         self.testapp.get('/logout')
         response = self.testapp.get(
-            '/_delete/bugs/_version/{}'.format(version_ids[0]))
+            '/_delete/bugs/_version/{}'.format(version_ids[0]),
+            expect_errors=True)
 
         # A 403 error is delivered to him.
         self.assertEqual(response.status_int, 403)

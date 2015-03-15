@@ -187,8 +187,10 @@ class UnauthorizedDeleteAttemptErrorTest(BaseTestCase):
 
         # Bob signs out and tries to delete one of article's version via direct
         # url.
+        self.testapp.get('/logout')
         error_page = self.testapp.get(
-            '/_delete/people/_version/{}'.format(version_ids[0]))
+            '/_delete/people/_version/{}'.format(version_ids[0]),
+            expect_errors=True)
 
         # Error page is served for Bob.
         head = error_page.pyquery('#error-message')
@@ -198,7 +200,7 @@ class UnauthorizedDeleteAttemptErrorTest(BaseTestCase):
         self.assertEqual(
             body.text(),
             "This operation is not allowed for unauthorized users. Sign up or "
-            "log in and try again.")
+            "sign in and try again.")
 
         # Detailed error message contains links to sign up and login page.
         signup_offer_link = error_page.pyquery('#signup-offer-link')

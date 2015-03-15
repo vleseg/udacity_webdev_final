@@ -349,18 +349,16 @@ class DeleteVersion(BaseHandler):
         self.template = "wiki/error.html"
 
         self.response.set_status(exception.status_int)
-        self.context.update({'mode': 'error', 'user': self.user})
+        self.context.update({
+            'mode': 'error', 'user': self.user, 'logout_url': '/'})
         if exception.status_int == 403:
-            self.context.update({
-                'error_type': 'sole_version_del_attempt', 'logout_url': '/'
-            })
+            self.context['error_type'] = 'unauthorized_del_attempt'
+            if self.user is not None:
+                self.context['error_type'] = 'sole_version_del_attempt'
         elif exception.status_int == 404:
-            error_type = 'not_found_dv'
+            self.context['error_type'] = 'not_found_dv'
             if self.context.pop('article_exists', False):
-                error_type = 'version_not_found'
-            self.context.update({
-                'error_type': error_type, 'logout_url': '/'
-            })
+                self.context['error_type'] = 'version_not_found'
         else:
             super(DeleteVersion, self)._handle_exception(exception, debug)
 
@@ -368,7 +366,7 @@ class DeleteVersion(BaseHandler):
 
     def _get(self, url, version_id):
         if not self.user:
-            pass
+            self.abort(403)
         else:
             article = Article.by_url(url, project_with_version=False)
             if article is None:

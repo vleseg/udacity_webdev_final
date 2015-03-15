@@ -16,3 +16,10 @@
   You can create this article;
   <a id="new-article-offer-link" href="/_edit{{ url }}">click here</a> to do so.
 {%- endmacro %}
+
+{% macro unauthorized_del_attempt() %}
+  This operation is not allowed for unauthorized users.
+  <a id="signup-offer-link" href="/signup?return_to=/{{ url }}">Sign up</a> or
+  <a id="login-offer-link" href="/login?return_to={{ url }}">sign in</a>
+  and try again.
+{% endmacro %}
