@@ -1,3 +1,4 @@
+from random import randint
 import unittest
 # Third-party imports
 from google.appengine.ext import testbed
@@ -49,6 +50,15 @@ class BaseTestCase(unittest.TestCase):
             form[f] = fields[f]
         return form
 
+    def get_fake_version_id(self, article_url, rand_start=0, rand_end=10):
+        version_ids = self.fetch_version_ids(article_url)
+        random_version_id = randint(rand_start, rand_end)
+
+        while random_version_id in version_ids:
+            random_version_id = randint(rand_start, rand_end)
+
+        return random_version_id
+
     def sign_up(self, **params):
         if not params:
             params = {
@@ -57,6 +67,7 @@ class BaseTestCase(unittest.TestCase):
         signup_page = self.testapp.get('/signup')
         self.fill_form(signup_page, **params).submit()
 
+    # Shared assertions.
     def assertHasFormError(self, page, error_text):
         errors = page.pyquery('.form-errors')
         self.assertEqual(len(errors), 1)

@@ -113,10 +113,7 @@ class VersionNotFoundErrorPageTest(BaseTestCase):
         # Bob signs up and creates an article.
         self.create_article('/navy_blue')
 
-        real_version_id = self.fetch_version_ids('/navy_blue')[0]
-        fake_version_id = randint(0, 10)
-        while real_version_id == fake_version_id:
-            fake_version_id = randint(0, 10)
+        fake_version_id = self.get_fake_version_id('/navy_blue')
 
         # Bob tries to delete article's version, which certainly does not exist
         # via direct url. He receives an error page.
@@ -132,6 +129,30 @@ class VersionNotFoundErrorPageTest(BaseTestCase):
         self.assertEqual(head.text(), 'Version not found')
         self.assertEqual(
             body.text(), 'Version with the requested id does not exist.')
+
+    def test_redirect_to_latest_version_when_logging_out_of_error_page(self):
+        # Bob signs up and creates an article. He edits it several times to add
+        # more versions.
+        self.create_article('/flowers')
+        self.edit_article('/flowers', body='<div>Roses are red.</div>')
+        self.edit_article('/flowers', body='<div>Violets are blue.</div>')
+
+        fake_version_id = self.get_fake_version_id('/flowers')
+
+        # Bob tries to delete article's nonexistent version via direct url.
+        error_page = self.testapp.get(
+            '/_delete/flowers/_version/{}'.format(fake_version_id),
+            expect_errors=True)
+
+        # An error is served him. He logs out from that page.
+        response = error_page.click(linkid='logout-link').follow()
+
+        # Bob is redirected to article's latest version.
+        head = response.pyquery('#wiki-head')
+        body = response.pyquery('#wiki-body')
+        self.assertTitleEqual(response, u'MyWiki — Flowers')
+        self.assertEqual(head.text(), 'Flowers')
+        self.assertEqual(body.text(), 'Violets are blue.')
 
 
 class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):
@@ -174,6 +195,26 @@ class SingleVersionDeleteAttemptErrorPageTest(BaseTestCase):
         self.assertEqual(message.text(), 'Operation forbidden')
         self.assertEqual(
             detail.text(), "You can't delete article's sole version.")
+
+    def test_redirect_to_latest_version_when_logging_out_of_error_page(self):
+        # Bob signs up and creates an article.
+        self.create_article('/ping', body='<h2>Pong!</h2>')
+
+        version_id = self.fetch_version_ids('/ping')[0]
+
+        # Bob tries to delete article's only version via direct url.
+        error_page = self.testapp.get(
+            '/_delete/ping/_version/{}'.format(version_id), expect_errors=True)
+
+        # An error is served him. He logs out from that page.
+        response = error_page.click(linkid='logout-link').follow()
+
+        # Bob is redirected to article's latest version.
+        head = response.pyquery('#wiki-head')
+        body = response.pyquery('#wiki-body')
+        self.assertTitleEqual(response, u'MyWiki — Ping')
+        self.assertEqual(head.text(), 'Ping')
+        self.assertEqual(body.text(), 'Pong!')
 
 
 class UnauthorizedDeleteAttemptErrorTest(BaseTestCase):

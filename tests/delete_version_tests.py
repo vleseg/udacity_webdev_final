@@ -121,10 +121,7 @@ class ErrorTest(BaseTestCase):
         # Bob signs up and creates an article.
         self.create_article('/delete_random')
 
-        real_version_id = self.fetch_version_ids('/delete_random')[0]
-        fake_version_id = randint(0, 10)
-        while fake_version_id == real_version_id:
-            fake_version_id = randint(0, 10)
+        fake_version_id = self.get_fake_version_id('/delete_random')
 
         # Bob tries to delete version that certainly does not exist via direct
         # url

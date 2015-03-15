@@ -272,16 +272,12 @@ class VersionsTest(BaseTestCase):
         # He edits the article once to create another version.
         self.edit_article('/vita_nostra_brevis_est', head='Brevi Finietur')
 
-        version_ids = self.fetch_version_ids('/vita_nostra_brevis_est')
-
-        random_id = randint(0, 10)
-        while random_id in version_ids:
-            random_id = randint(0, 10)
+        fake_version_id = self.get_fake_version_id('/vita_nostra_brevis_est')
 
         # Bob tries to fetch article's version, which does not exist by direct
         # url.
         response = self.testapp.get(
-            '/vita_nostra_brevis_est/_version/{}'.format(random_id))
+            '/vita_nostra_brevis_est/_version/{}'.format(fake_version_id))
 
         # Current version is delivered to him.
         self.assertTitleEqual(response, u'MyWiki — Brevi Finietur')
