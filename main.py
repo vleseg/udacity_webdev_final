@@ -354,11 +354,17 @@ class DeleteVersion(BaseHandler):
         if exception.status_int == 403:
             self.context['error_type'] = 'unauthorized_del_attempt'
             if self.user is not None:
-                self.context['error_type'] = 'sole_version_del_attempt'
+                self.context.update({
+                    'error_type': 'sole_version_del_attempt',
+                    'logout_url': self.context['url']
+                })
         elif exception.status_int == 404:
             self.context['error_type'] = 'not_found_dv'
             if self.context.pop('article_exists', False):
-                self.context['error_type'] = 'version_not_found'
+                self.context.update({
+                    'error_type': 'version_not_found',
+                    'logout_url': self.context['url']
+                })
         else:
             super(DeleteVersion, self)._handle_exception(exception, debug)
 
