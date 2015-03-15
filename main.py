@@ -323,25 +323,45 @@ class EditPage(BaseHandler):
         if self.user is None:
             self.redirect('/login', abort=True)
 
-        form = EditForm(self.request.params)
+        logging.info('url: {}'.format(url))
+        logging.info('version: {}'.format(version))
+        logging.info('user: {}'.format(self.user))
+
+        head = self.request.params.get('head', self.form_head_from_path(url))
+        body = self.request.params.get('content')
+
+        logging.info('head: {}'.format(head))
+        logging.info('body: {}'.format(body))
+
+        form = EditForm()
+        logging.info(form.data)
+
         if version is None:
             article = Article.by_url(url)
         else:
             article = Article.by_url(url, version)
 
+        logging.info('article: {}'.format(article))
+
         if article is None:
             self.context['mode'] = 'new'
 
         if form.validate():
+            logging.info('Form validated successfully.')
             if self.context['mode'] == 'new':
+                logging.info('Edit mode: new article.')
                 Article.new(url, form.head.data, form.body.data)
             else:
+                logging.info('Edit mode: editing article.')
                 article.new_version(form.head.data, form.body.data)
             self.redirect(url)
         else:
+            logging.info('Form validation failed.')
+            logging.info(form.errors)
             self.context.update(
                 {'user': self.user, 'form': form, 'article': article})
             self.render()
+        logging.info("Handler's context: {}".format(self.context))
 
 
 class DeleteVersion(BaseHandler):
